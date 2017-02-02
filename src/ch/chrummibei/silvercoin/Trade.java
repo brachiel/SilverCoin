@@ -4,21 +4,33 @@ package ch.chrummibei.silvercoin;
  * Trade containing amount and price of item to be traded.
  */
 public class Trade {
-    Item item;
-    int amount; // Negative is selling
-    Double price; // Positive is selling
-    Trader buyer = null;
-    Trader seller = null;
+    private Item item;
+    private int amount;
+    private Credit totalValue;
+    private Trader buyer = null;
+    private Trader seller = null;
 
-    public Trade(Trader seller, Trader buyer, Item item, int amount, Double price) {
+    public Trade(Trader seller, Trader buyer, Item item, int amount, Price price) {
         this.seller = seller;
         this.buyer = buyer;
 
         this.item = item;
         this.amount = amount;
-        this.price = price;
+        this.totalValue = new Credit(amount * price.toDouble());
     }
 
+    public Trade(Trader seller, Trader buyer, Item item, int amount, Credit totalValue) {
+        this.seller = seller;
+        this.buyer = buyer;
+
+        this.item = item;
+        this.amount = amount;
+        this.totalValue = totalValue;
+    }
+
+    public Trade(TradeOffer offer) {
+
+    }
 
     public Item getItem() {
         return item;
@@ -29,7 +41,10 @@ public class Trade {
     }
 
     public Double getPrice() {
-        return price;
+        return totalValue.toDouble() / amount;
+    }
+    public Double getTotalValue() {
+        return totalValue.toDouble();
     }
 
     public Trader getBuyer() {

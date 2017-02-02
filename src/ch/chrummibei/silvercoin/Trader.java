@@ -1,18 +1,19 @@
 package ch.chrummibei.silvercoin;
 
 import java.util.ArrayList;
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Unit capable of trading
  */
 public class Trader extends Market {
-    static int traderNameSequence = 0;
+    private static int traderNameSequence = 0;
 
-    String name;
-    Double balance = 0.0;
-    ArrayList<TradeOffer> offeredTrades = new ArrayList<>();
-    ArrayList<InventoryItem> inventory = new ArrayList<>();
+    private String name;
+    private Credit credit = new Credit(0.0);
+    private ArrayList<TradeOffer> offeredTrades = new ArrayList<>();
+    private Map<Item,PricedItemPosition> inventory = new HashMap<>();
 
     public Trader() {
         this.name = "Trader " + String.valueOf(Trader.getNextTraderNameSequence());
@@ -20,7 +21,7 @@ public class Trader extends Market {
         traderNameSequence += 1;
     }
 
-    public static int getNextTraderNameSequence() {
+    private static int getNextTraderNameSequence() {
         return(traderNameSequence++);
     }
 
@@ -32,13 +33,26 @@ public class Trader extends Market {
         this.name = name;
     }
 
-    public Double getBalance() {
-        return balance;
+    public Credit getCredit() {
+        return credit;
     }
 
-    public void setBalance(Double balance) {
-        this.balance = balance;
+    public void setCredit(Credit credit) {
+        this.credit.set(credit);
+    }
+    public void setCredit(Double credit) {
+        this.credit.set(credit);
     }
 
+    public String toString() {
+        return name;
+    }
 
+    public void addToInventory(PricedItemPosition inventoryItem) {
+        if (inventory.containsKey(inventoryItem.getItem())) {
+            inventory.get(inventoryItem.getItem()).add(inventoryItem);
+        } else {
+            inventory.put(inventoryItem.getItem(), inventoryItem);
+        }
+    }
 }

@@ -5,64 +5,73 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * Created by brachiel on 02/02/2017.
+ * A TradeOffer is a potential Trade offered by a Trader.
  */
 public class TradeOffer {
     public enum TYPE {
-        BUYING, SELLING
+        BUYING("Buy", "Buying", "is buying"), SELLING("Sell", "Selling", "is selling");
+
+        TYPE(final String shortString,
+             final String longString,
+             final String verb) {
+            this.shortString = shortString;
+            this.longString = longString;
+            this.verb = verb;
+        }
+        public String toString() { return this.longString; }
+
+        public final String shortString; /* The string representation of this type */
+        public final String longString; /* The string representation of this type */
+        public final String verb; /* The string representation of this type */
     }
 
-    public static final EnumMap<TYPE,String> offerTypeName;
-    static {
-        EnumMap<TYPE,String> tmpMap = new EnumMap<TYPE,String>(TYPE.class);
-        tmpMap.put(TYPE.SELLING,"Selling");
-        tmpMap.put(TYPE.BUYING,"Buying");
-        offerTypeName = Collections.unmodifiable(tmpMap);
-    }
+    private Trader trader;
+    private Item item;
+    private TYPE type;
+    private int amount;
+    private Price price;
 
-    Trader trader;
-    Item item;
-    int direction;
-    int amount;
-    double price;
-
-    public TradeOffer(Trader trader, Item item, int direction, int amount, double price) {
+    public TradeOffer(Trader trader, Item item, TYPE type, int amount, Price price) {
         this.trader = trader;
         this.item = item;
-        if (direction == type.SELLING || direction == type.BUYING) {
-            this.direction = direction;
-        } else {
-            throw new IllegalArgumentException("Direction has to be valid");
-        }
+        this.type = type;
         this.amount = amount;
         this.price = price;
     }
 
     public boolean isSelling() {
-        return direction == SELLING;
+        return type == TYPE.SELLING;
     }
 
     public boolean isBuying() {
-        return direction == BUYING;
+        return type == TYPE.BUYING;
     }
 
     public Trader getTrader() {
         return trader;
     }
 
+    public int getAmount() {
+        return amount;
+    }
+
     public Item getItem() {
         return item;
     }
 
-    public int getDirection() {
-        return direction;
+    public TYPE getType() {
+        return type;
     }
 
-    public double getPrice() {
+    public Price getPrice() {
         return price;
     }
 
     public String toString() {
-        return item.getName() + " for " + String.format("%.2f", price);
+        return trader + " " + type.verb + " " + item.getName() + " for " + price;
+    }
+
+    public String compactString() {
+        return price + " (" + trader + ")";
     }
 }
