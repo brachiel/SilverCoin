@@ -1,4 +1,8 @@
-package ch.chrummibei.silvercoin;
+package ch.chrummibei.silvercoin.position;
+
+import ch.chrummibei.silvercoin.item.Item;
+import ch.chrummibei.silvercoin.credit.Price;
+import ch.chrummibei.silvercoin.credit.TotalValue;
 
 /**
  * An amount of items that can be held by a trader

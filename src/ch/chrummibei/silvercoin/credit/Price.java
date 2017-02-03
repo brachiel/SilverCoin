@@ -1,4 +1,4 @@
-package ch.chrummibei.silvercoin;
+package ch.chrummibei.silvercoin.credit;
 
 /**
  * A price is a Credit per Unit of an Item. Can be converted to TotalValue. Used for type safety.

@@ -1,4 +1,6 @@
-package ch.chrummibei.silvercoin;
+package ch.chrummibei.silvercoin.trade;
+
+import ch.chrummibei.silvercoin.actor.ArbitrageTradeActor;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -7,7 +9,13 @@ import java.util.stream.Stream;
  * An ArbitrageTrader is a Trader who is able to find Arbitrages
  */
 public class ArbitrageTrader extends Trader {
-    public static Stream<Arbitrage> findArbitrages(Market market) {
+    Market market;
+
+    public ArbitrageTrader(Market market) {
+        this.market = market;
+    }
+
+    public Stream<Arbitrage> findArbitrages() {
         return market.searchTradedItems()
                 // Make Arbitrage where possible, empty else
                 .map(item -> {
@@ -27,5 +35,15 @@ public class ArbitrageTrader extends Trader {
                 })
                 .filter(Optional::isPresent) // Filter out the empty arbitrages
                 .map(Optional::get); // Convert Optional<Arbitrage> to Arbitrage
+    }
+
+    public void executeArbitrage(Arbitrage arbitrage) {
+        try {
+            arbitrage.getBuy().accept(this);
+            arbitrage.getSell().accept(this);
+        } catch (TradeOfferAlreadyAcceptedException e) {
+            // Tough titty.
+            e.printStackTrace();
+        }
     }
 }

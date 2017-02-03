@@ -1,4 +1,10 @@
-package ch.chrummibei.silvercoin;
+package ch.chrummibei.silvercoin.trade;
+
+import ch.chrummibei.silvercoin.item.CraftableItem;
+import ch.chrummibei.silvercoin.item.Item;
+import ch.chrummibei.silvercoin.position.PricedItemPosition;
+import ch.chrummibei.silvercoin.position.YieldingItemPosition;
+import ch.chrummibei.silvercoin.credit.Price;
 
 import java.util.Map;
 

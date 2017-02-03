@@ -1,7 +1,10 @@
-package ch.chrummibei.silvercoin;
+package ch.chrummibei.silvercoin.trade;
+
+import ch.chrummibei.silvercoin.credit.Price;
+import ch.chrummibei.silvercoin.credit.TotalValue;
 
 /**
- * An Arbitrage is a pair of profitable trade offers.
+ * An Arbitrage is a pair of profitable credit offers.
  */
 public class Arbitrage {
     private TradeOffer buy;  // What we buy

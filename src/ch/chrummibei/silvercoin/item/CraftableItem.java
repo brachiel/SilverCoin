@@ -1,4 +1,6 @@
-package ch.chrummibei.silvercoin;
+package ch.chrummibei.silvercoin.item;
+
+import ch.chrummibei.silvercoin.item.Item;
 
 import java.util.Map;
 import java.util.HashMap;

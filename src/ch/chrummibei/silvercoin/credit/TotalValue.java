@@ -1,4 +1,4 @@
-package ch.chrummibei.silvercoin;
+package ch.chrummibei.silvercoin.credit;
 
 /**
  * A TotalValue is the total price of items. Can be converted to Price per unit.
@@ -24,4 +24,8 @@ public class TotalValue extends Credit {
     @Override public TotalValue subtract(Credit o) { return new TotalValue(balance - o.balance); }
     @Override public TotalValue subtract(double o) { return new TotalValue(balance - o); }
     @Override public TotalValue subtract(int o) { return new TotalValue(balance - o); }
+
+    @Override public TotalValue invert() {
+        return new TotalValue(-balance);
+    }
 }
