@@ -18,12 +18,13 @@ public class Credit {
     }
 
     public String toString() {
-        return String.format("%.02f", balance);
+        return String.format("%.02f Cr.", balance);
     }
 
     public Credit add(double o) { return new Credit(balance + o); }
     public Credit add(Credit o) { return add(o.balance); }
     public Credit add(int o) { return new Credit(balance + o); }
+    public void iadd(Credit o) { balance += o.balance; }
 
     public Credit subtract(double o) { return new Credit(balance - o); }
     public Credit subtract(Credit o) { return subtract(o.balance); }

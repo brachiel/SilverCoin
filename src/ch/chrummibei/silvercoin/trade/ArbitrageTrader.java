@@ -1,7 +1,5 @@
 package ch.chrummibei.silvercoin.trade;
 
-import ch.chrummibei.silvercoin.actor.ArbitrageTradeActor;
-
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -39,11 +37,24 @@ public class ArbitrageTrader extends Trader {
 
     public void executeArbitrage(Arbitrage arbitrage) {
         try {
-            arbitrage.getBuy().accept(this);
-            arbitrage.getSell().accept(this);
-        } catch (TradeOfferAlreadyAcceptedException e) {
+            arbitrage.getBuy().accept(this, arbitrage.getTradeableAmount());
+            arbitrage.getSell().accept(this, arbitrage.getTradeableAmount());
+        } catch (TradeOfferHasNotEnoughAmountLeft e) {
             // Tough titty.
             e.printStackTrace();
         }
+    }
+
+    public void printShortStatus() {
+        System.out.println(this + " traded for a profit of " + calcTotalProfit());
+    }
+
+    public void printLongStatus() {
+        System.out.println(this + " traded in the following items:");
+        inventory.values().forEach(pos -> System.out.println(pos.getItem() + " for a profit of: " + pos.getRealisedProfit()));
+    }
+
+    public Market getMarket() {
+        return market;
     }
 }

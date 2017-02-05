@@ -10,7 +10,7 @@ import java.util.stream.Stream;
  * A market is a list of TradeOffers that makes them comparable and searchable.
  */
 public class Market {
-    private ArrayList<TradeOffer> offeredTrades = new ArrayList<>();
+    ArrayList<TradeOffer> offeredTrades = new ArrayList<>();
 
     public Market() {
 
@@ -29,8 +29,18 @@ public class Market {
         offeredTrades.add(offer);
     }
 
-    public void addAllOffers(Market market) {
-        offeredTrades.addAll(market.getOfferedTrades());
+    public void addAllOffers(ArrayList<TradeOffer> offeredTrades) {
+        this.offeredTrades.addAll(offeredTrades);
+    }
+
+    public void removeTradeOffer(TradeOffer offer) {
+        System.out.println("Removing " + offer);
+        offeredTrades.remove(offer);
+    }
+
+    public void removeAllTradeOffers(ArrayList<TradeOffer> offeredTrades) {
+        offeredTrades.stream().map(t -> "Removing " + t).forEach(System.out::println);
+        this.offeredTrades.removeAll(offeredTrades);
     }
 
     /**

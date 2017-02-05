@@ -6,8 +6,8 @@ import ch.chrummibei.silvercoin.item.Item;
  * An amount of items that can be held by a trader
  */
 public class ItemPosition {
-    private Item item;
-    private int amount;
+    Item item;
+    int amount;
 
     public ItemPosition(Item item, int amount) {
         this.item = item;
@@ -44,7 +44,6 @@ public class ItemPosition {
 
 
     public void removeItems(int amount) {
-        this.amount -= amount;
-        // Reduce the purchase value by the amount of units given away.
+        this.addItems(-amount);
     }
 }

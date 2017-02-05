@@ -8,7 +8,7 @@ import ch.chrummibei.silvercoin.credit.TotalValue;
  * An amount of items that can be held by a trader
  */
 public class PricedItemPosition extends ItemPosition {
-    private TotalValue purchaseValue;
+    TotalValue purchaseValue = new TotalValue(0);
 
     public PricedItemPosition(Item item) {
         this(item, 0, new TotalValue(0.0));
@@ -20,18 +20,17 @@ public class PricedItemPosition extends ItemPosition {
 
     public PricedItemPosition(Item item, int amount, TotalValue purchaseValue) {
         super(item, amount);
-        this.purchaseValue = purchaseValue;
+        increasingPosition(amount, purchaseValue);
     }
 
     public PricedItemPosition(Item item, int amount, Price purchasePrice) {
         super(item, amount);
-        this.purchaseValue = purchasePrice.toTotalValue(amount);
+        increasingPosition(amount, purchasePrice.toTotalValue(amount));
     }
 
 
     public void add(PricedItemPosition other) {
-        super.add(other);
-        purchaseValue.add(other.getPurchaseValue());
+        addItems(other.amount, other.getPurchaseValue());
     }
 
     /**
@@ -40,8 +39,7 @@ public class PricedItemPosition extends ItemPosition {
      * @param pricePerUnit The price of one unit of item.
      */
     public void addItems(int amount, Price pricePerUnit) {
-        super.addItems(amount);
-        purchaseValue.add(pricePerUnit.toTotalValue(amount));
+        addItems(amount, pricePerUnit.toTotalValue(amount));
     }
 
     /**
@@ -50,12 +48,46 @@ public class PricedItemPosition extends ItemPosition {
      * @param totalValue The total value of the added items.
      */
     public void addItems(int amount, TotalValue totalValue) {
+        if (this.amount == 0) {
+            increasingPosition(amount, totalValue);
+        } else if (Math.signum(this.amount) == Math.signum(amount)) {
+            increasingPosition(amount, totalValue);
+        } else if (Math.abs(amount) < Math.abs(this.amount)) {
+            decreasingPosition(amount, totalValue);
+        } else if (this.amount == -amount) {
+            zeroingPosition(amount, totalValue);
+        } else {
+            flippingPosition(amount, totalValue);
+        }
+
         super.addItems(amount);
-        purchaseValue.add(totalValue);
+    }
+
+    void flippingPosition(int amount, TotalValue totalValue) {
+        int decreasingAmount = -this.amount;
+        int increasingAmount = amount+this.amount;
+
+        TotalValue decreasingValue = totalValue.toPrice(amount).toTotalValue(decreasingAmount);
+        TotalValue increasingValue = totalValue.toPrice(amount).toTotalValue(increasingAmount);
+
+        zeroingPosition(decreasingAmount, decreasingValue);
+        increasingPosition(increasingAmount, increasingValue);
+    }
+
+    void zeroingPosition(int amount, TotalValue totalValue) {
+        purchaseValue.set(0);
+    }
+
+    void decreasingPosition(int amount, TotalValue totalValue) {
+        // Decrease has no effect on purchase Price
+    }
+
+    void increasingPosition(int amount, TotalValue totalValue) {
+        purchaseValue.iadd(totalValue);
     }
 
     public void removeItems(int amount) {
-        this.removeItems(amount, purchaseValue.toPrice(this.getAmount()).toTotalValue(amount));
+        this.addItems(-amount, purchaseValue.toPrice(this.amount).toTotalValue(-amount));
     }
 
     /**
@@ -64,7 +96,7 @@ public class PricedItemPosition extends ItemPosition {
      * @param pricePerUnit The price of one unit of removed item.
      */
     public void removeItems(int amount, Price pricePerUnit) {
-        removeItems(amount, pricePerUnit.toTotalValue(amount));
+        addItems(-amount, pricePerUnit.toTotalValue(-amount));
     }
 
     /**
@@ -73,8 +105,7 @@ public class PricedItemPosition extends ItemPosition {
      * @param totalValue The positive total value of the removed items.
      */
     public void removeItems(int amount, TotalValue totalValue) {
-        purchaseValue.subtract(totalValue);
-        super.removeItems(amount);
+        addItems(-amount, totalValue.invert());
     }
 
     /**

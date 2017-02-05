@@ -18,8 +18,8 @@ public class Trader extends Market {
 
     private String name;
     private Credit credit = new Credit(0.0);
-    private ArrayList<TradeOffer> offeredTrades = new ArrayList<>();
-    private Map<Item,YieldingItemPosition> inventory = new HashMap<>();
+    Map<Item,YieldingItemPosition> inventory = new HashMap<>();
+    private ArrayList<Market> offersPresentAtMarket = new ArrayList<>();
 
     public Trader() {
         this.name = "Trader " + String.valueOf(Trader.getNextTraderNameSequence());
@@ -35,12 +35,11 @@ public class Trader extends Market {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Credit getCredit() {
+    public Credit getCredits() {
         return credit;
+    }
+    public void addCredits(Credit credits) {
+        credit.add(credits);
     }
 
     public void setCredit(Credit credit) {
@@ -54,6 +53,11 @@ public class Trader extends Market {
         return name;
     }
 
+    public void offerTradesAt(Market market) {
+        market.addAllOffers(offeredTrades);
+        offersPresentAtMarket.add(market);
+    }
+
     public void addToInventory(PricedItemPosition inventoryItem) {
         if (inventory.containsKey(inventoryItem.getItem())) {
             inventory.get(inventoryItem.getItem()).add(inventoryItem);
@@ -64,11 +68,20 @@ public class Trader extends Market {
 
 
     public void executeTrade(Trade trade) throws TraderNotInvolvedException {
+        System.out.println(this + " is executing trade " + trade);
+
         PricedItemPosition newItemPosition = trade.getTradersItemPosition(this);
         // newItemPosition might be negative
 
         credit.isubtract(newItemPosition.getPurchaseValue());
         addToInventory(newItemPosition);
+    }
+
+    public void offerAccepted(TradeOffer offer) {
+        if (offer.getAmount() <= 0) {
+            offeredTrades.remove(offer);
+            offersPresentAtMarket.forEach(m -> m.removeTradeOffer(offer));
+        }
     }
 
     public double calcTotalProfit() {

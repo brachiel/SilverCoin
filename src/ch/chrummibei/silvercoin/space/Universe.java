@@ -5,6 +5,7 @@ import ch.chrummibei.silvercoin.actor.ArbitrageTradeActor;
 import ch.chrummibei.silvercoin.credit.Price;
 import ch.chrummibei.silvercoin.item.CraftableItem;
 import ch.chrummibei.silvercoin.item.Item;
+import ch.chrummibei.silvercoin.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.trade.Market;
 import ch.chrummibei.silvercoin.trade.TradeOffer;
 import ch.chrummibei.silvercoin.trade.Trader;
@@ -18,12 +19,12 @@ import java.util.Random;
  */
 public class Universe implements Actor {
     private boolean running = false;
-    private Double targetTicksPerSecond = 1.0;
+    private Double targetTicksPerSecond = 10.0;
     private Random random = new Random();
     private ArrayList<Item> catalogue = new ArrayList<>();
     private Market market = new Market();
-    private ArrayList<Actor> actors = new ArrayList<>();;
-    private ArbitrageTradeActor arbitrageTrader;
+    private ArrayList<Actor> actors = new ArrayList<>();
+    private ArrayList<ArbitrageTradeActor> arbitrageTraders = new ArrayList<>();
 
     public Universe() {
         initialise();
@@ -49,7 +50,7 @@ public class Universe implements Actor {
         long totalTicks = 0;
         running = true;
 
-        while (running && totalTicks < 10) {
+        while (running && totalTicks < 1000) {
             long nowMillis = System.currentTimeMillis();
             tick((nowMillis - lastTickMillis)*1000); // This might take a while
 
@@ -58,7 +59,11 @@ public class Universe implements Actor {
             try {
                 long millisToSleep = (long) (nowMillis + 1000/targetTicksPerSecond - lastTickMillis);
                 System.out.println("Sleeping " + millisToSleep);
-                Thread.sleep(millisToSleep);
+                if (millisToSleep > 0) {
+                    Thread.sleep(millisToSleep);
+                } else {
+                    System.out.println("Trouble keeping up...");
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 running = false;
@@ -73,13 +78,11 @@ public class Universe implements Actor {
             Optional<TradeOffer> bestBuy = market.searchBestBuyingTrade(item);
             Optional<TradeOffer> bestSell = market.searchBestSellingTrade(item);
             System.out.println(
-                    item + " " +
-                            bestBuy.map(TradeOffer::compactString).orElse("No Buyer") + " " +
+                    item + " BUY: " +
+                            bestBuy.map(TradeOffer::compactString).orElse("No Buyer") + " SELL: " +
                             bestSell.map(TradeOffer::compactString).orElse("No Seller"));
 
         });
-
-        System.out.println(String.format("Realised profit by ArbitrageTrader: %.02f", arbitrageTrader.calcTotalProfit()));
     }
 
     public void initialise() {
@@ -102,20 +105,25 @@ public class Universe implements Actor {
             for (int j = 0; j < random.nextInt(15); ++j) {
                 Item item = catalogue.get(random.nextInt(catalogue.size()));
                 TradeOffer offer = new TradeOffer(trader, item, TradeOffer.TYPE.SELLING, random.nextInt(100), new Price(100 * random.nextDouble()));
+                trader.addToInventory(new PricedItemPosition(offer.getItem(), offer.getAmount(), offer.getTotalValue()));
                 trader.addOfferedTrade(offer);
             }
 
             for (int j = 0; j < random.nextInt(15); ++j) {
                 Item item = catalogue.get(random.nextInt(catalogue.size()));
                 TradeOffer offer = new TradeOffer(trader,item,TradeOffer.TYPE.BUYING,random.nextInt(100), new Price(100*random.nextDouble()));
+                trader.addCredits(offer.getTotalValue());
                 trader.addOfferedTrade(offer);
             }
 
-            market.addAllOffers(trader);
+            trader.offerTradesAt(market);
         }
 
-        arbitrageTrader = new ArbitrageTradeActor(market);
-        this.addActor(arbitrageTrader);
+        arbitrageTraders.add(new ArbitrageTradeActor(market));
+        arbitrageTraders.add(new ArbitrageTradeActor(market));
+        arbitrageTraders.add(new ArbitrageTradeActor(market));
+        arbitrageTraders.add(new ArbitrageTradeActor(market));
+        arbitrageTraders.forEach(a -> this.addActor(a));
 
         catalogue.stream().filter(i -> i instanceof CraftableItem).map(CraftableItem.class::cast).forEachOrdered(i -> System.out.println(i.getIngredientString()));
     }

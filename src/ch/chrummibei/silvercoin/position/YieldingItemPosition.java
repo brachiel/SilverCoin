@@ -30,23 +30,58 @@ public class YieldingItemPosition extends PricedItemPosition {
         this(position.getItem(), position.getAmount(), position.getPurchaseValue());
     }
 
-    public void add(YieldingItemPosition other) {
+    @Override
+    public void add(PricedItemPosition other) {
         super.add(other);
-        realisedProfit = other.realisedProfit;
-    }
-
-    public TotalValue getRealisedProfit() {
-        return realisedProfit;
     }
 
     @Override
-    public void removeItems(int amount, TotalValue totalValue) {
-        removeItems(amount, totalValue.toPrice(amount));
+    public void addItems(int amount, Price pricePerUnit) {
+        super.addItems(amount, pricePerUnit);
+    }
+
+    @Override
+    public void removeItems(int amount) {
+        super.removeItems(amount);
     }
 
     @Override
     public void removeItems(int amount, Price pricePerUnit) {
-        realisedProfit = realisedProfit.add(pricePerUnit.subtract(getPurchasePrice()).toTotalValue(amount));
         super.removeItems(amount, pricePerUnit);
+    }
+
+    @Override
+    public void removeItems(int amount, TotalValue totalValue) {
+        super.removeItems(amount, totalValue);
+    }
+
+    @Override
+    public void addItems(int amount, TotalValue totalValue) {
+        super.addItems(amount, totalValue);
+    }
+
+    @Override
+    void flippingPosition(int amount, TotalValue totalValue) {
+        super.flippingPosition(amount, totalValue);
+    }
+
+    // PricedItemPosition gives us callbacks for the interesting operations:
+    @Override
+    void zeroingPosition(int amount, TotalValue totalValue) {
+        decreasingPosition(amount, totalValue);
+        super.zeroingPosition(amount, totalValue);
+    }
+
+    @Override
+    void decreasingPosition(int amount, TotalValue totalValue) {
+        Price sellingPrice = totalValue.toPrice(amount);
+        Price priceDifference = getPurchasePrice().subtract(sellingPrice);
+        TotalValue profit = priceDifference.toTotalValue(amount);
+        realisedProfit.iadd(profit);
+        super.decreasingPosition(amount, totalValue);
+    }
+
+    public TotalValue getRealisedProfit() {
+        return realisedProfit;
     }
 }

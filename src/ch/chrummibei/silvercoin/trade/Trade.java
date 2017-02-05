@@ -16,6 +16,10 @@ public class Trade {
     private Trader buyer = null;
     private Trader seller = null;
 
+    public String toString() {
+        return "Trade: " + amount + " " + item + ": " + seller + " -> " + buyer + " for " + totalValue;
+    }
+
     public Trade(Trader buyer, Trader seller, Item item, int amount, Price price) {
         this.seller = seller;
         this.buyer = buyer;

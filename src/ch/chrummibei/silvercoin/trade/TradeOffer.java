@@ -1,6 +1,5 @@
 package ch.chrummibei.silvercoin.trade;
 
-import ch.chrummibei.silvercoin.credit.Credit;
 import ch.chrummibei.silvercoin.credit.TotalValue;
 import ch.chrummibei.silvercoin.item.Item;
 import ch.chrummibei.silvercoin.credit.Price;
@@ -81,14 +80,18 @@ public class TradeOffer {
         return price + " (" + offeringTrader + ")";
     }
 
-    public void accept(Trader acceptingTrader) throws TradeOfferAlreadyAcceptedException {
-        if (resultingTrade != null) {
-            // This trade offer was already accepted.
-            throw new TradeOfferAlreadyAcceptedException();
+
+    public void accept(Trader acceptingTrader, int amount) throws TradeOfferHasNotEnoughAmountLeft {
+        if (this.amount < amount) {
+            throw new TradeOfferHasNotEnoughAmountLeft();
         }
 
-        resultingTrade = toTrade(acceptingTrader);
+        // The offer decreases its amount that is offered.
+        this.amount -= amount;
+
+        resultingTrade = toTrade(acceptingTrader, amount);
         try {
+            offeringTrader.offerAccepted(this);
             acceptingTrader.executeTrade(resultingTrade);
             offeringTrader.executeTrade(resultingTrade);
         } catch (TraderNotInvolvedException e) {
@@ -98,6 +101,10 @@ public class TradeOffer {
     }
 
     public Trade toTrade(Trader acceptingTrader) {
+        return toTrade(acceptingTrader, this.amount);
+    }
+
+    public Trade toTrade(Trader acceptingTrader, int amount) {
         if (isBuying()) {
             // offer is to buy, so the offering Trader is buying
             return new Trade(offeringTrader, acceptingTrader, item, amount, price);
