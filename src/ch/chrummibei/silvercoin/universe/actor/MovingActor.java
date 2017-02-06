@@ -6,11 +6,12 @@ import ch.chrummibei.silvercoin.universe.space.Velocity;
 /**
  * Created by brachiel on 03/02/2017.
  */
-public abstract class MovingActor extends PositionedActor {
+public abstract class MovingActor implements PositionedActor {
+    Position position;
     Velocity velocity;
 
     public MovingActor(Position position, Velocity velocity) {
-        super(position);
+        this.position = position;
         this.velocity = velocity;
     }
 
@@ -19,8 +20,18 @@ public abstract class MovingActor extends PositionedActor {
     }
 
     @Override
+    public Position getPosition() {
+        return position;
+    }
+
+    @Override
+    public void setPosition(Position position) {
+        this.position = position;
+    }
+
+    @Override
     // Newton Step
-    public void tick(double timeDiff) {
-        position.iadd(velocity.multiply(timeDiff));
+    public void tick(long timeDiffMillis) {
+        position.iadd(velocity.multiply(Double.valueOf(timeDiffMillis)/1000.0));
     }
 }

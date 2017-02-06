@@ -18,8 +18,6 @@ import java.util.Random;
  * Created by brachiel on 03/02/2017.
  */
 public class Universe implements Actor {
-    private boolean running = false;
-    private Double targetTicksPerSecond = 10.0;
     private Random random = new Random();
     private ArrayList<Item> catalogue = new ArrayList<>();
     private Market market = new Market();
@@ -35,8 +33,9 @@ public class Universe implements Actor {
     }
 
     @Override
-    public void tick(double timeDiff) {
-        actors.forEach(a -> a.tick(timeDiff));
+    public void tick(long timeDiffMillis) {
+        System.out.println("tick");
+        actors.forEach(a -> a.tick(timeDiffMillis));
     }
 
     public void printStatus() {
@@ -52,7 +51,6 @@ public class Universe implements Actor {
     }
 
     void initialise() {
-
         for (int i = 0; i < 10; ++i) {
             catalogue.add(new Item("Item " + i));
         }
@@ -89,7 +87,7 @@ public class Universe implements Actor {
         arbitrageTraders.add(new ArbitrageTradeActor(market));
         arbitrageTraders.add(new ArbitrageTradeActor(market));
         arbitrageTraders.add(new ArbitrageTradeActor(market));
-        arbitrageTraders.forEach(a -> this.addActor(a));
+        arbitrageTraders.forEach(this::addActor);
 
         catalogue.stream().filter(i -> i instanceof CraftableItem).map(CraftableItem.class::cast).forEachOrdered(i -> System.out.println(i.getIngredientString()));
     }

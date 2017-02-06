@@ -1,2 +1,2 @@
 # SilverCoin
-A space trading simulator
+A space trade simulator

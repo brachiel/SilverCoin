@@ -25,8 +25,8 @@ public abstract class AcceleratedActor extends MovingActor {
 
     @Override
     // Newton Step
-    public void tick(double timeDiff) {
-        velocity.add(acceleration.multiply(timeDiff));
-        super.tick(timeDiff);
+    public void tick(long timeDiffMillis) {
+        velocity.iadd(acceleration.multiply(Double.valueOf(timeDiffMillis)/1000.0));
+        super.tick(timeDiffMillis);
     }
 }

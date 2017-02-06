@@ -4,18 +4,33 @@ import ch.chrummibei.silvercoin.universe.trade.Arbitrage;
 import ch.chrummibei.silvercoin.universe.trade.ArbitrageTrader;
 import ch.chrummibei.silvercoin.universe.trade.Market;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.function.Consumer;
 
 /**
  * Created by brachiel on 03/02/2017.
  */
-public class ArbitrageTradeActor extends ArbitrageTrader implements Actor {
+public class ArbitrageTradeActor extends ArbitrageTrader implements TimestepActionActor {
+    Map<Consumer<Long>,Timekeeper> actions = new HashMap<>();
+
     public ArbitrageTradeActor(Market market) {
         super(market);
+        addAction(this::findAndExecuteArbitrage, 1000);
     }
 
     @Override
-    public void tick(double timeDiff) {
+    public void addAction(Consumer<Long> action, long periodicity) {
+        actions.put(action, new Timekeeper(periodicity));
+    }
+
+    @Override
+    public Map<Consumer<Long>, Timekeeper> getTimedActions() {
+        return actions;
+    }
+
+    public void findAndExecuteArbitrage(long timeDiffMillis) {
         // TODO: Use a stream for randomisation
 
         // The following implements http://stackoverflow.com/questions/23351918/select-an-element-from-a-stream-with-uniform-distributed-probability

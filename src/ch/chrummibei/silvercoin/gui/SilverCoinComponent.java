@@ -1,14 +1,18 @@
 package ch.chrummibei.silvercoin.gui;
 
+import ch.chrummibei.silvercoin.universe.actor.TimestepActionActor;
 import ch.chrummibei.silvercoin.universe.space.Universe;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Created by brachiel on 06/02/2017.
  */
-public class SilverCoinComponent extends Canvas implements Runnable {
+public class SilverCoinComponent extends Canvas implements Runnable, TimestepActionActor {
     private static final int WIDTH = 400;
     private static final int HEIGHT = 200;
     private static final int SCALE = 4;
@@ -20,6 +24,7 @@ public class SilverCoinComponent extends Canvas implements Runnable {
     private Bitmap bitmap;
     private boolean running = false;
     private Thread thread;
+    private Map<Consumer<Long>, Timekeeper> timestepActorAction = new HashMap<>();
 
     public SilverCoinComponent() {
         Dimension size = new Dimension(WIDTH * SCALE, HEIGHT * SCALE);
@@ -30,6 +35,11 @@ public class SilverCoinComponent extends Canvas implements Runnable {
         bitmap = new Bitmap(WIDTH, HEIGHT);
 
         universe = new Universe();
+        universe.addActor(this);
+    }
+
+    public Universe getUniverse() {
+        return universe;
     }
 
     public void start() {
@@ -59,14 +69,14 @@ public class SilverCoinComponent extends Canvas implements Runnable {
         while (running && totalTicks < 1000) {
             long nowMillis = System.currentTimeMillis();
 
-            tick((nowMillis - lastTickMillis)*1000); // This might take a while
-            render();
+            tick(nowMillis - lastTickMillis); // This might take a while
+            render(); // This might take a while
 
             lastTickMillis = System.currentTimeMillis();
             // We have to sleep currentTime + 1000/targetTicksPerSecond - now
             try {
                 long millisToSleep = (long) (nowMillis + 1000/TARGET_TPS - lastTickMillis);
-                System.out.println("Sleeping " + millisToSleep);
+
                 if (millisToSleep > 0) {
                     Thread.sleep(millisToSleep);
                 } else {
@@ -85,7 +95,18 @@ public class SilverCoinComponent extends Canvas implements Runnable {
         universe.printStatus();
     }
 
-    private void tick(double timeDiff) {
-        universe.tick(timeDiff);
+    @Override
+    public void addAction(Consumer<Long> action, long periodicity) {
+        timestepActorAction.put(action, new Timekeeper(periodicity));
+    }
+
+    @Override
+    public Map<Consumer<Long>, Timekeeper> getTimedActions() {
+        return timestepActorAction;
+    }
+
+    public void tick(long timeDiffMillis) {
+        universe.tick(timeDiffMillis);
+        TimestepActionActor.super.tick(timeDiffMillis); // Check if we need to render
     }
 }
