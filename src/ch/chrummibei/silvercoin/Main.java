@@ -1,24 +1,27 @@
 package ch.chrummibei.silvercoin;
 
-import ch.chrummibei.silvercoin.actor.ArbitrageTradeActor;
-import ch.chrummibei.silvercoin.item.CraftableItem;
-import ch.chrummibei.silvercoin.item.Item;
-import ch.chrummibei.silvercoin.credit.Price;
-import ch.chrummibei.silvercoin.space.Universe;
-import ch.chrummibei.silvercoin.trade.ArbitrageTrader;
-import ch.chrummibei.silvercoin.trade.Market;
-import ch.chrummibei.silvercoin.trade.TradeOffer;
-import ch.chrummibei.silvercoin.trade.Trader;
+import ch.chrummibei.silvercoin.gui.SilverCoinComponent;
 
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.Random;
+import javax.swing.*;
+import java.awt.*;
 
 public class Main {
 
     public static void main(String[] args) {
-        Universe universe = new Universe();
-        universe.run();
+        SilverCoinComponent game = new SilverCoinComponent();
+
+        JFrame jframe = new JFrame("SilverCoin - A space trade simulator");
+        JPanel jpanel = new JPanel(new BorderLayout());
+        jpanel.add(game, BorderLayout.CENTER);
+
+        jframe.setContentPane(jpanel);
+        jframe.pack();
+        jframe.setLocationRelativeTo(null);
+        jframe.setResizable(false);
+        jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jframe.setVisible(true);
+
+        game.start();
     }
 }
 
