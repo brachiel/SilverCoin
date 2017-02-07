@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Created by brachiel on 06/02/2017.
+ * Main GUI component of SilverCoin
  */
 public class SilverCoinComponent extends Canvas implements Runnable, TimestepActionActor {
     private static final int WIDTH = 400;
@@ -35,7 +35,9 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimestepAct
         bitmap = new Bitmap(WIDTH, HEIGHT);
 
         universe = new Universe();
-        universe.addActor(this);
+
+        // Setup rendering every 1000 milliseconds
+        this.addAction(this::render, 1000);
     }
 
     public Universe getUniverse() {
@@ -70,7 +72,7 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimestepAct
             long nowMillis = System.currentTimeMillis();
 
             tick(nowMillis - lastTickMillis); // This might take a while
-            render(); // This might take a while
+            // render(); // Render is solved through an ActionActor
 
             lastTickMillis = System.currentTimeMillis();
             // We have to sleep currentTime + 1000/targetTicksPerSecond - now
@@ -91,8 +93,9 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimestepAct
         }
     }
 
-    private void render() {
+    private void render(long timeDiffMillis) {
         universe.printStatus();
+
     }
 
     @Override

@@ -2,7 +2,9 @@ package ch.chrummibei.silvercoin.universe.trade;
 
 import ch.chrummibei.silvercoin.universe.item.Item;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 

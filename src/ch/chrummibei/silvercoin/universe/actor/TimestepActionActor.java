@@ -1,6 +1,5 @@
 package ch.chrummibei.silvercoin.universe.actor;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -11,7 +10,7 @@ import java.util.function.Consumer;
  */
 public interface TimestepActionActor extends Actor {
     class Timekeeper {
-        public Long localTime = Long.valueOf(0);
+        public Long localTime = 0L;
         public Long periodicity;
 
         public Timekeeper(Long periodicity) {

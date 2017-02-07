@@ -1,7 +1,7 @@
 package ch.chrummibei.silvercoin.universe.item;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**

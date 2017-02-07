@@ -1,11 +1,7 @@
 package ch.chrummibei.silvercoin.universe.actor;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-
 /**
- * Created by brachiel on 03/02/2017.
+ * A thing that ticks. Will be added to the universe and ticks there.
  */
 public interface Actor {
     void tick(long timeStepMillis);

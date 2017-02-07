@@ -1,9 +1,9 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
+import ch.chrummibei.silvercoin.universe.credit.Credit;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
-import ch.chrummibei.silvercoin.universe.credit.Credit;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 
 import java.util.ArrayList;

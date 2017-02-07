@@ -1,14 +1,14 @@
 package ch.chrummibei.silvercoin.universe.position;
 
-import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
+import ch.chrummibei.silvercoin.universe.item.Item;
 
 /**
  * An amount of items that can be held by a trader
  */
 public class PricedItemPosition extends ItemPosition {
-    TotalValue purchaseValue = new TotalValue(0);
+    private TotalValue purchaseValue = new TotalValue(0);
 
     public PricedItemPosition(Item item) {
         this(item, 0, new TotalValue(0.0));
