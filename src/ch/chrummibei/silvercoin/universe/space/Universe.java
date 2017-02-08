@@ -90,7 +90,7 @@ public class Universe implements Actor {
         arbitrageTraders.add(new ArbitrageTradeActor(market));
         arbitrageTraders.forEach(this::addActor);
 
-        catalogue.stream().filter(i -> i instanceof CraftableItem).map(CraftableItem.class::cast).forEachOrdered(i -> System.out.println(i.getIngredientString()));
+        //catalogue.stream().filter(i -> i instanceof CraftableItem).map(CraftableItem.class::cast).forEachOrdered(i -> System.out.println(i.getIngredientString()));
     }
 
     // Return a stream of all markets

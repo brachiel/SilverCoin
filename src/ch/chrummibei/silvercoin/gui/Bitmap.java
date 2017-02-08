@@ -1,5 +1,10 @@
 package ch.chrummibei.silvercoin.gui;
 
+import java.awt.*;
+import java.awt.image.DirectColorModel;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.util.stream.IntStream;
 
 import static java.lang.Math.min;
@@ -7,43 +12,49 @@ import static java.lang.Math.min;
 /**
  * Created by brachiel on 06/02/2017.
  */
-public class Bitmap {
-    public static final Bitmap font = Fonts.getFontBitmap();
-
+public class Bitmap extends WritableRaster {
     public final int width;
     public final int height;
-    public final int[] pixels;
 
     public Bitmap(int width, int height) {
+        super(DirectColorModel.getRGBdefault().createCompatibleSampleModel(width, height), new Point(0,0));
+
         this.width = width;
         this.height = height;
-        pixels = new int[width*height];
     }
 
-    void draw(Bitmap bitmap, int srcXOff, int srcYOff, int trgXOff, int trgYOff) {
-        // Parallel draw
-        IntStream.rangeClosed(0,min(width,bitmap.width)-1).parallel().forEach(x ->
-            IntStream.rangeClosed(0,min(height,bitmap.height)-1).parallel().forEach(y -> {
-                // TODO: This logic isn't needed if we're clever about the ranges.
-                int tx = x + trgXOff;
-                int ty = y + trgYOff;
-                int sx = x + srcXOff;
-                int sy = y + srcYOff;
-
-                if (tx < 0 || width <= tx) return;
-                if (ty < 0 || height <= ty) return;
-                if (sx < 0 || bitmap.width <= sx) return;
-                if (sy < 0 || bitmap.height <= sy) return;
-
-                pixels[tx + width * ty] = bitmap.pixels[sx + bitmap.width * sy];
-            })
-        );
+    /**
+     * Draw translated srcRaster onto this one at location dx, dy
+     * Copies every (x+tx, y+ty) of the srcRaster onto (x+dy, y+dy) on this Bitmap
+     * @param srcRaster Other srcRaster
+     * @param tx X translation of srcRaster
+     * @param ty Y translation of srcRaster
+     * @param dx target X
+     * @param dy target Y
+     */
+    void draw(Raster srcRaster, int tx, int ty, int dx, int dy) {
+        setRect(dx, dy, srcRaster.createTranslatedChild(tx, ty));
     }
 
-    void writeString(String string, int targetXOffset, int targetYOffset) {
+    /**
+     * Draw translated srcRaster onto this one at location dx, dy
+     * Copies every (x, y) of the srcRaster onto (x+dy, y+dy) on this Bitmap
+     * @param srcRaster Other srcRaster
+     * @param dx target X
+     * @param dy target Y
+     */
+    void draw(Raster srcRaster, int dx, int dy) {
+        setRect(dx, dy, srcRaster);
+    }
+
+    void drawRect(Raster srcRaster, int tx, int ty, int width, int height, int dx, int dy) {
+        draw(srcRaster.createChild(0, 0, width, height, tx, ty, null), dx, dy);
+    }
+
+    void writeString(String string, int dx, int dy) {
         for (int i = 0; i < string.length(); ++i) {
-            int sourceXOffset = Fonts.CHAR_WIDTH * Fonts.FONT_STRING.indexOf(string.charAt(i));
-            draw(font, sourceXOffset, 0, targetXOffset + Fonts.CHAR_WIDTH * i, targetYOffset);
+            int sourceXOffset = Font.CHAR_WIDTH * Font.FONT_STRING.indexOf(string.charAt(i));
+            drawRect(Font.FIXED_FONT, sourceXOffset, 0, Font.CHAR_WIDTH, Font.CHAR_HEIGHT, dx + Font.CHAR_WIDTH * i, dy);
         }
     }
 }

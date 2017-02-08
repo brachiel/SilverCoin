@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
  * Created by brachiel on 07/02/2017.
  */
 public class Fonts {
+    /*
     public static final String FIXED = "../resources/fonts/fixed_01.ttf";
     public static final int FONT_SIZE = 8;
     public static final int CHAR_WIDTH = FONT_SIZE;
@@ -50,4 +51,5 @@ public class Fonts {
 
         return bitmap;
     }
+    */
 }

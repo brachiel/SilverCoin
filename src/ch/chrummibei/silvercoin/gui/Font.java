@@ -9,19 +9,32 @@ import java.io.InputStream;
  * Created by brachiel on 08/02/2017.
  */
 public class Font extends Bitmap {
-    public static final String FONT_PATH = "resources/fonts/fixed_01.png";
+    public static final String FONT_PATH = "/resources/fonts/fixed_01.png";
+    public static final Font FIXED_FONT;
+    public static final String FONT_STRING = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?_-.,;:$öäüÖÄÜ+='\"^*#~";
+    public static final int CHAR_HEIGHT = 18;
+    public static final int CHAR_WIDTH = 12;
 
-    public Font(int width, int height) {
-        super(width, height);
+    static {
+        FIXED_FONT = new Font(loadStaticFontBuffer());
+    }
 
+    private static BufferedImage loadStaticFontBuffer() {
         InputStream inputStream = Font.class.getResourceAsStream(FONT_PATH);
-        BufferedImage fontImage;
-        try {
-            fontImage = ImageIO.read(inputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (inputStream == null) {
+            System.out.println("Font Image " + FONT_PATH + " cannot be found.");
+            return null;
         }
 
-        fontImage.getData().getDataBuffer()
+        try {
+            return ImageIO.read(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Font(BufferedImage fontImage) {
+        super(fontImage.getWidth(), fontImage.getHeight());
     }
 }

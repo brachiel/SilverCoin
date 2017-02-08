@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.awt.image.WritableRaster;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -26,7 +27,7 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
 
     private final Screen screen;
     private final BufferedImage img;
-    private final int[] pixels;
+    private final WritableRaster raster;
     private boolean running = false;
     private Thread thread;
     private final Map<Consumer<Long>, Timekeeper> timestepActorAction = new HashMap<>();
@@ -40,7 +41,7 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
 
         screen = new Screen(WIDTH, HEIGHT);
         img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-        pixels = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
+        raster = img.getRaster();
 
         universe = new Universe();
 
@@ -113,14 +114,12 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
             bufferStrategy = getBufferStrategy();
         }
 
-        screen.testScreen();
+        screen.render(universe);
 
         //screen.render(universe);
 
-        // Render screen pixels on BufferImage
-        IntStream.rangeClosed(0, pixels.length-1).parallel().forEach(
-                i -> pixels[i] = screen.pixels[i]
-        );
+        // Render screen on raster
+        raster.setRect(screen);
 
         Graphics graphics = bufferStrategy.getDrawGraphics();
         graphics.fillRect(0, 0, WIDTH*SCALE, HEIGHT*SCALE);
