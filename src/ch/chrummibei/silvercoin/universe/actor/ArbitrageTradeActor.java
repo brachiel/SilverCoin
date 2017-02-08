@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 /**
  * Created by brachiel on 03/02/2017.
  */
-public class ArbitrageTradeActor extends ArbitrageTrader implements TimestepActionActor {
+public class ArbitrageTradeActor extends ArbitrageTrader implements TimeStepActionActor {
     Map<Consumer<Long>,Timekeeper> actions = new HashMap<>();
 
     public ArbitrageTradeActor(Market market) {

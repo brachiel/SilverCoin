@@ -4,11 +4,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * TimestepActionActor is an actor that executes specified actions every set amount of milliseconds.
+ * TimeStepActionActor is an actor that executes specified actions every set amount of milliseconds.
  * This implementation only guarantees, that every action will be executed enough times; not that it will
  * be executed after exactly the right amount of milliseconds.
  */
-public interface TimestepActionActor extends Actor {
+public interface TimeStepActionActor extends Actor {
     class Timekeeper {
         public Long localTime = 0L;
         public Long periodicity;

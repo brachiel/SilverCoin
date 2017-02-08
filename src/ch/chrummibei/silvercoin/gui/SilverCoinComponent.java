@@ -1,30 +1,36 @@
 package ch.chrummibei.silvercoin.gui;
 
-import ch.chrummibei.silvercoin.universe.actor.TimestepActionActor;
+import ch.chrummibei.silvercoin.universe.actor.TimeStepActionActor;
 import ch.chrummibei.silvercoin.universe.space.Universe;
 
-import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 /**
  * Main GUI component of SilverCoin
  */
-public class SilverCoinComponent extends Canvas implements Runnable, TimestepActionActor {
+public class SilverCoinComponent extends Canvas implements Runnable, TimeStepActionActor {
     private static final int WIDTH = 400;
     private static final int HEIGHT = 200;
     private static final int SCALE = 4;
     private static final double TARGET_TPS = 10.0;
+    private static final double TARGET_FPS = 1;
 
-    private Universe universe;
+    private final Universe universe;
 
-    private JFrame jframe;
-    private Bitmap bitmap;
+    private final Screen screen;
+    private final BufferedImage img;
+    private final int[] pixels;
     private boolean running = false;
     private Thread thread;
-    private Map<Consumer<Long>, Timekeeper> timestepActorAction = new HashMap<>();
+    private final Map<Consumer<Long>, Timekeeper> timestepActorAction = new HashMap<>();
+
 
     public SilverCoinComponent() {
         Dimension size = new Dimension(WIDTH * SCALE, HEIGHT * SCALE);
@@ -32,12 +38,14 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimestepAct
         setMinimumSize(size);
         setMaximumSize(size);
 
-        bitmap = new Bitmap(WIDTH, HEIGHT);
+        screen = new Screen(WIDTH, HEIGHT);
+        img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+        pixels = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
 
         universe = new Universe();
 
         // Setup rendering every 1000 milliseconds
-        this.addAction(this::render, 1000);
+        this.addAction(this::render, Math.round(1000*TARGET_FPS));
     }
 
     public Universe getUniverse() {
@@ -72,7 +80,7 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimestepAct
             long nowMillis = System.currentTimeMillis();
 
             tick(nowMillis - lastTickMillis); // This might take a while
-            // render(); // Render is solved through an ActionActor
+            // render(); // Render is solved through an TimeStepActionActor
 
             lastTickMillis = System.currentTimeMillis();
             // We have to sleep currentTime + 1000/targetTicksPerSecond - now
@@ -93,9 +101,32 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimestepAct
         }
     }
 
+    /*
+        render is called by this being a TimeStepActionActor and the render
+        method being registered as an action.
+     */
     private void render(long timeDiffMillis) {
-        universe.printStatus();
+        // Render universe on screen
+        BufferStrategy bufferStrategy = getBufferStrategy();
+        if (bufferStrategy == null) {
+            createBufferStrategy(3);
+            bufferStrategy = getBufferStrategy();
+        }
 
+        screen.testScreen();
+
+        //screen.render(universe);
+
+        // Render screen pixels on BufferImage
+        IntStream.rangeClosed(0, pixels.length-1).parallel().forEach(
+                i -> pixels[i] = screen.pixels[i]
+        );
+
+        Graphics graphics = bufferStrategy.getDrawGraphics();
+        graphics.fillRect(0, 0, WIDTH*SCALE, HEIGHT*SCALE);
+        graphics.drawImage(img, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
+        graphics.dispose();
+        bufferStrategy.show();
     }
 
     @Override
@@ -110,6 +141,6 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimestepAct
 
     public void tick(long timeDiffMillis) {
         universe.tick(timeDiffMillis);
-        TimestepActionActor.super.tick(timeDiffMillis); // Check if we need to render
+        TimeStepActionActor.super.tick(timeDiffMillis); // Check if we need to render
     }
 }

@@ -13,6 +13,7 @@ import ch.chrummibei.silvercoin.universe.trade.Trader;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Stream;
 
 /**
  * Created by brachiel on 03/02/2017.
@@ -90,5 +91,10 @@ public class Universe implements Actor {
         arbitrageTraders.forEach(this::addActor);
 
         catalogue.stream().filter(i -> i instanceof CraftableItem).map(CraftableItem.class::cast).forEachOrdered(i -> System.out.println(i.getIngredientString()));
+    }
+
+    // Return a stream of all markets
+    public Stream<Market> getMarkets() {
+        return Stream.of(market);
     }
 }
