@@ -1,13 +1,9 @@
 package ch.chrummibei.silvercoin.gui;
 
 import java.awt.*;
-import java.awt.image.DirectColorModel;
+import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.util.stream.IntStream;
-
-import static java.lang.Math.min;
 
 /**
  * Created by brachiel on 06/02/2017.
@@ -17,7 +13,14 @@ public class Bitmap extends WritableRaster {
     public final int height;
 
     public Bitmap(int width, int height) {
-        super(DirectColorModel.getRGBdefault().createCompatibleSampleModel(width, height), new Point(0,0));
+        super((new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)).getSampleModel(), new Point(0,0));
+
+        this.width = width;
+        this.height = height;
+    }
+
+    public Bitmap(int width, int height, int colorMode) {
+        super((new BufferedImage(width, height, colorMode)).getSampleModel(), new Point(0,0));
 
         this.width = width;
         this.height = height;
@@ -48,12 +51,13 @@ public class Bitmap extends WritableRaster {
     }
 
     void drawRect(Raster srcRaster, int tx, int ty, int width, int height, int dx, int dy) {
-        draw(srcRaster.createChild(0, 0, width, height, tx, ty, null), dx, dy);
+        draw(srcRaster.createChild(tx, ty, width, height, 0, 0, null), dx, dy);
     }
 
     void writeString(String string, int dx, int dy) {
         for (int i = 0; i < string.length(); ++i) {
             int sourceXOffset = Font.CHAR_WIDTH * Font.FONT_STRING.indexOf(string.charAt(i));
+            if (! (sourceXOffset >= 0)) continue;
             drawRect(Font.FIXED_FONT, sourceXOffset, 0, Font.CHAR_WIDTH, Font.CHAR_HEIGHT, dx + Font.CHAR_WIDTH * i, dy);
         }
     }

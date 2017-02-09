@@ -6,12 +6,10 @@ import ch.chrummibei.silvercoin.universe.space.Universe;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
-import java.awt.image.WritableRaster;
+import java.awt.image.Raster;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
 
 /**
  * Main GUI component of SilverCoin
@@ -26,8 +24,8 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
     private final Universe universe;
 
     private final Screen screen;
+    private final Raster screenRaster;
     private final BufferedImage img;
-    private final WritableRaster raster;
     private boolean running = false;
     private Thread thread;
     private final Map<Consumer<Long>, Timekeeper> timestepActorAction = new HashMap<>();
@@ -39,9 +37,10 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
         setMinimumSize(size);
         setMaximumSize(size);
 
-        screen = new Screen(WIDTH, HEIGHT);
+        screen = new Screen(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+        screenRaster = screen.createChild(0, 0, WIDTH, HEIGHT, 0, 0, new int[] {0,1,2});
+
         img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-        raster = img.getRaster();
 
         universe = new Universe();
 
@@ -115,13 +114,13 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
         }
 
         screen.render(universe);
-
-        //screen.render(universe);
+        //screen.testScreen();
 
         // Render screen on raster
-        raster.setRect(screen);
+        img.getRaster().setRect(screenRaster);
 
         Graphics graphics = bufferStrategy.getDrawGraphics();
+        graphics.setColor(Color.black);
         graphics.fillRect(0, 0, WIDTH*SCALE, HEIGHT*SCALE);
         graphics.drawImage(img, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
         graphics.dispose();

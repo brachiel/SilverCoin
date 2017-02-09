@@ -11,9 +11,9 @@ import java.io.InputStream;
 public class Font extends Bitmap {
     public static final String FONT_PATH = "/resources/fonts/fixed_01.png";
     public static final Font FIXED_FONT;
-    public static final String FONT_STRING = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?_-.,;:$öäüÖÄÜ+='\"^*#~";
-    public static final int CHAR_HEIGHT = 18;
-    public static final int CHAR_WIDTH = 12;
+    public static final String FONT_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?_-.,;:$öäüÖÄÜ+='\"^*#~";
+    public static final int CHAR_HEIGHT = 9;
+    public static final int CHAR_WIDTH = 6;
 
     static {
         FIXED_FONT = new Font(loadStaticFontBuffer());
@@ -36,5 +36,6 @@ public class Font extends Bitmap {
 
     public Font(BufferedImage fontImage) {
         super(fontImage.getWidth(), fontImage.getHeight());
+        setRect(fontImage.getRaster());
     }
 }
