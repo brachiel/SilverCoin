@@ -1,7 +1,6 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
 import ch.chrummibei.silvercoin.universe.credit.Price;
-import ch.chrummibei.silvercoin.universe.item.CraftableItem;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.item.Recipe;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;

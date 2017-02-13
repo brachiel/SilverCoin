@@ -20,65 +20,80 @@
     "Food",
     "Algae"
   ],
-  "recipes": {
-    "Transport Ship": [
-      {
+  "recipes": [
+    {
+      "product": "Transport Ship",
+      "ingredients": {
         "Engine": 4,
         "Power core": 1,
         "Structural component": 40,
         "Drone": 5,
         "AI Core": 2
       }
-    ],
-    "Engine": [
-      {
+    },
+    {
+      "product": "Engine",
+      "ingredients": {
         "Electronic coils": 15,
         "Heavy water": 30
-      },
-      {
-        "Water": 40
+      }
+    },
+    {
+      "product": "Engine",
+      "ingredients": {
+        "Water": 40,
         "Thorium": 30
       }
     ],
-    "Structural component": [
-      {
+    {
+      "product": "Structural component",
+      "ingredients": {
         "Iron": 30
-      },
-      {
+      }
+    },
+    {
+      "product": "Structural component",
+      "ingredients": {
         "Aluminum": 40
       }
-    ],
-    "Heavy Water": [
-      {
+    },
+    {
+      "product": "Heavy Water",
+      "ingredients": {
         "Water": 30,
         "Energy": 50
       }
-    ],
-    "Electronic coil": [
-      {
+    },
+    {
+      "product": "Electronic coil",
+      "ingredients": {
         "Copper": 5
       }
-    ],
-    "Electronics": [
-      {
+    },
+    {
+      "product": "Electronics",
+      "ingredients": {
         "Copper": 3,
         "Silicon": 5
       }
-    ],
-    "AI Core": [
-      {
+    },
+    {
+      "product": "AI Core",
+      "ingredients": {
         "Electronics": 5
       }
-    ],
-    "Food": [
-      {
+    },
+    {
+      "product": "Food",
+      "ingredients": {
         "Algae": 200
       }
-    ],
-    "Oxygen": [
-      {
+    },
+    {
+      "product": "Oxygen",
+      "ingredients": {
         "Energy": 5
       }
-    ]
-  }
+    }
+  ]
 }
