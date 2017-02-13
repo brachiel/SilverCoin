@@ -1,0 +1,84 @@
+{
+  "items": [
+    "Transport Ship",
+    "Engine",
+    "Power core",
+    "Heavy water",
+    "Water",
+    "Thorium",
+    "Electronic coil",
+    "Copper",
+    "Structural component",
+    "Iron",
+    "Aluminum",
+    "Electronics",
+    "Silicon",
+    "Drone",
+    "AI core",
+    "Oxygen",
+    "Energy",
+    "Food",
+    "Algae"
+  ],
+  "recipes": {
+    "Transport Ship": [
+      {
+        "Engine": 4,
+        "Power core": 1,
+        "Structural component": 40,
+        "Drone": 5,
+        "AI Core": 2
+      }
+    ],
+    "Engine": [
+      {
+        "Electronic coils": 15,
+        "Heavy water": 30
+      },
+      {
+        "Water": 40
+        "Thorium": 30
+      }
+    ],
+    "Structural component": [
+      {
+        "Iron": 30
+      },
+      {
+        "Aluminum": 40
+      }
+    ],
+    "Heavy Water": [
+      {
+        "Water": 30,
+        "Energy": 50
+      }
+    ],
+    "Electronic coil": [
+      {
+        "Copper": 5
+      }
+    ],
+    "Electronics": [
+      {
+        "Copper": 3,
+        "Silicon": 5
+      }
+    ],
+    "AI Core": [
+      {
+        "Electronics": 5
+      }
+    ],
+    "Food": [
+      {
+        "Algae": 200
+      }
+    ],
+    "Oxygen": [
+      {
+        "Energy": 5
+      }
+    ]
+  }
+}

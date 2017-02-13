@@ -3,6 +3,7 @@ package ch.chrummibei.silvercoin.universe.trade;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.item.CraftableItem;
 import ch.chrummibei.silvercoin.universe.item.Item;
+import ch.chrummibei.silvercoin.universe.item.Recipe;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 
@@ -15,17 +16,17 @@ import java.util.Map;
 public class Factory extends Trader {
     private int goalStock;
 
-    private CraftableItem product;
+    private Recipe recipe;
     private Map<Item, PricedItemPosition> inventory;
     private YieldingItemPosition productStock;
 
-    public Factory(CraftableItem product, int goalStock) {
-        this.product = product;
+    public Factory(Recipe recipe, int goalStock) {
+        this.recipe = recipe;
         this.goalStock = goalStock;
     }
 
     public int calcProducibleAmount(Item item, int ownedAmount) {
-        return ownedAmount / product.getIngredientAmount(item);
+        return ownedAmount / recipe.getIngredientAmount(item);
     }
 
     public int calcProducibleAmount() {
@@ -39,7 +40,7 @@ public class Factory extends Trader {
         int producingAmount = calcProducibleAmount();
         Price productPrice = new Price(0);
         for (PricedItemPosition position : inventory.values()) {
-            int ingredientAmount = product.getIngredientAmount(position.getItem());
+            int ingredientAmount = recipe.getIngredientAmount(position.getItem());
             // Add the ingredient price to the product price
             productPrice = productPrice.add(position.getPurchasePrice().toTotalValue(ingredientAmount));
             // Reduce inventory by amount needed to produce the product

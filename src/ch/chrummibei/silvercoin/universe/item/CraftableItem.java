@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.universe.item;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,24 +9,17 @@ import java.util.stream.Collectors;
  * An item that can be crafted from other items in factories.
  */
 public class CraftableItem extends Item {
-    private Map<Item, Integer> ingredients;
+    private final ArrayList<Recipe> recipes = new ArrayList<>();
 
     public CraftableItem(String name) {
         super(name);
-        ingredients = new HashMap<>();
     }
 
-    public void addIngredient(Item ingredient, Integer amount) {
-        ingredients.put(ingredient, amount);
+    public void addRecipe(Recipe recipe) {
+        recipes.add(recipe);
     }
 
-    public Integer getIngredientAmount(Item dependency) {
-        return ingredients.get(dependency);
-    }
-
-    public String getIngredientString() {
-        return toString() + " <- " + ingredients.keySet().stream()
-                                        .map(Item::toString)
-                                        .collect(Collectors.joining(", "));
+    public ArrayList<Recipe> getRecipes() {
+        return recipes;
     }
 }
