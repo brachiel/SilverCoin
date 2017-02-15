@@ -7,6 +7,7 @@ public class Price extends Credit<Price> {
     public Price(double balance) {
         super(balance);
     }
+    public Price copy() { return new Price(balance); }
 
     public Price(Credit credit) {
         super(credit.balance);

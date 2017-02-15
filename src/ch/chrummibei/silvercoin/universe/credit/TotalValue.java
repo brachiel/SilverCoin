@@ -7,6 +7,7 @@ public class TotalValue extends Credit<TotalValue> {
     public TotalValue(double balance) {
         super(balance);
     }
+    public TotalValue copy() { return new TotalValue(balance); }
 
     public TotalValue(Credit credit) {
         super(credit.balance);

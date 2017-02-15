@@ -3,10 +3,18 @@ package ch.chrummibei.silvercoin.universe.credit;
 /**
  * A balance of currency. Used for type safety.
  */
-public class Credit<CHILD extends Credit<CHILD>> {
+public class Credit<T extends Credit<T>> {
     double balance;
+
+    public Credit() {
+    }
+
     public Credit(double balance) {
-        this.balance = balance;
+        set(balance);
+    }
+
+    public T copy() {
+        return new Credit<T>().set(balance);
     }
 
     public long toLong() {
@@ -21,31 +29,26 @@ public class Credit<CHILD extends Credit<CHILD>> {
         return String.format("%.02f Cr.", balance);
     }
 
-    public CHILD add(double o) { return (CHILD) new Credit(balance + o); }
-    public CHILD add(Credit o) { return add(o.balance); }
-    public CHILD add(int o) { return add(balance + o); }
-    public void iAdd(Credit o) { balance += o.balance; }
+    public T add(double o) { return this.copy().iAdd(o); }
+    public T add(Credit o) { return add(o.balance); }
+    public T iAdd(double o) { balance += o; return (T) this; }
+    public T iAdd(Credit o) { balance += o.balance; return (T) this; }
 
-    public CHILD subtract(double o) { return (CHILD) new Credit(balance - o); }
-    public CHILD subtract(Credit o) { return subtract(o.balance); }
-    public CHILD subtract(int o) { return subtract(balance - o); }
-    public void iSubtract(Credit o) { balance -= o.balance; }
+    public T subtract(double o) { return this.copy().iSubtract(o); }
+    public T subtract(Credit o) { return subtract(o.balance); }
+    public T iSubtract(double o) { balance -= o; return (T) this; }
+    public T iSubtract(Credit o) { balance -= o.balance; return (T) this; }
 
-    public void set(double o) { balance = o; }
-    public void set(Credit o) { set(o.balance); }
-    public void set(int o) { balance = o; }
+    public T set(double o) { balance = o; return (T) this; }
+    public T set(Credit o) { set(o.balance); return (T) this; }
+    public T set(int o) { balance = o; return (T) this; }
 
-    public CHILD invert() {
-        return (CHILD) new Credit(-balance);
-    }
-    public void iInvert() {
-        balance *= -1;
-    }
+    public T invert() { return this.copy().iInvert(); }
+    public T iInvert() { balance *= -1; return (T) this; }
 
-    public void iMultiply(double factor) { balance *= factor; }
-    public void iDivide(double factor) { iMultiply(1/factor); }
+    public T multiply(double factor) { return this.copy().iMultiply(factor); }
+    public T iMultiply(double factor) { balance *= factor; return (T) this; }
+    public T divide(double factor) { return multiply(1/factor); }
+    public T iDivide(double factor) { iMultiply(1/factor); return (T) this; }
 
-    public CHILD multiply(double factor) {
-        return (CHILD) new Credit(balance*factor);
-    }
 }
