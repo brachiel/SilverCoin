@@ -3,7 +3,7 @@ package ch.chrummibei.silvercoin.universe.credit;
 /**
  * A balance of currency. Used for type safety.
  */
-public class Credit {
+public class Credit<CHILD extends Credit<CHILD>> {
     double balance;
     public Credit(double balance) {
         this.balance = balance;
@@ -21,25 +21,31 @@ public class Credit {
         return String.format("%.02f Cr.", balance);
     }
 
-    public Credit add(double o) { return new Credit(balance + o); }
-    public Credit add(Credit o) { return add(o.balance); }
-    public Credit add(int o) { return new Credit(balance + o); }
-    public void iadd(Credit o) { balance += o.balance; }
+    public CHILD add(double o) { return (CHILD) new Credit(balance + o); }
+    public CHILD add(Credit o) { return add(o.balance); }
+    public CHILD add(int o) { return add(balance + o); }
+    public void iAdd(Credit o) { balance += o.balance; }
 
-    public Credit subtract(double o) { return new Credit(balance - o); }
-    public Credit subtract(Credit o) { return subtract(o.balance); }
-    public Credit subtract(int o) { return new Credit(balance - o); }
-    public void isubtract(Credit o) { balance -= o.balance; }
+    public CHILD subtract(double o) { return (CHILD) new Credit(balance - o); }
+    public CHILD subtract(Credit o) { return subtract(o.balance); }
+    public CHILD subtract(int o) { return subtract(balance - o); }
+    public void iSubtract(Credit o) { balance -= o.balance; }
 
     public void set(double o) { balance = o; }
     public void set(Credit o) { set(o.balance); }
     public void set(int o) { balance = o; }
 
-    public Credit invert() {
-        return new Credit(-balance);
+    public CHILD invert() {
+        return (CHILD) new Credit(-balance);
     }
-    public void iinvert() {
+    public void iInvert() {
         balance *= -1;
     }
 
+    public void iMultiply(double factor) { balance *= factor; }
+    public void iDivide(double factor) { iMultiply(1/factor); }
+
+    public CHILD multiply(double factor) {
+        return (CHILD) new Credit(balance*factor);
+    }
 }

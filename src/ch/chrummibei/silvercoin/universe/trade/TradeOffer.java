@@ -56,6 +56,16 @@ public class TradeOffer {
         return amount;
     }
 
+    public void updateAmount(int amount, Price price) { // Same price
+        this.amount = amount;
+        this.price = price;
+    }
+
+    public void addAmount(int amount, Price price) {
+        this.price = this.price.toTotalValue(this.amount).add(price.toTotalValue(amount)).toPrice(this.amount + amount);
+        this.amount += amount;
+    }
+
     public Item getItem() {
         return item;
     }

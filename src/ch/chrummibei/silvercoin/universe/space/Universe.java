@@ -2,15 +2,18 @@ package ch.chrummibei.silvercoin.universe.space;
 
 import ch.chrummibei.silvercoin.universe.actor.Actor;
 import ch.chrummibei.silvercoin.universe.actor.ArbitrageTradeActor;
+import ch.chrummibei.silvercoin.universe.actor.FactoryActor;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.item.CraftableItem;
 import ch.chrummibei.silvercoin.universe.item.Item;
+import ch.chrummibei.silvercoin.universe.item.Recipe;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.trade.Market;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import ch.chrummibei.silvercoin.universe.trade.Trader;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -24,6 +27,7 @@ public class Universe implements Actor {
     private Market market = new Market();
     private ArrayList<Actor> actors = new ArrayList<>();
     private ArrayList<ArbitrageTradeActor> arbitrageTraders = new ArrayList<>();
+    private ArrayList<FactoryActor> factories = new ArrayList<>();
 
     public Universe() {
         initialise();
@@ -59,8 +63,11 @@ public class Universe implements Actor {
         // Create 10 craftable items with random ingredients from catalogue
         for (int i = 0; i < 10; ++i) {
             CraftableItem item = new CraftableItem("CraftableItem " + i);
+            HashMap<Item,Integer> ingredients = new HashMap<>();
             random.ints(random.nextInt(10),2,catalogue.size())
-                    .forEach(j -> item.addIngredient(catalogue.get(j), random.nextInt(10)));
+                    .forEach(j -> ingredients.put(catalogue.get(j), random.nextInt(10)));
+            Recipe recipe = new Recipe(item, ingredients);
+            item.addRecipe(recipe);
             catalogue.add(item);
         }
 

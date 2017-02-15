@@ -1,13 +1,14 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
 import ch.chrummibei.silvercoin.universe.credit.Price;
-import ch.chrummibei.silvercoin.universe.item.CraftableItem;
+import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.item.Recipe;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * A Factory is a trader who is able to convert Items to a specific CraftableItem.
@@ -15,14 +16,30 @@ import java.util.Map;
  */
 public class Factory extends Trader {
     private int goalStock;
+    private Price productPrice;
 
     private Recipe recipe;
     private Map<Item, PricedItemPosition> inventory;
     private YieldingItemPosition productStock;
+    private TradeOffer productSellTradeOffer;
+
 
     public Factory(Recipe recipe, int goalStock) {
         this.recipe = recipe;
         this.goalStock = goalStock;
+        this.productSellTradeOffer = new TradeOffer(this, recipe.product, TradeOffer.TYPE.SELLING, 0, new Price(0));
+    }
+
+    /**
+     * Adds just produced product to the main trade offer.
+     * @param amount of produced product
+     * @param price of ingredients to produce this product
+     */
+    public void addProductToTradeOffer(int amount, Price price) {
+        productSellTradeOffer.addAmount(amount, price);
+        if (! offeredTrades.contains(productSellTradeOffer)) {
+            offeredTrades.add(productSellTradeOffer);
+        }
     }
 
     public int calcProducibleAmount(Item item, int ownedAmount) {
@@ -34,6 +51,27 @@ public class Factory extends Trader {
                 .mapToInt(pos -> calcProducibleAmount(pos.getItem(), pos.getAmount()))
                 .min()
                 .orElse(0);
+    }
+
+    public int calcWantedAmountOfIngredient(Item ingredient) {
+        return goalStock * recipe.ingredients.get(ingredient);
+    }
+
+    public Optional<TotalValue> calcTotalIngredientCostPerProductFromMarket(Market market) {
+        TotalValue totalValue = new TotalValue(0);
+
+        for (Map.Entry<Item, Integer> entry : recipe.ingredients.entrySet()) {
+            Optional<TotalValue> buyCost = market.calculateTotalBuyCosts(entry.getKey(), entry.getValue());
+
+            if (! buyCost.isPresent()) {
+                // Item does not have a trade offer; we can't calculate a price
+                return Optional.empty();
+            } else {
+                totalValue.iAdd(buyCost.get());
+            }
+        }
+
+        return Optional.of(totalValue);
     }
 
     public void produceProduct() {
@@ -49,5 +87,8 @@ public class Factory extends Trader {
 
         // Add the produced products
         productStock.addItems(producingAmount, productPrice);
+
+        // Update trade offer
+        addProductToTradeOffer(producingAmount, productPrice);
     }
 }

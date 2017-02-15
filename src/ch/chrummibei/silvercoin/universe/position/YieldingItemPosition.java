@@ -77,7 +77,7 @@ public class YieldingItemPosition extends PricedItemPosition {
         Price sellingPrice = totalValue.toPrice(amount);
         Price priceDifference = getPurchasePrice().subtract(sellingPrice);
         TotalValue profit = priceDifference.toTotalValue(amount);
-        realisedProfit.iadd(profit);
+        realisedProfit.iAdd(profit);
         super.decreasingPosition(amount, totalValue);
     }
 

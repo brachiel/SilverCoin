@@ -73,7 +73,7 @@ public class Trader extends Market {
         PricedItemPosition newItemPosition = trade.getTradersItemPosition(this);
         // newItemPosition might be negative
 
-        credit.isubtract(newItemPosition.getPurchaseValue());
+        credit.iSubtract(newItemPosition.getPurchaseValue());
         addToInventory(newItemPosition);
     }
 

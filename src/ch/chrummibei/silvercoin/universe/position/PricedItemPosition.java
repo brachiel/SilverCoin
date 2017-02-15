@@ -83,7 +83,7 @@ public class PricedItemPosition extends ItemPosition {
     }
 
     void increasingPosition(int amount, TotalValue totalValue) {
-        purchaseValue.iadd(totalValue);
+        purchaseValue.iAdd(totalValue);
     }
 
     public void removeItems(int amount) {

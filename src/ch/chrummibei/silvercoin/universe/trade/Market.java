@@ -1,11 +1,11 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
+import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -79,6 +79,44 @@ public class Market {
 
     public Optional<TradeOffer> searchBestBuyingTrade(Item item) {
         return searchOfferedBuyingTrades(item).max(Comparator.comparing(t -> t.getPrice().toDouble()));
+    }
+
+    public Map<TradeOffer,Integer> getTradeOfferSetToBuyAmount(Item item, int amount) {
+        HashMap<TradeOffer,Integer> tradeOffers = new HashMap<>();
+
+        int amountLeftToBuy = amount;
+        List<TradeOffer> sortedTradeOffers = searchOfferedSellingTrades(item)
+                .sorted(Comparator.comparing(offer -> offer.getPrice().toDouble()))
+                .collect(Collectors.toList());
+
+
+        for (TradeOffer tradeOffer : sortedTradeOffers) {
+            int amountToBuyWithThisOffer = Math.min(amountLeftToBuy, tradeOffer.getAmount());
+            amountLeftToBuy -= amountToBuyWithThisOffer;
+
+            tradeOffers.put(tradeOffer, amountToBuyWithThisOffer);
+
+            if (amountLeftToBuy <= 0) {
+                // Last Buy
+                break;
+            }
+        }
+
+        return tradeOffers;
+    }
+
+    public Optional<TotalValue> calculateTotalBuyCosts(Item item, int amount) {
+        TotalValue totalValue = new TotalValue(0);
+
+        for (Map.Entry<TradeOffer, Integer> entry : getTradeOfferSetToBuyAmount(item, amount).entrySet()) {
+            totalValue.iAdd(entry.getKey().getPrice().toTotalValue(entry.getValue()));
+        }
+
+        if (totalValue.toDouble() == 0) {
+            return Optional.empty();
+        } else {
+            return Optional.of(totalValue);
+        }
     }
 
     public Stream<Item> searchTradedItems() {
