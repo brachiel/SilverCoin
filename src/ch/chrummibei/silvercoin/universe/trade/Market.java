@@ -19,7 +19,7 @@ public class Market {
     }
 
 
-    public ArrayList<TradeOffer> getOfferedTrades() {
+    public ArrayList<TradeOffer> searchOfferedTrades() {
         return offeredTrades;
     }
 
@@ -27,7 +27,7 @@ public class Market {
         offeredTrades.clear();
     }
 
-    public void addOfferedTrade(TradeOffer offer) {
+    public void addTradeOffer(TradeOffer offer) {
         offeredTrades.add(offer);
     }
 
@@ -51,7 +51,7 @@ public class Market {
      * @param cmp A comparator function
      * @return credit or null
      */
-    public Stream<TradeOffer> getOfferedTrades(Predicate<TradeOffer> cmp) {
+    public Stream<TradeOffer> searchOfferedTrades(Predicate<TradeOffer> cmp) {
         return offeredTrades.stream().filter(cmp);
     }
 
@@ -61,16 +61,20 @@ public class Market {
      * @param item Item to be filtered
      * @return credit or null
      */
-    public Stream<TradeOffer> getOfferedTrades(Item item) {
-        return getOfferedTrades(offer -> offer.getItem() == item);
+    public Stream<TradeOffer> searchOfferedTrades(Item item) {
+        return searchOfferedTrades(offer -> offer.getItem() == item);
+    }
+
+    public Stream<TradeOffer> searchOfferedTrades(Item item, TradeOffer.TYPE type) {
+        return searchOfferedTrades(offer -> offer.getItem() == item && offer.getType() == type);
     }
 
     public Stream<TradeOffer> searchOfferedSellingTrades(Item item) {
-        return getOfferedTrades(item).filter(TradeOffer::isSelling);
+        return searchOfferedTrades(item).filter(TradeOffer::isSelling);
     }
 
     public Stream<TradeOffer> searchOfferedBuyingTrades(Item item) {
-        return getOfferedTrades(item).filter(TradeOffer::isBuying);
+        return searchOfferedTrades(item).filter(TradeOffer::isBuying);
     }
 
     public Optional<TradeOffer> searchBestSellingTrade(Item item) {

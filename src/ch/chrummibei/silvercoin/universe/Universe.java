@@ -5,16 +5,13 @@ import ch.chrummibei.silvercoin.universe.actor.Actor;
 import ch.chrummibei.silvercoin.universe.actor.ArbitrageTradeActor;
 import ch.chrummibei.silvercoin.universe.actor.FactoryActor;
 import ch.chrummibei.silvercoin.universe.credit.Price;
-import ch.chrummibei.silvercoin.universe.item.CraftableItem;
 import ch.chrummibei.silvercoin.universe.item.Item;
-import ch.chrummibei.silvercoin.universe.item.Recipe;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.trade.Market;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import ch.chrummibei.silvercoin.universe.trade.Trader;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -74,14 +71,14 @@ public class Universe implements Actor {
                 Item item = catalogue.get(random.nextInt(catalogue.size()));
                 TradeOffer offer = new TradeOffer(trader, item, TradeOffer.TYPE.SELLING, random.nextInt(100), new Price(100 * random.nextDouble()));
                 trader.addToInventory(new PricedItemPosition(offer.getItem(), offer.getAmount(), offer.getTotalValue()));
-                trader.addOfferedTrade(offer);
+                trader.addTradeOffer(offer);
             }
 
             for (int j = 0; j < random.nextInt(15); ++j) {
                 Item item = catalogue.get(random.nextInt(catalogue.size()));
                 TradeOffer offer = new TradeOffer(trader,item,TradeOffer.TYPE.BUYING,random.nextInt(100), new Price(100*random.nextDouble()));
                 trader.addCredits(offer.getTotalValue());
-                trader.addOfferedTrade(offer);
+                trader.addTradeOffer(offer);
             }
 
             trader.offerTradesAt(market);
@@ -96,6 +93,9 @@ public class Universe implements Actor {
         // Create 1 to 3 factories for every recipe with a goal stock of 5 to 15 items
         universeConfig.getRecipes().stream().flatMap(recipe -> Stream.iterate(recipe,r -> r).limit(1+random.nextInt(2))).forEach(recipe -> {
             FactoryActor factory = new FactoryActor(recipe, 5+random.nextInt(10));
+            factory.offerTradesAt(market);
+            factory.adaptPricesFor(market);
+
             factories.add(factory);
         });
         factories.forEach(this::addActor);

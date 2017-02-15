@@ -29,8 +29,17 @@ public class Factory extends Trader {
         super(recipe.product.getName() + " factory " + String.valueOf(Factory.getNextFactoryNameSequence()));
         this.recipe = recipe;
         this.goalStock = goalStock;
-        productSellTradeOffer = new TradeOffer(this, recipe.product, TradeOffer.TYPE.SELLING, 0, new Price(1));
+        productPrice = new Price(1);
+        productSellTradeOffer = new TradeOffer(this, recipe.product, TradeOffer.TYPE.SELLING, 0, productPrice);
         productStock = new YieldingItemPosition(recipe.product, 0);
+    }
+
+    /**
+     * Sets product price. Might be overwritten to allow for a profit.
+     * @param price New Product price.
+     */
+    public void setProductPrice(Price price) {
+        productPrice.set(price);
     }
 
     private static int getNextFactoryNameSequence() {
@@ -79,6 +88,16 @@ public class Factory extends Trader {
         }
 
         return Optional.of(totalValue);
+    }
+
+    public void adaptPricesFor(Market market) {
+        Optional<TotalValue> totalCostOfIngredients = calcTotalIngredientCostPerProductFromMarket(market);
+        if (totalCostOfIngredients.isPresent()) {
+            setProductPrice(totalCostOfIngredients.get().toPrice(1));
+            setUniqueTradeOffer(productStock.getItem(), TradeOffer.TYPE.SELLING, productStock.getAmount(), productPrice);
+        }
+
+        // TODO update ingredient offers
     }
 
     public void produceProduct() {

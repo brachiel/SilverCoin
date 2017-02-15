@@ -1,6 +1,7 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
 import ch.chrummibei.silvercoin.universe.credit.Credit;
+import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
@@ -9,6 +10,7 @@ import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Unit capable of trading
@@ -20,7 +22,7 @@ public class Trader extends Market {
 
     private String name;
     private Credit credit = new Credit(0.0);
-    private final ArrayList<Market> offersPresentAtMarket = new ArrayList<>();
+    private final ArrayList<Market> offersPresentAtMarkets = new ArrayList<>();
 
     public Trader(String name) {
         this.name = name;
@@ -58,7 +60,38 @@ public class Trader extends Market {
 
     public void offerTradesAt(Market market) {
         market.addAllOffers(offeredTrades);
-        offersPresentAtMarket.add(market);
+        offersPresentAtMarkets.add(market);
+    }
+
+    @Override
+    public void addTradeOffer(TradeOffer offer) {
+        super.addTradeOffer(offer);
+        offersPresentAtMarkets.forEach(market -> market.addTradeOffer(offer));
+    }
+
+    @Override
+    public void removeTradeOffer(TradeOffer offer) {
+        super.removeTradeOffer(offer);
+        offersPresentAtMarkets.forEach(market -> market.removeTradeOffer(offer));
+    }
+
+    /**
+     * Replaces the amount and price of an existing trade offer for that item and type,
+     * or create a new trade offer.
+     * @param item The item to be bought or sold.
+     * @param type The type of offer BUY/SELL. Unique together with item
+     * @param amount Amount to be bought/sold
+     * @param price Price of one item
+     */
+    public void setUniqueTradeOffer(Item item, TradeOffer.TYPE type, int amount, Price price) {
+        Optional<TradeOffer> existingTradeOffer = searchOfferedTrades(item, type).findAny();
+
+        if (existingTradeOffer.isPresent()) {
+            existingTradeOffer.get().updateAmount(amount, price);
+        } else {
+            TradeOffer newTradeOffer = new TradeOffer(this, item, type, amount, price);
+            addTradeOffer(newTradeOffer);
+        }
     }
 
     public void addToInventory(PricedItemPosition inventoryItem) {
@@ -82,8 +115,7 @@ public class Trader extends Market {
 
     public void offerAccepted(TradeOffer offer) {
         if (offer.getAmount() <= 0) {
-            offeredTrades.remove(offer);
-            offersPresentAtMarket.forEach(m -> m.removeTradeOffer(offer));
+            removeTradeOffer(offer);
         }
     }
 
