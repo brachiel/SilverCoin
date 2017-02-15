@@ -10,7 +10,7 @@ public class Arbitrage {
     private TradeOffer buy;  // What we buy
     private TradeOffer sell; // What we sell
 
-    private int tradeableAmount;
+    private int tradableAmount;
     private Price priceDifference;
     private TotalValue projectedProfit;
 
@@ -22,12 +22,12 @@ public class Arbitrage {
         this.buy = buy;
         this.sell = sell;
 
-        tradeableAmount = calcTradeableAmount();
+        tradableAmount = calcTradableAmount();
         priceDifference = calcPriceDifference();
         projectedProfit = calcProjectedProfit();
     }
 
-    private int calcTradeableAmount() {
+    private int calcTradableAmount() {
         return Math.min(buy.getAmount(), sell.getAmount());
     }
 
@@ -36,7 +36,7 @@ public class Arbitrage {
     }
 
     private TotalValue calcProjectedProfit() {
-        return calcPriceDifference().toTotalValue(calcTradeableAmount());
+        return calcPriceDifference().toTotalValue(calcTradableAmount());
     }
 
     public TradeOffer getBuy() {
@@ -47,8 +47,8 @@ public class Arbitrage {
         return sell;
     }
 
-    public int getTradeableAmount() {
-        return tradeableAmount;
+    public int getTradableAmount() {
+        return tradableAmount;
     }
 
     public Price getPriceDifference() {
@@ -60,6 +60,6 @@ public class Arbitrage {
     }
 
     public String toString() {
-        return "Arbitrage of " + tradeableAmount + " of " + buy.getItem() + " for a profit of " + projectedProfit;
+        return "Arbitrage of " + tradableAmount + " of " + buy.getItem() + " for a profit of " + projectedProfit;
     }
 }

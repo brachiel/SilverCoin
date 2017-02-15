@@ -24,6 +24,17 @@ public class ModItemParser {
     private final ArrayList<Item> items = new ArrayList<>();
     private final ArrayList<CraftableItem> craftableItems = new ArrayList<>();
 
+    public ArrayList<Recipe> getRecipes() {
+        return recipes;
+    }
+
+    public ArrayList<Item> getItems() {
+        return items;
+    }
+
+    public ArrayList<CraftableItem> getCraftableItems() {
+        return craftableItems;
+    }
 
     public ModItemParser(String modItemFilePath) throws FileNotFoundException {
         FileReader fileReader = new FileReader(modItemFilePath);
@@ -55,7 +66,7 @@ public class ModItemParser {
             JSONObject recipe = (JSONObject) rawRecipe;
             String productName = (String) recipe.get("product");
             CraftableItem item = new CraftableItem(productName);
-            itemHash.add((Item) item);
+            itemHash.put(productName, item);
             craftableItems.add(item);
         });
 

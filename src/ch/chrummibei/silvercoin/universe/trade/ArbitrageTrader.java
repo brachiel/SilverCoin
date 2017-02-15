@@ -37,8 +37,8 @@ public class ArbitrageTrader extends Trader {
 
     public void executeArbitrage(Arbitrage arbitrage) {
         try {
-            arbitrage.getBuy().accept(this, arbitrage.getTradeableAmount());
-            arbitrage.getSell().accept(this, arbitrage.getTradeableAmount());
+            arbitrage.getBuy().accept(this, arbitrage.getTradableAmount());
+            arbitrage.getSell().accept(this, arbitrage.getTradableAmount());
         } catch (TradeOfferHasNotEnoughAmountLeft e) {
             // Tough titty.
             e.printStackTrace();
