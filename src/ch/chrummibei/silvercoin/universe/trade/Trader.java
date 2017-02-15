@@ -16,15 +16,18 @@ import java.util.Map;
 public class Trader extends Market {
     private static int traderNameSequence = 0;
 
+    protected final Map<Item,YieldingItemPosition> inventory = new HashMap<>();
+
     private String name;
     private Credit credit = new Credit(0.0);
-    Map<Item,YieldingItemPosition> inventory = new HashMap<>();
-    private ArrayList<Market> offersPresentAtMarket = new ArrayList<>();
+    private final ArrayList<Market> offersPresentAtMarket = new ArrayList<>();
+
+    public Trader(String name) {
+        this.name = name;
+    }
 
     public Trader() {
         this.name = "Trader " + String.valueOf(Trader.getNextTraderNameSequence());
-
-        traderNameSequence += 1;
     }
 
     private static int getNextTraderNameSequence() {

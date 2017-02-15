@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.universe.actor;
 
+import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.item.Recipe;
 import ch.chrummibei.silvercoin.universe.space.Position;
@@ -22,6 +23,7 @@ public class FactoryActor extends Factory implements PositionedActor, TimeStepAc
 
     public FactoryActor(Recipe recipe, int goalStock) {
         super(recipe, goalStock);
+        addAction(timeDiffMillis -> this.produceProduct(), Universe.getRandomInt(5000, 9000));
     }
 
     @Override

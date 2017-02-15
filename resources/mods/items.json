@@ -58,7 +58,7 @@
       }
     },
     {
-      "product": "Heavy Water",
+      "product": "Heavy water",
       "ingredients": {
         "Water": 30,
         "Energy": 50
@@ -78,7 +78,7 @@
       }
     },
     {
-      "product": "AI Core",
+      "product": "AI core",
       "ingredients": {
         "Electronics": 5
       }

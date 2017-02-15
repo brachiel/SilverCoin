@@ -15,19 +15,26 @@ import java.util.Optional;
  * Each Factory can only produce a single CraftableItem.
  */
 public class Factory extends Trader {
+    private static int factoryNameSequence = 0;
+
     private int goalStock;
     private Price productPrice;
 
     private Recipe recipe;
-    private Map<Item, PricedItemPosition> inventory;
     private YieldingItemPosition productStock;
     private TradeOffer productSellTradeOffer;
 
 
     public Factory(Recipe recipe, int goalStock) {
+        super(recipe.product.getName() + " factory " + String.valueOf(Factory.getNextFactoryNameSequence()));
         this.recipe = recipe;
         this.goalStock = goalStock;
-        this.productSellTradeOffer = new TradeOffer(this, recipe.product, TradeOffer.TYPE.SELLING, 0, new Price(0));
+        productSellTradeOffer = new TradeOffer(this, recipe.product, TradeOffer.TYPE.SELLING, 0, new Price(1));
+        productStock = new YieldingItemPosition(recipe.product, 0);
+    }
+
+    private static int getNextFactoryNameSequence() {
+        return factoryNameSequence++;
     }
 
     /**

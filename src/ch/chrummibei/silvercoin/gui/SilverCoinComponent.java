@@ -1,12 +1,16 @@
 package ch.chrummibei.silvercoin.gui;
 
+import ch.chrummibei.silvercoin.config.Resources;
+import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.actor.TimeStepActionActor;
-import ch.chrummibei.silvercoin.universe.space.Universe;
+import ch.chrummibei.silvercoin.universe.Universe;
+import ch.chrummibei.silvercoin.config.ModItemParser;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -15,12 +19,13 @@ import java.util.function.Consumer;
  * Main GUI component of SilverCoin
  */
 public class SilverCoinComponent extends Canvas implements Runnable, TimeStepActionActor {
-    private static final int WIDTH = 400;
-    private static final int HEIGHT = 200;
-    private static final int SCALE = 4;
+    private static final int WIDTH = 800;
+    private static final int HEIGHT = 400;
+    private static final int SCALE = 2;
     private static final double TARGET_TPS = 10.0;
     private static final double TARGET_FPS = 1;
 
+    private final UniverseConfig universeConfig;
     private final Universe universe;
 
     private final Screen screen;
@@ -42,7 +47,10 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
 
         img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-        universe = new Universe();
+        // Read config file
+        universeConfig = new ModItemParser(Resources.getDefaultModItemJsonReader());
+
+        universe = new Universe(universeConfig);
 
         // Setup rendering every 1000 milliseconds
         this.addAction(this::render, Math.round(1000*TARGET_FPS));

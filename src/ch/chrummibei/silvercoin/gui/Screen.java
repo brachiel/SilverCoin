@@ -1,7 +1,7 @@
 package ch.chrummibei.silvercoin.gui;
 
 import ch.chrummibei.silvercoin.universe.item.Item;
-import ch.chrummibei.silvercoin.universe.space.Universe;
+import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.trade.Market;
 
 import java.awt.image.DataBufferInt;

@@ -11,10 +11,10 @@ import java.util.function.Consumer;
 public interface TimeStepActionActor extends Actor {
     class Timekeeper {
         public Long localTime = 0L;
-        public Long periodicity;
+        public Long periodicityInMillis;
 
-        public Timekeeper(Long periodicity) {
-            this.periodicity = periodicity;
+        public Timekeeper(Long periodicityInMillis) {
+            this.periodicityInMillis = periodicityInMillis;
         }
     }
 
@@ -23,7 +23,7 @@ public interface TimeStepActionActor extends Actor {
      * Add an action to be executed every intervalMillis milliseconds.
      *
      * @param action      A lambda to be executed every intervalMillis milliseconds
-     * @param periodicity The periodicity at which to execute the action.
+     * @param periodicity The periodicityInMillis at which to execute the action.
      */
     void addAction(Consumer<Long> action, long periodicity);
     Map<Consumer<Long>,Timekeeper> getTimedActions();
@@ -34,7 +34,7 @@ public interface TimeStepActionActor extends Actor {
 
     default void executeTimedActions(long timeDiffMillis) {
         getTimedActions().entrySet().forEach(entry -> {
-            long periodicity = entry.getValue().periodicity;
+            long periodicity = entry.getValue().periodicityInMillis;
             entry.getValue().localTime += timeDiffMillis;
             while (periodicity < entry.getValue().localTime) {
                 entry.getKey().accept(periodicity);

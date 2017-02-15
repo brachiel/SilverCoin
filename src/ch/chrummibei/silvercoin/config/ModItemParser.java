@@ -1,4 +1,4 @@
-package ch.chrummibei.silvercoin.utils;
+package ch.chrummibei.silvercoin.config;
 
 import ch.chrummibei.silvercoin.universe.item.CraftableItem;
 import ch.chrummibei.silvercoin.universe.item.Item;
@@ -11,15 +11,15 @@ import org.json.simple.parser.ParseException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
  * Created by brachiel on 10/02/2017.
  */
-public class ModItemParser {
+public class ModItemParser implements UniverseConfig {
     private final ArrayList<Recipe> recipes = new ArrayList<>();
     private final ArrayList<Item> items = new ArrayList<>();
     private final ArrayList<CraftableItem> craftableItems = new ArrayList<>();
@@ -36,13 +36,12 @@ public class ModItemParser {
         return craftableItems;
     }
 
-    public ModItemParser(String modItemFilePath) throws FileNotFoundException {
-        FileReader fileReader = new FileReader(modItemFilePath);
+    public ModItemParser(Reader modItemReader) {
         JSONParser parser = new JSONParser();
         JSONObject modItemConfig;
 
         try {
-            modItemConfig = (JSONObject) parser.parse(fileReader);
+            modItemConfig = (JSONObject) parser.parse(modItemReader);
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -67,13 +66,15 @@ public class ModItemParser {
             String productName = (String) recipe.get("product");
             CraftableItem item = new CraftableItem(productName);
             itemHash.put(productName, item);
-            craftableItems.add(item);
+            this.craftableItems.add(item);
         });
 
         // Create all Items that are missing
-        itemNames.stream().filter(itemName -> ! itemHash.containsKey(itemName)).forEach(itemName ->
-                itemHash.put(itemName, new Item(itemName))
-        );
+        itemNames.stream().filter(itemName -> ! itemHash.containsKey(itemName)).forEach(itemName -> {
+            Item item = new Item(itemName);
+            itemHash.put(itemName, item);
+            this.items.add(item);
+        });
 
 
         ((JSONArray) modItemConfig.get("recipes")).forEach(rawRecipe -> {
@@ -87,14 +88,14 @@ public class ModItemParser {
 
             Map rawIngredients = (Map) recipe.get("ingredients");
 
-            rawIngredients.forEach((item, amount) ->
-                    ingredients.put((Item) item, (Integer) amount)
+            rawIngredients.forEach((itemName, amount) ->
+                    ingredients.put(itemHash.get(itemName), ((Long) amount).intValue())
             );
 
             CraftableItem product = (CraftableItem) itemHash.get(productName);
             Recipe newRecipe = new Recipe(product, ingredients);
-            recipes.add(newRecipe);
             product.addRecipe(newRecipe);
+            this.recipes.add(newRecipe);
         });
     }
 }

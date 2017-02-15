@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.universe.actor;
 
+import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.trade.Arbitrage;
 import ch.chrummibei.silvercoin.universe.trade.ArbitrageTrader;
 import ch.chrummibei.silvercoin.universe.trade.Market;
@@ -17,7 +18,7 @@ public class ArbitrageTradeActor extends ArbitrageTrader implements TimeStepActi
 
     public ArbitrageTradeActor(Market market) {
         super(market);
-        addAction(this::findAndExecuteArbitrage, 1000);
+        addAction(this::findAndExecuteArbitrage, Universe.getRandomInt(1500, 3000));
     }
 
     @Override
