@@ -1,10 +1,15 @@
 package ch.chrummibei.silvercoin.gui;
 
+import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.Universe;
+import ch.chrummibei.silvercoin.universe.trade.Factory;
 import ch.chrummibei.silvercoin.universe.trade.Market;
+import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 
 import java.awt.image.DataBufferInt;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by brachiel on 07/02/2017.
@@ -32,22 +37,46 @@ public class Screen extends Bitmap {
         writeString("Hello World!", 50, 50);
     }
 
-
     public void render(Universe universe) {
         Market market = universe.getMarkets().findFirst().get();
 
-        Object[] items = market.searchTradedItems().toArray();
-        final int itemLineHeight = Font.CHAR_HEIGHT + 1;
-        final int itemCol = 5;
+        List<Item> items = market.searchTradedItems().collect(Collectors.toList());
+        final int lineHeight = Font.CHAR_HEIGHT + 1;
+        final int nameCol = 5;
         final int sellCol = 180;
         final int buyCol = 260;
-        writeString("ITEM", itemCol, 5);
-        writeString("SELL", sellCol, 5);
-        writeString("BUY", buyCol, 5);
-        for (int i = 0, maxI = Math.min(items.length, 15); i < maxI; ++i) {
-            writeString(items[i].toString(), itemCol, 5 + (i+1) * itemLineHeight);
-            writeString(market.searchBestSellingTrade((Item) items[i]).get().getPrice().toString(), sellCol, 5 + (i+1) * itemLineHeight);
-            writeString(market.searchBestBuyingTrade((Item) items[i]).get().getPrice().toString(), buyCol, 5 + (i+1) * itemLineHeight);
+
+        int currentY = 5;
+
+        writeString("ITEM", nameCol, currentY);
+        writeString("SELL", sellCol, currentY);
+        writeString("BUY", buyCol, currentY);
+
+        for (Item item : items) {
+            currentY += lineHeight;
+            writeString(item.toString(), nameCol, currentY);
+            writeString(market.searchBestSellingTrade(item)
+                    .map(TradeOffer::getPrice)
+                    .map(Price::toString).orElse("-"), sellCol, currentY);
+            writeString(market.searchBestBuyingTrade(item)
+                    .map(TradeOffer::getPrice)
+                    .map(Price::toString).orElse("-"), buyCol, currentY);
+        }
+
+        final int stockCol = 240;
+        final int priceCol = 360;
+
+        currentY += 2 * lineHeight;
+
+        writeString("FACTORY", nameCol, currentY);
+        writeString("STOCK", stockCol, currentY);
+        writeString("PRICE", priceCol, currentY);
+
+        for (Factory factory : universe.getFactories().stream().limit(15).collect(Collectors.toList())) {
+            currentY += lineHeight;
+            writeString(factory.getName(), nameCol, currentY);
+            writeString(String.valueOf(factory.getProductTradeOffer().getAmount()), stockCol, currentY);
+            writeString(factory.getProductTradeOffer().getPrice().toString(), priceCol, currentY);
         }
     }
 }

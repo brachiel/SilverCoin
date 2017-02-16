@@ -97,7 +97,15 @@ public class Factory extends Trader {
             setUniqueTradeOffer(productStock.getItem(), TradeOffer.TYPE.SELLING, productStock.getAmount(), productPrice);
         }
 
-        // TODO update ingredient offers
+        for (Map.Entry<Item,Integer> entry : recipe.ingredients.entrySet()) {
+            Item ingredient = entry.getKey();
+            Optional<TradeOffer> bestOffer = market.searchBestBuyingTrade(ingredient);
+            if (bestOffer.isPresent()) {
+                setUniqueTradeOffer(ingredient, TradeOffer.TYPE.BUYING, entry.getValue() * goalStock,
+                        bestOffer.get().getPrice().copy());
+            }
+
+        }
     }
 
     public void produceProduct() {
@@ -116,5 +124,9 @@ public class Factory extends Trader {
 
         // Update trade offer
         addProductToTradeOffer(producingAmount, productPrice);
+    }
+
+    public TradeOffer getProductTradeOffer() {
+        return productSellTradeOffer;
     }
 }

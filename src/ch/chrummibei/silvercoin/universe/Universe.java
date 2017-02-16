@@ -105,4 +105,8 @@ public class Universe implements Actor {
     public Stream<Market> getMarkets() {
         return Stream.of(market);
     }
+
+    public ArrayList<FactoryActor> getFactories() {
+        return factories;
+    }
 }

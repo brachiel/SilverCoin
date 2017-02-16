@@ -13,7 +13,7 @@ public class Bitmap extends WritableRaster {
     public final int height;
 
     public Bitmap(int width, int height) {
-        super((new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)).getSampleModel(), new Point(0,0));
+        super((new BufferedImage(width, height, BufferedImage.)).getSampleModel(), new Point(0,0));
 
         this.width = width;
         this.height = height;
@@ -24,6 +24,9 @@ public class Bitmap extends WritableRaster {
 
         this.width = width;
         this.height = height;
+    }
+
+    public ? getCompatibleRaster(int width, int height) {
     }
 
     /**

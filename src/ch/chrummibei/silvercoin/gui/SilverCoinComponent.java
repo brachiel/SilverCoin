@@ -42,10 +42,11 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
         setMinimumSize(size);
         setMaximumSize(size);
 
+        this.createImage(WIDTH, HEIGHT)
+        img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         screen = new Screen(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
         screenRaster = screen.createChild(0, 0, WIDTH, HEIGHT, 0, 0, new int[] {0,1,2});
 
-        img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
         // Read config file
         universeConfig = new ModItemParser(Resources.getDefaultModItemJsonReader());
