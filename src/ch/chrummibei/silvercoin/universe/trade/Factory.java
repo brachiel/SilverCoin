@@ -24,6 +24,8 @@ public class Factory extends Trader {
     private final YieldingItemPosition productStock;
     private TradeOffer productSellTradeOffer;
 
+    private long timeReservoirMillis = 0;
+
 
     public Factory(Recipe recipe, int goalStock) {
         super(recipe.product.getName() + " factory " + String.valueOf(Factory.getNextFactoryNameSequence()));
@@ -75,11 +77,15 @@ public class Factory extends Trader {
         return ownedAmount / recipe.getIngredientAmount(item);
     }
 
-    public int calcProducibleAmount() {
+    public int calcProducibleAmountWithIngredients() {
+        if (recipe.ingredients.size() == 0) { // This recipe needs no ingredients. Production only depends on time
+            return Integer.MAX_VALUE;
+        }
+
         return inventory.values().stream()
-                .mapToInt(pos -> calcProducibleAmount(pos.getItem(), pos.getAmount()))
-                .min()
-                .orElse(0);
+                                    .mapToInt(pos -> calcProducibleAmount(pos.getItem(), pos.getAmount()))
+                                    .min()
+                                    .orElse(0);
     }
 
     public int calcWantedAmountOfIngredient(Item ingredient) {
@@ -121,11 +127,21 @@ public class Factory extends Trader {
         }
     }
 
-    public void produceProduct() {
-        int producingAmount = calcProducibleAmount();
-        if (producingAmount == 0) return;
+    public void produceProduct(long availableTimeMillis) {
+        int producingAmount = calcProducibleAmountWithIngredients();
+        if (producingAmount == 0) {
+            // We don't have enough ingredients, so we can't start to produce. Resetting time reservoir.
+            timeReservoirMillis = 0;
+            return;
+        }
+        // We would have enough ingredients, but maybe we don't have enough time.
+        timeReservoirMillis += availableTimeMillis;
 
-        Price productPrice = new Price(0);
+        // Calculate how many we can produce with the time reservoir
+        producingAmount = Math.min(producingAmount, Math.toIntExact(timeReservoirMillis / recipe.buildTimeMillis));
+        timeReservoirMillis -= producingAmount * recipe.buildTimeMillis; // Subtract the time we needed from reservoir
+
+        Price productPrice = new Price(recipe.buildTimeMillis / 10); // Minimum price depends on buildTime
         for (PricedItemPosition position : inventory.values()) {
             int ingredientAmount = recipe.getIngredientAmount(position.getItem());
 

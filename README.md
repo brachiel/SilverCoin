@@ -2,7 +2,6 @@
 A space trade simulator
 
 # TODO
-* Introduce item springs and sinks (constant producers and consumers).
-* Introduce time requirement for recipes.
+* Introduce item sinks (constant consumers).
 * Introduce actual space actors (moving actors).
 * Introduce multiple markets.

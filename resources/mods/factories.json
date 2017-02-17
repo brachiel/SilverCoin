@@ -1,7 +1,7 @@
 {
   "factoriesPerRecipe": {
-    "min": 5,
-    "max": 15
+    "min": 1,
+    "max": 3
   },
   "spreadFactor": {
     "min": 1.01,

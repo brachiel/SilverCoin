@@ -67,15 +67,20 @@ public class ModItemParser implements ItemConfig {
             }
 
             HashMap<Item, Integer> ingredients = new HashMap<>();
+            try {
+                Map rawIngredients = (Map) recipe.get("ingredients");
 
-            Map rawIngredients = (Map) recipe.get("ingredients");
+                rawIngredients.forEach((itemName, amount) ->
+                        ingredients.put(itemHash.get(itemName), ((Long) amount).intValue())
+                );
+            } catch (NullPointerException e) {
+                // No ingredients for this recipe :). It's free.
+            }
 
-            rawIngredients.forEach((itemName, amount) ->
-                    ingredients.put(itemHash.get(itemName), ((Long) amount).intValue())
-            );
+            long buildTime = (long) recipe.get("buildTime");
 
             CraftableItem product = (CraftableItem) itemHash.get(productName);
-            Recipe newRecipe = new Recipe(product, ingredients);
+            Recipe newRecipe = new Recipe(product, ingredients, buildTime);
             product.addRecipe(newRecipe);
             this.recipes.add(newRecipe);
         });

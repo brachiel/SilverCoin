@@ -24,7 +24,7 @@ public class FactoryActor extends Factory implements PositionedActor, TimeStepAc
 
     public FactoryActor(Recipe recipe, int goalStock) {
         super(recipe, goalStock);
-        addAction(timeDiffMillis -> this.produceProduct(), Universe.getRandomInt(5000, 9000));
+        addAction(timeDiffMillis -> this.produceProduct(timeDiffMillis), Universe.getRandomInt(5000, 9000));
     }
 
     @Override
