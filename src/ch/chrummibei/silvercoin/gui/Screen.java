@@ -63,8 +63,8 @@ public class Screen extends Bitmap {
         for (Factory factory : universe.getFactories().stream().limit(50).collect(Collectors.toList())) {
             currentY += lineHeight;
             writeString(factory.getName(), factoryNameCol, currentY);
-            writeString(String.valueOf(factory.getProductTradeOffer().getAmount()), stockCol, currentY);
-            writeString(factory.getProductTradeOffer().getPrice().toString(), priceCol, currentY);
+            writeString(String.valueOf(factory.getProductStock()), stockCol, currentY);
+            writeString(factory.getProductPrice().map(Price::toString).orElse("-"), priceCol, currentY);
         }
     }
 }

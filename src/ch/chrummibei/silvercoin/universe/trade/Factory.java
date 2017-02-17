@@ -21,7 +21,7 @@ public class Factory extends Trader {
 
     private final Recipe recipe;
     private final YieldingItemPosition productStock;
-    private TradeOffer productSellTradeOffer;
+    //private final Price productPriceTemplate = new Price(1);
 
     private long timeReservoirMillis = 0;
 
@@ -30,7 +30,6 @@ public class Factory extends Trader {
         super(recipe.product.getName() + " factory " + String.valueOf(Factory.getNextFactoryNameSequence()));
         this.recipe = recipe;
         this.goalStock = goalStock;
-        productSellTradeOffer = new TradeOffer(this, recipe.product, TradeOffer.TYPE.SELLING, 0, new Price(1));
         productStock = new YieldingItemPosition(recipe.product, 0, new TotalValue(0));
 
         inventory.put(recipe.product, productStock);
@@ -40,8 +39,12 @@ public class Factory extends Trader {
         }
     }
 
-    public Price getProductPrice() {
-        return productSellTradeOffer.getPrice();
+    public Optional<Price> getProductPrice() {
+        return getProductTradeOffer().map(TradeOffer::getPrice);
+    }
+
+    public Optional<TradeOffer> getProductTradeOffer() {
+        return searchOfferedSellingTrades(recipe.product).findFirst();
     }
 
     public int getGoalStock() {
@@ -52,9 +55,12 @@ public class Factory extends Trader {
      * Sets product price. Might be overwritten to allow for a profit.
      * @param price New Product price.
      */
+    /*
     public void setProductPrice(Price price) {
-        getProductPrice().set(price);
+        productPriceTemplate.set(price);
+        getProductPrice().ifPresent(p -> p.set(price));
     }
+    */
 
     private static int getNextFactoryNameSequence() {
         return factoryNameSequence++;
@@ -66,9 +72,12 @@ public class Factory extends Trader {
      * @param price of ingredients to produce this product
      */
     public void addProductToTradeOffer(int amount, Price price) {
-        productSellTradeOffer.addAmount(amount, price);
-        if (! hasTradeOffer(productSellTradeOffer)) {
-            addTradeOffer(productSellTradeOffer);
+        Optional<TradeOffer> offer = getProductTradeOffer();
+
+        if (offer.isPresent()) {
+            offer.get().addAmount(amount, price);
+        } else {
+            addTradeOffer(new TradeOffer(this, recipe.product, TradeOffer.TYPE.SELLING, amount, price));
         }
     }
 
@@ -110,10 +119,12 @@ public class Factory extends Trader {
     }
 
     public void adaptPricesFor(Market market) {
+        /*
         Optional<TotalValue> totalCostOfIngredients = calcTotalIngredientCostPerProductFromMarket(market);
         if (totalCostOfIngredients.isPresent()) {
             setProductPrice(totalCostOfIngredients.get().toPriceNotNull(1));
         }
+        */
 
         for (Map.Entry<Item,Integer> entry : recipe.ingredients.entrySet()) {
             Item ingredient = entry.getKey();
@@ -165,10 +176,7 @@ public class Factory extends Trader {
         addProductToTradeOffer(producingAmount, productPrice);
     }
 
-    public TradeOffer getProductTradeOffer() {
-        return productSellTradeOffer;
+    public int getProductStock() {
+        return productStock.getAmount();
     }
-
-
-
 }

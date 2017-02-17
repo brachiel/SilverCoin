@@ -25,12 +25,10 @@ public class BigSpenderActor extends TimeStepTraderActor {
         for (Market market : offersPresentAtMarkets) {
             Optional<TradeOffer> tradeOffer = market.searchBestSellingTrade(itemToConsume);
             if (! tradeOffer.isPresent()) {
-                System.out.println("Big spender "+ this.getName() +" didn't find a trade for " + itemToConsume);
                 continue;
             }
 
             try {
-                System.out.println("Big spender "+ this.getName() +" is buying 1 " + itemToConsume);
                 addCredits(tradeOffer.get().getPrice().toTotalValue(1)); // Give spender money for this trade.
                 tradeOffer.get().accept(this, 1);
             } catch (TradeOfferHasNotEnoughAmountLeft tradeOfferHasNotEnoughAmountLeft) {

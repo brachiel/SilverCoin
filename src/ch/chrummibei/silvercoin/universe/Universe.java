@@ -24,6 +24,7 @@ import java.util.stream.Stream;
  */
 public class Universe implements Actor {
     private static final Random random = new Random();
+    private static final double timeFactor = 10;
 
     private final UniverseConfig universeConfig;
     private final ArrayList<Item> catalogue = new ArrayList<>();
@@ -50,7 +51,7 @@ public class Universe implements Actor {
 
     @Override
     public void tick(long timeDiffMillis) {
-        actors.forEach(a -> a.tick(timeDiffMillis));
+        actors.forEach(a -> a.tick((long) (timeFactor * timeDiffMillis)));
     }
 
     public void printStatus() {
