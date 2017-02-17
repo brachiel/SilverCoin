@@ -7,3 +7,4 @@ A space trade simulator
 
 # Known Bugs
 * Debugging reveals, that factories have inventory items with item=null.
+* Factories that cannot buy due to lacking sell offers should instead place a buy order.

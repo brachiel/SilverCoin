@@ -51,17 +51,6 @@ public class Factory extends Trader {
         return goalStock;
     }
 
-    /**
-     * Sets product price. Might be overwritten to allow for a profit.
-     * @param price New Product price.
-     */
-    /*
-    public void setProductPrice(Price price) {
-        productPriceTemplate.set(price);
-        getProductPrice().ifPresent(p -> p.set(price));
-    }
-    */
-
     private static int getNextFactoryNameSequence() {
         return factoryNameSequence++;
     }
@@ -118,6 +107,26 @@ public class Factory extends Trader {
         return Optional.of(totalValue);
     }
 
+    public void buyIngredients(Market market) {
+        for (Map.Entry<Item,Integer> entry : recipe.ingredients.entrySet()) {
+            int amountToBuy = entry.getValue() * goalStock - inventory.get(entry.getKey()).getAmount();
+            if (amountToBuy <= 0) continue;
+
+            Map<TradeOffer, Integer> tradeOffers = market.getTradeOffersToTradeAmount(
+                    entry.getKey(),
+                    TradeOffer.TYPE.SELLING,
+                    amountToBuy);
+
+            tradeOffers.forEach((offer, amount) -> {
+                try {
+                    offer.accept(this, amount);
+                } catch (TradeOfferHasNotEnoughAmountLeft tradeOfferHasNotEnoughAmountLeft) {
+                    tradeOfferHasNotEnoughAmountLeft.printStackTrace();
+                }
+            });
+        }
+    }
+
     public void adaptPricesFor(Market market) {
         /*
         Optional<TotalValue> totalCostOfIngredients = calcTotalIngredientCostPerProductFromMarket(market);
@@ -130,10 +139,13 @@ public class Factory extends Trader {
             Item ingredient = entry.getKey();
             Optional<TradeOffer> bestOffer = market.searchBestBuyingTrade(ingredient);
             if (bestOffer.isPresent()) {
+                Price bestOfferPrice = bestOffer.get().getPrice().copy();
+                if (bestOffer.get().getOfferingTrader() != this) { // Offer is not by us.
+                    bestOfferPrice.multiply(1.001); // Increase offer
+                }
                 setUniqueTradeOffer(ingredient, TradeOffer.TYPE.BUYING, entry.getValue() * goalStock,
-                        bestOffer.get().getPrice().copy());
+                        bestOfferPrice);
             }
-
         }
     }
 
@@ -161,7 +173,7 @@ public class Factory extends Trader {
 
             try {
                 // Add the ingredient price to the product price
-                productPrice = productPrice.add(position.getPurchasePrice().toTotalValue(ingredientAmount));
+                productPrice.iAdd(position.getPurchasePrice().toTotalValue(ingredientAmount));
                 // Reduce inventory by amount needed to produce the product
                 position.removeItems(producingAmount * ingredientAmount, position.getPurchasePrice());
             } catch (InvalidPriceException e) {

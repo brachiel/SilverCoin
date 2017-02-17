@@ -45,6 +45,14 @@ public class Universe implements Actor {
         return lowBound + (highBound-lowBound)*random.nextDouble();
     }
 
+    public UniverseConfig getUniverseConfig() {
+        return universeConfig;
+    }
+
+    public ArrayList<Item> getItems() {
+        return universeConfig.item().getItems();
+    }
+
     public void addActor(Actor actor) {
         actors.add(actor);
     }

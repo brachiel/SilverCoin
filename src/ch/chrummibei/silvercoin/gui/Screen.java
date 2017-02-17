@@ -8,7 +8,8 @@ import ch.chrummibei.silvercoin.universe.trade.Market;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 
 import java.awt.image.WritableRaster;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -26,7 +27,6 @@ public class Screen extends Bitmap {
 
         Market market = universe.getMarkets().findFirst().get();
 
-        List<Item> items = market.searchTradedItems().collect(Collectors.toList());
         final int lineHeight = Font.CHAR_HEIGHT + 1;
 
         final int itemNameCol = 5;
@@ -39,6 +39,8 @@ public class Screen extends Bitmap {
         writeString("SELL", sellCol, currentY);
         writeString("BUY", buyCol, currentY);
 
+        ArrayList<Item> items = universe.getItems();
+        items.sort(Comparator.comparing(item -> item.getName()));
         for (Item item : items) {
             currentY += lineHeight;
             writeString(item.toString(), itemNameCol, currentY);

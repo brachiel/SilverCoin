@@ -26,6 +26,8 @@ public class Trade {
         this.item = item;
         this.amount = amount;
         this.totalValue = new TotalValue(amount * price.toDouble());
+
+        System.out.println(toString());
     }
 
     public Item getItem() {

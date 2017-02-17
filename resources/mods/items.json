@@ -57,6 +57,21 @@
       },
       "buildTime": 1500
     },
+    { "product": "Power core",
+      "ingredients": {
+        "Thorium": 30,
+        "Water": 80,
+        "Heavy Water": 5
+      },
+      "buildTime": 3000
+    },
+    { "product": "Power core",
+      "ingredients": {
+        "Heavy Water": 170,
+        "Electronic coil": 80
+      },
+      "buildTime": 5000
+    },
     { "product": "Heavy water",
       "ingredients": {
         "Water": 30,
@@ -110,7 +125,7 @@
       "buildTime": 100
     },
     { "product": "Energy",
-      "buildTime": 100
+      "buildTime": 10
     },
     { "product": "Water",
       "ingredients": {
