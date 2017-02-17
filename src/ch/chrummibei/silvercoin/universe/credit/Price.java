@@ -16,4 +16,5 @@ public class Price extends Credit<Price> {
     public TotalValue toTotalValue(int amount) {
         return new TotalValue(balance * amount);
     }
+
 }

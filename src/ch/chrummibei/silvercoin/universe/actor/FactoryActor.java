@@ -11,12 +11,13 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Created by brachiel on 15/02/2017.
+ * A factors that ticks every now and then and produces products. It also offers to buy its ingredients
+ * on the market to the last seen price. Also makes a spread profit with it.
  */
 public class FactoryActor extends Factory implements PositionedActor, TimeStepActionActor {
     Position position;
 
-    private HashMap<Consumer<Long>, Timekeeper> timedActions = new HashMap<>();
+    private final HashMap<Consumer<Long>, Timekeeper> timedActions = new HashMap<>();
     private double productionSpreadFactor = 1.2; // 20 Percent between ingredient costs and sell price
     private double ingredientOverBuyFactor = 1.5; // We're willing to buy 50% more per ingredient for the price
 
@@ -50,5 +51,9 @@ public class FactoryActor extends Factory implements PositionedActor, TimeStepAc
     @Override
     public Map<Consumer<Long>, Timekeeper> getTimedActions() {
         return timedActions;
+    }
+
+    public void setSpread(double spread) {
+        productionSpreadFactor = spread;
     }
 }

@@ -18,7 +18,7 @@ public class Main {
         jframe.pack();
         jframe.setLocationRelativeTo(null);
         jframe.setResizable(false);
-        jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jframe.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         jframe.setVisible(true);
 
         game.start();

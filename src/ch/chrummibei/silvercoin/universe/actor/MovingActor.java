@@ -4,7 +4,7 @@ import ch.chrummibei.silvercoin.universe.space.Position;
 import ch.chrummibei.silvercoin.universe.space.Velocity;
 
 /**
- * Created by brachiel on 03/02/2017.
+ * A positioned actor that can move around. Time step is done by newton method (for now).
  */
 public interface MovingActor extends PositionedActor {
     Position getPosition();
@@ -15,6 +15,6 @@ public interface MovingActor extends PositionedActor {
 
     // Newton Step
     default void tick(long timeDiffMillis) {
-        setPosition(getPosition().add(getVelocity()).multiply(Double.valueOf(timeDiffMillis)/1000.0));
+        setPosition(getPosition().add(getVelocity()).multiply((double) timeDiffMillis /1000.0));
     }
 }

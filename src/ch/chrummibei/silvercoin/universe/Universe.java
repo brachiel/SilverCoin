@@ -4,6 +4,7 @@ import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.actor.Actor;
 import ch.chrummibei.silvercoin.universe.actor.ArbitrageTradeActor;
 import ch.chrummibei.silvercoin.universe.actor.FactoryActor;
+import ch.chrummibei.silvercoin.universe.credit.Credit;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
@@ -17,17 +18,18 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 /**
- * Created by brachiel on 03/02/2017.
+ * The universe contains the world, all actors and manages time and randomness. It is used by the Component to
+ * tell the Screen what to render. All simulation is done here.
  */
 public class Universe implements Actor {
     private static final Random random = new Random();
 
     private final UniverseConfig universeConfig;
     private ArrayList<Item> catalogue = new ArrayList<>();
-    private Market market = new Market();
-    private ArrayList<Actor> actors = new ArrayList<>();
-    private ArrayList<ArbitrageTradeActor> arbitrageTraders = new ArrayList<>();
-    private ArrayList<FactoryActor> factories = new ArrayList<>();
+    private final Market market = new Market();
+    private final ArrayList<Actor> actors = new ArrayList<>();
+    private final ArrayList<ArbitrageTradeActor> arbitrageTraders = new ArrayList<>();
+    private final ArrayList<FactoryActor> factories = new ArrayList<>();
 
     public Universe(UniverseConfig universeConfig) {
         this.universeConfig = universeConfig;
@@ -38,13 +40,16 @@ public class Universe implements Actor {
         return lowBound + random.nextInt(highBound - lowBound + 1); // +1 since upper bound is exclusive
     }
 
+    public static double getRandomDouble(double lowBound, double highBound) {
+        return lowBound + (highBound-lowBound)*random.nextDouble();
+    }
+
     public void addActor(Actor actor) {
         actors.add(actor);
     }
 
     @Override
     public void tick(long timeDiffMillis) {
-        System.out.println("tick");
         actors.forEach(a -> a.tick(timeDiffMillis));
     }
 
@@ -61,27 +66,26 @@ public class Universe implements Actor {
     }
 
     void initialise() {
-        catalogue = universeConfig.getItems();
+        catalogue = universeConfig.item().getItems();
 
         // Create random traders
         for (int i = 0; i < 30; ++ i) {
             Trader trader = new Trader();
+            trader.offerTradesAt(market);
 
-            for (int j = 0; j < random.nextInt(15); ++j) {
+            for (int j = 0, maxJ = getRandomInt(1,15); j < maxJ; ++j) {
                 Item item = catalogue.get(random.nextInt(catalogue.size()));
-                TradeOffer offer = new TradeOffer(trader, item, TradeOffer.TYPE.SELLING, random.nextInt(100), new Price(100 * random.nextDouble()));
+                TradeOffer offer = new TradeOffer(trader, item, TradeOffer.TYPE.SELLING, getRandomInt(1,100), new Price(getRandomDouble(10,90)));
                 trader.addToInventory(new PricedItemPosition(offer.getItem(), offer.getAmount(), offer.getTotalValue()));
                 trader.addTradeOffer(offer);
             }
 
-            for (int j = 0; j < random.nextInt(15); ++j) {
+            for (int j = 0, maxJ = getRandomInt(1,15); j < maxJ; ++j) {
                 Item item = catalogue.get(random.nextInt(catalogue.size()));
-                TradeOffer offer = new TradeOffer(trader,item,TradeOffer.TYPE.BUYING,random.nextInt(100), new Price(100*random.nextDouble()));
+                TradeOffer offer = new TradeOffer(trader,item,TradeOffer.TYPE.BUYING, getRandomInt(1,100), new Price(getRandomDouble(10,90)));
                 trader.addCredits(offer.getTotalValue());
                 trader.addTradeOffer(offer);
             }
-
-            trader.offerTradesAt(market);
         }
 
         arbitrageTraders.add(new ArbitrageTradeActor(market));
@@ -91,10 +95,22 @@ public class Universe implements Actor {
         arbitrageTraders.forEach(this::addActor);
 
         // Create 1 to 3 factories for every recipe with a goal stock of 5 to 15 items
-        universeConfig.getRecipes().stream().flatMap(recipe -> Stream.iterate(recipe,r -> r).limit(1+random.nextInt(2))).forEach(recipe -> {
-            FactoryActor factory = new FactoryActor(recipe, 5+random.nextInt(10));
+        universeConfig.item().getRecipes().stream()
+                .flatMap(recipe -> Stream.iterate(recipe,r -> r)
+                                         .limit(universeConfig.factory().getRandomisedIntSetting("factoriesPerRecipe")))
+                .forEach(recipe -> {
+            FactoryActor factory = new FactoryActor(recipe, universeConfig.factory().getRandomisedIntSetting("goalStock"));
+            factory.setSpread(universeConfig.factory().getRandomisedDoubleSetting("spreadFactor"));
+            factory.addCredits(new Credit(universeConfig.factory().getRandomisedDoubleSetting("startingCredit")));
             factory.offerTradesAt(market);
             factory.adaptPricesFor(market);
+
+            recipe.ingredients.keySet().forEach(ingredient -> {
+                int startingAmount = (int) Math.round(factory.calcWantedAmountOfIngredient(ingredient)
+                        * universeConfig.factory().getRandomisedDoubleSetting("inventoryPerIngredient"));
+                Price purchasePrice = new Price(universeConfig.factory().getRandomisedDoubleSetting("purchasePricePerIngredient"));
+                factory.addToInventory(new PricedItemPosition(ingredient, startingAmount, purchasePrice));
+            });
 
             factories.add(factory);
         });

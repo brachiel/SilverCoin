@@ -1,16 +1,13 @@
 package ch.chrummibei.silvercoin.gui;
 
-import ch.chrummibei.silvercoin.config.Resources;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
-import ch.chrummibei.silvercoin.universe.actor.TimeStepActionActor;
 import ch.chrummibei.silvercoin.universe.Universe;
-import ch.chrummibei.silvercoin.config.ModItemParser;
+import ch.chrummibei.silvercoin.universe.actor.TimeStepActionActor;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
-import java.io.FileNotFoundException;
+import java.awt.image.WritableRaster;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -22,18 +19,23 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
     private static final int WIDTH = 800;
     private static final int HEIGHT = 400;
     private static final int SCALE = 2;
-    private static final double TARGET_TPS = 10.0;
-    private static final double TARGET_FPS = 1;
+    private static final double TARGET_TPS = 20.0;
+    private static final double TARGET_FPS = 10.0;
 
     private final UniverseConfig universeConfig;
     private final Universe universe;
 
     private final Screen screen;
-    private final Raster screenRaster;
+    private final WritableRaster screenRaster;
     private final BufferedImage img;
+    private BufferStrategy bufferStrategy;
     private boolean running = false;
     private Thread thread;
-    private final Map<Consumer<Long>, Timekeeper> timestepActorAction = new HashMap<>();
+    private final Map<Consumer<Long>, Timekeeper> timeStepActorAction = new HashMap<>();
+
+    private long totalTime = 0;
+    private long totalTickCount = 0;
+    private long totalRenderCount = 0;
 
 
     public SilverCoinComponent() {
@@ -42,19 +44,36 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
         setMinimumSize(size);
         setMaximumSize(size);
 
-        this.createImage(WIDTH, HEIGHT)
-        img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-        screen = new Screen(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
-        screenRaster = screen.createChild(0, 0, WIDTH, HEIGHT, 0, 0, new int[] {0,1,2});
+        GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice graphicsDevice = graphicsEnvironment.getDefaultScreenDevice();
+        GraphicsConfiguration graphicsConfiguration = graphicsDevice.getDefaultConfiguration();
 
+        img = graphicsConfiguration.createCompatibleImage(WIDTH, HEIGHT, Transparency.BITMASK);
+        screenRaster = img.getRaster();
+        screen = new Screen(screenRaster);
+
+        Graphics g = img.getGraphics();
+        g.setColor(Color.green);
+        g.fillOval(200, 100, 200, 200);
+        g.dispose();
 
         // Read config file
-        universeConfig = new ModItemParser(Resources.getDefaultModItemJsonReader());
-
+        universeConfig = new UniverseConfig();
         universe = new Universe(universeConfig);
 
+
+        // Render universe on screen
         // Setup rendering every 1000 milliseconds
-        this.addAction(this::render, Math.round(1000*TARGET_FPS));
+        this.addAction(this::render, Math.round(1000/TARGET_FPS));
+
+        this.addAction(this::reportFPS, Math.round(1000/TARGET_TPS));
+
+    }
+
+    private void reportFPS(Long timeDiffMillis) {
+        totalTime += timeDiffMillis;
+        System.out.println("FPS: " + (totalRenderCount * 1000) / totalTime);
+        System.out.println("TPS: " + (totalTickCount * 1000) / totalTime);
     }
 
     public Universe getUniverse() {
@@ -83,9 +102,13 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
     @Override
     public void run() {
         long lastTickMillis = System.currentTimeMillis();
-        long totalTicks = 0;
+        totalTickCount = 0;
+        totalRenderCount = 0;
 
-        while (running && totalTicks < 1000) {
+        createBufferStrategy(3);
+        bufferStrategy = getBufferStrategy();
+
+        while (running) {
             long nowMillis = System.currentTimeMillis();
 
             tick(nowMillis - lastTickMillis); // This might take a while
@@ -106,7 +129,7 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
                 running = false;
             }
 
-            ++totalTicks;
+            ++totalTickCount;
         }
     }
 
@@ -115,13 +138,6 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
         method being registered as an action.
      */
     private void render(long timeDiffMillis) {
-        // Render universe on screen
-        BufferStrategy bufferStrategy = getBufferStrategy();
-        if (bufferStrategy == null) {
-            createBufferStrategy(3);
-            bufferStrategy = getBufferStrategy();
-        }
-
         screen.render(universe);
         //screen.testScreen();
 
@@ -130,20 +146,24 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
 
         Graphics graphics = bufferStrategy.getDrawGraphics();
         graphics.setColor(Color.black);
-        graphics.fillRect(0, 0, WIDTH*SCALE, HEIGHT*SCALE);
-        graphics.drawImage(img, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
+        graphics.fillRect(0, 0, getWidth(), getHeight());
+        graphics.setColor(Color.red);
+        graphics.fillOval(400, 300, 400, 400);
+        graphics.drawImage(img, 0, 0, getWidth(), getHeight(), null);
         graphics.dispose();
         bufferStrategy.show();
+
+        ++totalRenderCount;
     }
 
     @Override
     public void addAction(Consumer<Long> action, long periodicity) {
-        timestepActorAction.put(action, new Timekeeper(periodicity));
+        timeStepActorAction.put(action, new Timekeeper(periodicity));
     }
 
     @Override
     public Map<Consumer<Long>, Timekeeper> getTimedActions() {
-        return timestepActorAction;
+        return timeStepActorAction;
     }
 
     public void tick(long timeDiffMillis) {

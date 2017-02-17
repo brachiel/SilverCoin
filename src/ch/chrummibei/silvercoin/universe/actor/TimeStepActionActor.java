@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 public interface TimeStepActionActor extends Actor {
     class Timekeeper {
         public Long localTime = 0L;
-        public Long periodicityInMillis;
+        public final Long periodicityInMillis;
 
         public Timekeeper(Long periodicityInMillis) {
             this.periodicityInMillis = periodicityInMillis;

@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
+import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
@@ -18,10 +19,9 @@ public class Factory extends Trader {
     private static int factoryNameSequence = 0;
 
     private int goalStock;
-    private Price productPrice;
 
-    private Recipe recipe;
-    private YieldingItemPosition productStock;
+    private final Recipe recipe;
+    private final YieldingItemPosition productStock;
     private TradeOffer productSellTradeOffer;
 
 
@@ -29,9 +29,21 @@ public class Factory extends Trader {
         super(recipe.product.getName() + " factory " + String.valueOf(Factory.getNextFactoryNameSequence()));
         this.recipe = recipe;
         this.goalStock = goalStock;
-        productPrice = new Price(1);
-        productSellTradeOffer = new TradeOffer(this, recipe.product, TradeOffer.TYPE.SELLING, 0, productPrice);
-        productStock = new YieldingItemPosition(recipe.product, 0);
+        productSellTradeOffer = new TradeOffer(this, recipe.product, TradeOffer.TYPE.SELLING, 0, new Price(1));
+        productStock = new YieldingItemPosition(recipe.product, 0, new TotalValue(0));
+
+        // Initialise inventory with ingredients
+        for (Item ingredient : recipe.ingredients.keySet()) {
+            inventory.put(ingredient, new YieldingItemPosition(ingredient, 0, new TotalValue(0)));
+        }
+    }
+
+    public Price getProductPrice() {
+        return productSellTradeOffer.getPrice();
+    }
+
+    public int getGoalStock() {
+        return goalStock;
     }
 
     /**
@@ -39,7 +51,7 @@ public class Factory extends Trader {
      * @param price New Product price.
      */
     public void setProductPrice(Price price) {
-        productPrice.set(price);
+        getProductPrice().set(price);
     }
 
     private static int getNextFactoryNameSequence() {
@@ -53,10 +65,11 @@ public class Factory extends Trader {
      */
     public void addProductToTradeOffer(int amount, Price price) {
         productSellTradeOffer.addAmount(amount, price);
-        if (! offeredTrades.contains(productSellTradeOffer)) {
-            offeredTrades.add(productSellTradeOffer);
+        if (! hasTradeOffer(productSellTradeOffer)) {
+            addTradeOffer(productSellTradeOffer);
         }
     }
+
 
     public int calcProducibleAmount(Item item, int ownedAmount) {
         return ownedAmount / recipe.getIngredientAmount(item);
@@ -93,8 +106,8 @@ public class Factory extends Trader {
     public void adaptPricesFor(Market market) {
         Optional<TotalValue> totalCostOfIngredients = calcTotalIngredientCostPerProductFromMarket(market);
         if (totalCostOfIngredients.isPresent()) {
-            setProductPrice(totalCostOfIngredients.get().toPrice(1));
-            setUniqueTradeOffer(productStock.getItem(), TradeOffer.TYPE.SELLING, productStock.getAmount(), productPrice);
+            setProductPrice(totalCostOfIngredients.get().toPriceNotNull(1));
+            setUniqueTradeOffer(productStock.getItem(), TradeOffer.TYPE.SELLING, productStock.getAmount(), getProductPrice());
         }
 
         for (Map.Entry<Item,Integer> entry : recipe.ingredients.entrySet()) {
@@ -110,13 +123,20 @@ public class Factory extends Trader {
 
     public void produceProduct() {
         int producingAmount = calcProducibleAmount();
+        if (producingAmount == 0) return;
+
         Price productPrice = new Price(0);
         for (PricedItemPosition position : inventory.values()) {
             int ingredientAmount = recipe.getIngredientAmount(position.getItem());
-            // Add the ingredient price to the product price
-            productPrice = productPrice.add(position.getPurchasePrice().toTotalValue(ingredientAmount));
-            // Reduce inventory by amount needed to produce the product
-            position.removeItems(producingAmount * ingredientAmount, position.getPurchasePrice());
+
+            try {
+                // Add the ingredient price to the product price
+                productPrice = productPrice.add(position.getPurchasePrice().toTotalValue(ingredientAmount));
+                // Reduce inventory by amount needed to produce the product
+                position.removeItems(producingAmount * ingredientAmount, position.getPurchasePrice());
+            } catch (InvalidPriceException e) {
+                throw new RuntimeException("Position has an amount of 0. This is a bug.");
+            }
         }
 
         // Add the produced products
@@ -129,4 +149,7 @@ public class Factory extends Trader {
     public TradeOffer getProductTradeOffer() {
         return productSellTradeOffer;
     }
+
+
+
 }

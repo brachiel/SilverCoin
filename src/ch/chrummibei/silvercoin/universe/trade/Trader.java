@@ -20,8 +20,8 @@ public class Trader extends Market {
 
     protected final Map<Item,YieldingItemPosition> inventory = new HashMap<>();
 
-    private String name;
-    private Credit credit = new Credit(0.0);
+    private final String name;
+    private final Credit credit = new Credit(0.0);
     private final ArrayList<Market> offersPresentAtMarkets = new ArrayList<>();
 
     public Trader(String name) {
@@ -59,14 +59,18 @@ public class Trader extends Market {
     }
 
     public void offerTradesAt(Market market) {
-        market.addAllOffers(offeredTrades);
+        market.addAllOffers(getOfferedTrades());
         offersPresentAtMarkets.add(market);
     }
 
     @Override
     public void addTradeOffer(TradeOffer offer) {
-        super.addTradeOffer(offer);
-        offersPresentAtMarkets.forEach(market -> market.addTradeOffer(offer));
+        System.out.println(this.toString() + " is adding this trade: " + offer);
+        TradeOffer restOffer = findAndAcceptOppositeTradeOffersInMarkets(offer);
+        if (restOffer == null) return; // We could find all trades in markets already. No need to offer this trade anymore.
+
+        super.addTradeOffer(restOffer);
+        offersPresentAtMarkets.forEach(market -> market.addTradeOffer(restOffer));
     }
 
     @Override
@@ -74,6 +78,45 @@ public class Trader extends Market {
         super.removeTradeOffer(offer);
         offersPresentAtMarkets.forEach(market -> market.removeTradeOffer(offer));
     }
+
+    /**
+     * Takes a trade offer and executes all opposing trades with equal or cheaper price until there is either no more
+     * amount to trade, or there are no more applicable trade offers found.
+     * @param offer The trade offer we're trying to find opposing trades for
+     * @return A trade offer which has the amount that is left to trade, or null if all were traded.
+     */
+    public TradeOffer findAndAcceptOppositeTradeOffersInMarkets(TradeOffer offer) {
+        int leftToTrade = offer.getAmount();
+
+        // TODO: If multiple markets exist, this will not choose the best trades.
+        for (Market market : offersPresentAtMarkets) {
+            for (Map.Entry<TradeOffer, Integer> entry : market.getTradeOffersToTradeAmount(offer.getItem(), offer.getType().opposite(), offer.getAmount()).entrySet()) {
+                TradeOffer opposingOffer = entry.getKey();
+
+                // When offers are selling, the singed Price is positive
+                // SO: We sell, they buy, we must have: our price <= -their price for us to make a profit in arbitrage
+                if (opposingOffer.getSignedPriceDouble() > -offer.getSignedPriceDouble()) {
+                    // This is a a bad trade for us. Since it's ordered, we don't need to search further.
+                    break;
+                }
+
+                try {
+                    System.out.println("Found opposing trade offer: " + opposingOffer);
+                    opposingOffer.accept(offer.getOfferingTrader(), entry.getValue()); // Trade :)
+                    leftToTrade -= entry.getValue();
+                } catch (TradeOfferHasNotEnoughAmountLeft e) { // Someone else already accepted this trade :/. Skip it.
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        if (leftToTrade > 0) {
+            return new TradeOffer(offer.getOfferingTrader(), offer.getItem(), offer.getType(), leftToTrade, offer.getPrice());
+        } else {
+            return null;
+        }
+    }
+
 
     /**
      * Replaces the amount and price of an existing trade offer for that item and type,
@@ -95,6 +138,10 @@ public class Trader extends Market {
     }
 
     public void addToInventory(PricedItemPosition inventoryItem) {
+        if (inventoryItem.getAmount() == 0) {
+            throw new RuntimeException("Trying to add a position with amount 0. This is a bug.");
+        }
+
         if (inventory.containsKey(inventoryItem.getItem())) {
             inventory.get(inventoryItem.getItem()).add(inventoryItem);
         } else {

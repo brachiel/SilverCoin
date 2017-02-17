@@ -3,7 +3,8 @@ package ch.chrummibei.silvercoin.universe.item;
 import java.util.Map;
 
 /**
- * Created by brachiel on 10/02/2017.
+ * A recipe defined a set and amount of ingredient items and a product. Recipes are used by factories to produce items
+ * from other items.
  */
 public class Recipe {
     public final Item product;

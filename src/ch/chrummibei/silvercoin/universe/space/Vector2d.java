@@ -1,7 +1,8 @@
 package ch.chrummibei.silvercoin.universe.space;
 
 /**
- * Created by brachiel on 03/02/2017.
+ * Vector that can be added, subtracted and multiplied by scalars. In effect, is a member of the R-vector space R^2.
+ * This needs to be rebuilt to use fluid interfaces Vector2D<T expands Vector2D<T>>.
  */
 public class Vector2d {
     private Double[] coordinates = new Double[2];

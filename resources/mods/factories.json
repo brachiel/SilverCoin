@@ -1,0 +1,26 @@
+{
+  "factoriesPerRecipe": {
+    "min": 5,
+    "max": 15
+  },
+  "spreadFactor": {
+    "min": 1.01,
+    "max": 1.20
+  },
+  "inventoryPerIngredient": {
+    "min": 0.5,
+    "max": 2.5
+  },
+  "purchasePricePerIngredient": {
+    "min": 10.0,
+    "max": 50.0
+  },
+  "startingCredit": {
+    "min": 1000.0,
+    "max": 5000.0
+  },
+  "goalStock": {
+    "min": 5,
+    "max": 120
+  }
+}

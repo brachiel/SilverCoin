@@ -6,7 +6,7 @@ import ch.chrummibei.silvercoin.universe.item.Item;
  * An amount of items that can be held by a trader
  */
 public class ItemPosition {
-    Item item;
+    final Item item;
     int amount;
 
     public ItemPosition(Item item, int amount) {

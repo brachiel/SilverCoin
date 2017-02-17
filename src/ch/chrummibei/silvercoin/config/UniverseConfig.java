@@ -1,16 +1,23 @@
 package ch.chrummibei.silvercoin.config;
 
-import ch.chrummibei.silvercoin.universe.item.CraftableItem;
-import ch.chrummibei.silvercoin.universe.item.Item;
-import ch.chrummibei.silvercoin.universe.item.Recipe;
-
-import java.util.ArrayList;
-
 /**
- * Created by brachiel on 15/02/2017.
+ * Glue between the Universe and the configuration files. Everything that is configurable through files goes
+ * through here.
  */
-public interface UniverseConfig {
-    ArrayList<Recipe> getRecipes();
-    ArrayList<Item> getItems();
-    ArrayList<CraftableItem> getCraftableItems();
+public class UniverseConfig {
+    final ModItemParser modItemParser;
+    final ModFactoryParser modFactoryParser;
+
+    public UniverseConfig() {
+        modItemParser = new ModItemParser(Resources.getDefaultModItemConfigReader());
+        modFactoryParser = new ModFactoryParser(Resources.getDefaultModFactoryConfigReader());
+    }
+
+    public FactoryConfig factory() {
+        return modFactoryParser;
+    }
+
+    public ItemConfig item() {
+        return modItemParser;
+    }
 }

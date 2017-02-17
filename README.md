@@ -2,4 +2,7 @@
 A space trade simulator
 
 # TODO
-* FIX: White border that pops up during rendering every now and then.
+* Introduce item springs and sinks (constant producers and consumers).
+* Introduce time requirement for recipes.
+* Introduce actual space actors (moving actors).
+* Introduce multiple markets.

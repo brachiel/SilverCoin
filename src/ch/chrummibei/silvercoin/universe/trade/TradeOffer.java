@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
+import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
@@ -23,11 +24,13 @@ public class TradeOffer {
         public final String shortString; /* The string representation of this type */
         public final String longString; /* The string representation of this type */
         public final String verb; /* The string representation of this type */
+
+        public TYPE opposite() { if (this == BUYING) return SELLING; else return BUYING; }
     }
 
-    private Trader offeringTrader;
-    private Item item;
-    private TYPE type;
+    private final Trader offeringTrader;
+    private final Item item;
+    private final TYPE type;
     private int amount;
     private Price price;
     private Trade resultingTrade = null;
@@ -39,6 +42,7 @@ public class TradeOffer {
         this.amount = amount;
         this.price = price;
     }
+
 
     public boolean isSelling() {
         return type == TYPE.SELLING;
@@ -62,7 +66,12 @@ public class TradeOffer {
     }
 
     public void addAmount(int amount, Price price) {
-        this.price = this.price.toTotalValue(this.amount).add(price.toTotalValue(amount)).toPrice(this.amount + amount);
+        if (amount == 0) throw new RuntimeException("Trying to divide by 0");
+        try {
+            this.price = this.price.toTotalValue(this.amount).add(price.toTotalValue(amount)).toPrice(this.amount + amount);
+        } catch (InvalidPriceException e) {
+            e.printStackTrace();
+        }
         this.amount += amount;
     }
 
@@ -76,6 +85,14 @@ public class TradeOffer {
 
     public Price getPrice() {
         return price;
+    }
+
+    public double getSignedPriceDouble() {
+        if (isBuying()) { // If buying, the highest prices are best. So we need to order descending.
+            return -getPrice().toDouble();
+        } else {
+            return getPrice().toDouble();
+        }
     }
 
     public TotalValue getTotalValue() {
@@ -110,16 +127,12 @@ public class TradeOffer {
         }
     }
 
-    public Trade toTrade(Trader acceptingTrader) {
-        return toTrade(acceptingTrader, this.amount);
-    }
-
     public Trade toTrade(Trader acceptingTrader, int amount) {
         if (isBuying()) {
             // offer is to buy, so the offering Trader is buying
-            return new Trade(offeringTrader, acceptingTrader, item, amount, price);
-        } else {
             return new Trade(acceptingTrader, offeringTrader, item, amount, price);
+        } else {
+            return new Trade(offeringTrader, acceptingTrader, item, amount, price);
         }
     }
 }

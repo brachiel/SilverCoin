@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  * A market is a list of TradeOffers that makes them comparable and searchable.
  */
 public class Market {
-    ArrayList<TradeOffer> offeredTrades = new ArrayList<>();
+    private final ArrayList<TradeOffer> offeredTrades = new ArrayList<>();
 
     public Market() {
 
@@ -27,6 +27,10 @@ public class Market {
         offeredTrades.clear();
     }
 
+    public ArrayList<TradeOffer> getOfferedTrades() {
+        return offeredTrades;
+    }
+
     public void addTradeOffer(TradeOffer offer) {
         offeredTrades.add(offer);
     }
@@ -38,6 +42,10 @@ public class Market {
     public void removeTradeOffer(TradeOffer offer) {
         System.out.println("Removing " + offer);
         offeredTrades.remove(offer);
+    }
+
+    public boolean hasTradeOffer(TradeOffer tradeOffer) {
+        return offeredTrades.contains(tradeOffer);
     }
 
     public void removeAllTradeOffers(ArrayList<TradeOffer> offeredTrades) {
@@ -85,22 +93,23 @@ public class Market {
         return searchOfferedBuyingTrades(item).max(Comparator.comparing(t -> t.getPrice().toDouble()));
     }
 
-    public Map<TradeOffer,Integer> getTradeOfferSetToBuyAmount(Item item, int amount) {
+    public Map<TradeOffer,Integer> getTradeOffersToTradeAmount(Item item, TradeOffer.TYPE type, int amount) {
         HashMap<TradeOffer,Integer> tradeOffers = new HashMap<>();
 
-        int amountLeftToBuy = amount;
-        List<TradeOffer> sortedTradeOffers = searchOfferedSellingTrades(item)
-                .sorted(Comparator.comparing(offer -> offer.getPrice().toDouble()))
+        int amountLeftToTrade = amount;
+        List<TradeOffer> sortedTradeOffers = searchOfferedTrades(item, type)
+                // If we're buying, we want to order priced ascending; if we're selling we want to sort them descending
+                .sorted(Comparator.comparingDouble(TradeOffer::getSignedPriceDouble))
                 .collect(Collectors.toList());
 
 
         for (TradeOffer tradeOffer : sortedTradeOffers) {
-            int amountToBuyWithThisOffer = Math.min(amountLeftToBuy, tradeOffer.getAmount());
-            amountLeftToBuy -= amountToBuyWithThisOffer;
+            int amountToTradeWithThisOffer = Math.min(amountLeftToTrade, tradeOffer.getAmount());
+            amountLeftToTrade -= amountToTradeWithThisOffer;
 
-            tradeOffers.put(tradeOffer, amountToBuyWithThisOffer);
+            tradeOffers.put(tradeOffer, amountToTradeWithThisOffer);
 
-            if (amountLeftToBuy <= 0) {
+            if (amountLeftToTrade <= 0) {
                 // Last Buy
                 break;
             }
@@ -112,7 +121,7 @@ public class Market {
     public Optional<TotalValue> calculateTotalBuyCosts(Item item, int amount) {
         TotalValue totalValue = new TotalValue(0);
 
-        for (Map.Entry<TradeOffer, Integer> entry : getTradeOfferSetToBuyAmount(item, amount).entrySet()) {
+        for (Map.Entry<TradeOffer, Integer> entry : getTradeOffersToTradeAmount(item, TradeOffer.TYPE.BUYING, amount).entrySet()) {
             totalValue.iAdd(entry.getKey().getPrice().toTotalValue(entry.getValue()));
         }
 

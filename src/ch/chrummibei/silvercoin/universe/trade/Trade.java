@@ -9,9 +9,9 @@ import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
  * Trade containing amount and price of item to be traded.
  */
 public class Trade {
-    private Item item;
-    private int amount;
-    private TotalValue totalValue;
+    private final Item item;
+    private final int amount;
+    private final TotalValue totalValue;
     private Trader buyer = null;
     private Trader seller = null;
 
@@ -19,22 +19,13 @@ public class Trade {
         return "Trade: " + amount + " " + item + ": " + seller + " -> " + buyer + " for " + totalValue;
     }
 
-    public Trade(Trader buyer, Trader seller, Item item, int amount, Price price) {
+    public Trade(Trader seller, Trader buyer, Item item, int amount, Price price) {
         this.seller = seller;
         this.buyer = buyer;
 
         this.item = item;
         this.amount = amount;
         this.totalValue = new TotalValue(amount * price.toDouble());
-    }
-
-    public Trade(Trader buyer, Trader seller, Item item, int amount, TotalValue totalValue) {
-        this.seller = seller;
-        this.buyer = buyer;
-
-        this.item = item;
-        this.amount = amount;
-        this.totalValue = totalValue;
     }
 
     public Item getItem() {

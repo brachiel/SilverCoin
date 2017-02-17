@@ -1,7 +1,7 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
 /**
- * Created by brachiel on 03/02/2017.
+ * A trader was told to execute a trade; but the trader is no involved with this trade. If this happens, is's a bug.
  */
 public class TraderNotInvolvedException extends Exception {
 }

@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.universe.position;
 
+import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
@@ -8,7 +9,7 @@ import ch.chrummibei.silvercoin.universe.item.Item;
  * An amount of items that can be held by a trader
  */
 public class PricedItemPosition extends ItemPosition {
-    private TotalValue purchaseValue = new TotalValue(0);
+    private final TotalValue purchaseValue = new TotalValue(0);
 
     public PricedItemPosition(Item item) {
         this(item, 0, new TotalValue(0.0));
@@ -48,6 +49,8 @@ public class PricedItemPosition extends ItemPosition {
      * @param totalValue The total value of the added items.
      */
     public void addItems(int amount, TotalValue totalValue) {
+        if (amount == 0) throw new RuntimeException("addItems was called with amount to add = 0. This is a bug.");
+
         if (this.amount == 0) {
             increasingPosition(amount, totalValue);
         } else if (Math.signum(this.amount) == Math.signum(amount)) {
@@ -63,12 +66,13 @@ public class PricedItemPosition extends ItemPosition {
         super.addItems(amount);
     }
 
+    // Is only called when amount != 0
     void flippingPosition(int amount, TotalValue totalValue) {
         int decreasingAmount = -this.amount;
         int increasingAmount = amount+this.amount;
 
-        TotalValue decreasingValue = totalValue.toPrice(amount).toTotalValue(decreasingAmount);
-        TotalValue increasingValue = totalValue.toPrice(amount).toTotalValue(increasingAmount);
+        TotalValue decreasingValue = totalValue.toPriceNotNull(amount).toTotalValue(decreasingAmount);
+        TotalValue increasingValue = totalValue.toPriceNotNull(amount).toTotalValue(increasingAmount);
 
         zeroingPosition(decreasingAmount, decreasingValue);
         increasingPosition(increasingAmount, increasingValue);
@@ -87,7 +91,8 @@ public class PricedItemPosition extends ItemPosition {
     }
 
     public void removeItems(int amount) {
-        this.addItems(-amount, purchaseValue.toPrice(this.amount).toTotalValue(-amount));
+        if (amount == 0) throw new RuntimeException("Cannot remove " + amount + " items from empty position.");
+        this.addItems(-amount, purchaseValue.toPriceNotNull(this.amount).toTotalValue(-amount));
     }
 
     /**
@@ -112,7 +117,7 @@ public class PricedItemPosition extends ItemPosition {
      * The purchase price of one item.
      * @return Price per one item.
      */
-    public Price getPurchasePrice() {
+    public Price getPurchasePrice() throws InvalidPriceException {
         return purchaseValue.toPrice(getAmount());
     }
 

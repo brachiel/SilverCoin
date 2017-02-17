@@ -11,10 +11,12 @@ import java.util.Random;
 import java.util.function.Consumer;
 
 /**
- * Created by brachiel on 03/02/2017.
+ * Arbitrage Trader who sits at a market and tries to make a profit by finding trades that sell cheaper than
+ * they buy. This is obsolete with traders automatically resolving opposite trades.
+ * Can maybe be rebuilt such that it does arbitrage between different markets.
  */
 public class ArbitrageTradeActor extends ArbitrageTrader implements TimeStepActionActor {
-    Map<Consumer<Long>,Timekeeper> actions = new HashMap<>();
+    final Map<Consumer<Long>,Timekeeper> actions = new HashMap<>();
 
     public ArbitrageTradeActor(Market market) {
         super(market);
