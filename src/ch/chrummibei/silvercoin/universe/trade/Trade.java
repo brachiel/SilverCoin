@@ -52,6 +52,10 @@ public class Trade {
     }
 
     public PricedItemPosition getTradersItemPosition(Trader trader) throws TraderNotInvolvedException {
+        if (amount == 0) {
+            throw new RuntimeException("Trading item positions with amount = 0 doesn't make sense. This is a bug.");
+        }
+
         if (trader == buyer) {
             return new PricedItemPosition(item, amount, totalValue);
         } else if (trader == seller) {

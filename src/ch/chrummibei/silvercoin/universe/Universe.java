@@ -3,6 +3,7 @@ package ch.chrummibei.silvercoin.universe;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.actor.Actor;
 import ch.chrummibei.silvercoin.universe.actor.ArbitrageTradeActor;
+import ch.chrummibei.silvercoin.universe.actor.BigSpenderActor;
 import ch.chrummibei.silvercoin.universe.actor.FactoryActor;
 import ch.chrummibei.silvercoin.universe.credit.Credit;
 import ch.chrummibei.silvercoin.universe.credit.Price;
@@ -25,10 +26,9 @@ public class Universe implements Actor {
     private static final Random random = new Random();
 
     private final UniverseConfig universeConfig;
-    private ArrayList<Item> catalogue = new ArrayList<>();
+    private final ArrayList<Item> catalogue = new ArrayList<>();
     private final Market market = new Market();
     private final ArrayList<Actor> actors = new ArrayList<>();
-    private final ArrayList<ArbitrageTradeActor> arbitrageTraders = new ArrayList<>();
     private final ArrayList<FactoryActor> factories = new ArrayList<>();
 
     public Universe(UniverseConfig universeConfig) {
@@ -66,33 +66,27 @@ public class Universe implements Actor {
     }
 
     void initialise() {
-        catalogue = universeConfig.item().getItems();
+        catalogue.addAll(universeConfig.item().getItems());
 
         // Create random traders
-        for (int i = 0; i < 30; ++ i) {
+        for (int i = 0; i < 5; ++ i) {
             Trader trader = new Trader();
             trader.offerTradesAt(market);
 
-            for (int j = 0, maxJ = getRandomInt(1,15); j < maxJ; ++j) {
+            for (int j = 0, maxJ = getRandomInt(1,3); j < maxJ; ++j) {
                 Item item = catalogue.get(random.nextInt(catalogue.size()));
-                TradeOffer offer = new TradeOffer(trader, item, TradeOffer.TYPE.SELLING, getRandomInt(1,100), new Price(getRandomDouble(10,90)));
+                TradeOffer offer = new TradeOffer(trader, item, TradeOffer.TYPE.SELLING, getRandomInt(1,10), new Price(getRandomDouble(10,90)));
                 trader.addToInventory(new PricedItemPosition(offer.getItem(), offer.getAmount(), offer.getTotalValue()));
                 trader.addTradeOffer(offer);
             }
 
-            for (int j = 0, maxJ = getRandomInt(1,15); j < maxJ; ++j) {
+            for (int j = 0, maxJ = getRandomInt(1,3); j < maxJ; ++j) {
                 Item item = catalogue.get(random.nextInt(catalogue.size()));
-                TradeOffer offer = new TradeOffer(trader,item,TradeOffer.TYPE.BUYING, getRandomInt(1,100), new Price(getRandomDouble(10,90)));
+                TradeOffer offer = new TradeOffer(trader,item,TradeOffer.TYPE.BUYING, getRandomInt(1,10), new Price(getRandomDouble(10,90)));
                 trader.addCredits(offer.getTotalValue());
                 trader.addTradeOffer(offer);
             }
         }
-
-        arbitrageTraders.add(new ArbitrageTradeActor(market));
-        arbitrageTraders.add(new ArbitrageTradeActor(market));
-        arbitrageTraders.add(new ArbitrageTradeActor(market));
-        arbitrageTraders.add(new ArbitrageTradeActor(market));
-        arbitrageTraders.forEach(this::addActor);
 
         // Create 1 to 3 factories for every recipe with a goal stock of 5 to 15 items
         universeConfig.item().getRecipes().stream()
@@ -115,6 +109,15 @@ public class Universe implements Actor {
             factories.add(factory);
         });
         factories.forEach(this::addActor);
+
+        ArbitrageTradeActor arbitrageTradeActor = new ArbitrageTradeActor(market);
+        addActor(arbitrageTradeActor);
+
+        catalogue.stream().forEach(item -> System.out.println(item.getName()));
+        Item transportShipItem = catalogue.stream().filter(item -> item.getName().equals("Transport ship")).findFirst().get();
+        BigSpenderActor bigSpender = new BigSpenderActor(transportShipItem, 2000);
+        bigSpender.offerTradesAt(market);
+        addActor(bigSpender);
     }
 
     // Return a stream of all markets

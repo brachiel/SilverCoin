@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  * A factors that ticks every now and then and produces products. It also offers to buy its ingredients
  * on the market to the last seen price. Also makes a spread profit with it.
  */
-public class FactoryActor extends Factory implements PositionedActor, TimeStepActionActor {
+public class FactoryActor extends Factory implements PositionedActor, TimeStepActor {
     Position position;
 
     private final HashMap<Consumer<Long>, Timekeeper> timedActions = new HashMap<>();

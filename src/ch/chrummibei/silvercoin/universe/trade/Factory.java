@@ -5,7 +5,6 @@ import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.item.Recipe;
-import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 
 import java.util.Map;
@@ -34,6 +33,7 @@ public class Factory extends Trader {
         productSellTradeOffer = new TradeOffer(this, recipe.product, TradeOffer.TYPE.SELLING, 0, new Price(1));
         productStock = new YieldingItemPosition(recipe.product, 0, new TotalValue(0));
 
+        inventory.put(recipe.product, productStock);
         // Initialise inventory with ingredients
         for (Item ingredient : recipe.ingredients.keySet()) {
             inventory.put(ingredient, new YieldingItemPosition(ingredient, 0, new TotalValue(0)));
@@ -73,8 +73,8 @@ public class Factory extends Trader {
     }
 
 
-    public int calcProducibleAmount(Item item, int ownedAmount) {
-        return ownedAmount / recipe.getIngredientAmount(item);
+    public int calcProducibleAmount(Item item) {
+        return inventory.get(item).getAmount() / recipe.getIngredientAmount(item);
     }
 
     public int calcProducibleAmountWithIngredients() {
@@ -82,8 +82,8 @@ public class Factory extends Trader {
             return Integer.MAX_VALUE;
         }
 
-        return inventory.values().stream()
-                                    .mapToInt(pos -> calcProducibleAmount(pos.getItem(), pos.getAmount()))
+        return recipe.ingredients.keySet().stream()
+                                    .mapToInt(item -> calcProducibleAmount(item))
                                     .min()
                                     .orElse(0);
     }
@@ -113,7 +113,6 @@ public class Factory extends Trader {
         Optional<TotalValue> totalCostOfIngredients = calcTotalIngredientCostPerProductFromMarket(market);
         if (totalCostOfIngredients.isPresent()) {
             setProductPrice(totalCostOfIngredients.get().toPriceNotNull(1));
-            setUniqueTradeOffer(productStock.getItem(), TradeOffer.TYPE.SELLING, productStock.getAmount(), getProductPrice());
         }
 
         for (Map.Entry<Item,Integer> entry : recipe.ingredients.entrySet()) {
@@ -129,6 +128,9 @@ public class Factory extends Trader {
 
     public void produceProduct(long availableTimeMillis) {
         int producingAmount = calcProducibleAmountWithIngredients();
+        // Do not produce more than needed
+        producingAmount = Math.min(producingAmount, goalStock - productStock.getAmount());
+
         if (producingAmount == 0) {
             // We don't have enough ingredients, so we can't start to produce. Resetting time reservoir.
             timeReservoirMillis = 0;
@@ -142,8 +144,9 @@ public class Factory extends Trader {
         timeReservoirMillis -= producingAmount * recipe.buildTimeMillis; // Subtract the time we needed from reservoir
 
         Price productPrice = new Price(recipe.buildTimeMillis / 10); // Minimum price depends on buildTime
-        for (PricedItemPosition position : inventory.values()) {
-            int ingredientAmount = recipe.getIngredientAmount(position.getItem());
+        for (Item ingredient : recipe.ingredients.keySet()) {
+            int ingredientAmount = recipe.getIngredientAmount(ingredient);
+            YieldingItemPosition position = inventory.get(ingredient);
 
             try {
                 // Add the ingredient price to the product price

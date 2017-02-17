@@ -40,7 +40,6 @@ public class Market {
     }
 
     public void removeTradeOffer(TradeOffer offer) {
-        System.out.println("Removing " + offer);
         offeredTrades.remove(offer);
     }
 
@@ -61,6 +60,10 @@ public class Market {
      */
     public Stream<TradeOffer> searchOfferedTrades(Predicate<TradeOffer> cmp) {
         return offeredTrades.stream().filter(cmp);
+    }
+
+    public static Comparator<TradeOffer> bestPriceComparator() {
+        return Comparator.comparingDouble(TradeOffer::getSignedPriceDouble);
     }
 
     /**
@@ -99,7 +102,7 @@ public class Market {
         int amountLeftToTrade = amount;
         List<TradeOffer> sortedTradeOffers = searchOfferedTrades(item, type)
                 // If we're buying, we want to order priced ascending; if we're selling we want to sort them descending
-                .sorted(Comparator.comparingDouble(TradeOffer::getSignedPriceDouble))
+                .sorted(bestPriceComparator())
                 .collect(Collectors.toList());
 
 

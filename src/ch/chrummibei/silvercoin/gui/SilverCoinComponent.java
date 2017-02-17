@@ -2,7 +2,7 @@ package ch.chrummibei.silvercoin.gui;
 
 import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.Universe;
-import ch.chrummibei.silvercoin.universe.actor.TimeStepActionActor;
+import ch.chrummibei.silvercoin.universe.actor.TimeStepActor;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 /**
  * Main GUI component of SilverCoin
  */
-public class SilverCoinComponent extends Canvas implements Runnable, TimeStepActionActor {
+public class SilverCoinComponent extends Canvas implements Runnable, TimeStepActor {
     private static final int WIDTH = 800;
     private static final int HEIGHT = 400;
     private static final int SCALE = 2;
@@ -66,7 +66,7 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
         // Setup rendering every 1000 milliseconds
         this.addAction(this::render, Math.round(1000/TARGET_FPS));
 
-        this.addAction(this::reportFPS, Math.round(1000/TARGET_TPS));
+        //this.addAction(this::reportFPS, Math.round(1000/TARGET_TPS));
 
     }
 
@@ -112,7 +112,7 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
             long nowMillis = System.currentTimeMillis();
 
             tick(nowMillis - lastTickMillis); // This might take a while
-            // render(); // Render is solved through an TimeStepActionActor
+            // render(); // Render is solved through an TimeStepActor
 
             lastTickMillis = System.currentTimeMillis();
             // We have to sleep currentTime + 1000/targetTicksPerSecond - now
@@ -134,7 +134,7 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
     }
 
     /*
-        render is called by this being a TimeStepActionActor and the render
+        render is called by this being a TimeStepActor and the render
         method being registered as an action.
      */
     private void render(long timeDiffMillis) {
@@ -168,6 +168,6 @@ public class SilverCoinComponent extends Canvas implements Runnable, TimeStepAct
 
     public void tick(long timeDiffMillis) {
         universe.tick(timeDiffMillis);
-        TimeStepActionActor.super.tick(timeDiffMillis); // Check if we need to render
+        TimeStepActor.super.tick(timeDiffMillis); // Check if we need to render
     }
 }

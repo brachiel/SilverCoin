@@ -46,9 +46,13 @@ public class ModItemParser implements ItemConfig {
         ((JSONArray) modItemConfig.get("recipes")).forEach(rawRecipe -> {
             JSONObject recipe = (JSONObject) rawRecipe;
             String productName = (String) recipe.get("product");
-            CraftableItem item = new CraftableItem(productName);
-            itemHash.put(productName, item);
-            this.craftableItems.add(item);
+
+            if (! itemHash.keySet().contains(productName)) {
+                CraftableItem item = new CraftableItem(productName);
+                itemHash.put(productName, item);
+                this.craftableItems.add(item);
+                this.items.add(item);
+            }
         });
 
         // Create all Items that are missing

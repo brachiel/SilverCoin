@@ -15,7 +15,7 @@ import java.util.function.Consumer;
  * they buy. This is obsolete with traders automatically resolving opposite trades.
  * Can maybe be rebuilt such that it does arbitrage between different markets.
  */
-public class ArbitrageTradeActor extends ArbitrageTrader implements TimeStepActionActor {
+public class ArbitrageTradeActor extends ArbitrageTrader implements TimeStepActor {
     final Map<Consumer<Long>,Timekeeper> actions = new HashMap<>();
 
     public ArbitrageTradeActor(Market market) {
@@ -50,9 +50,9 @@ public class ArbitrageTradeActor extends ArbitrageTrader implements TimeStepActi
             System.out.println("ArbitrageTrader found an opportunity: " + arbitrage);
             executeArbitrage(arbitrage);
         } else {
-            System.out.println("ArbitrageTrader got no luck");
+            //System.out.println("ArbitrageTrader got no luck");
         }
 
-        printShortStatus();
+        // printShortStatus();
     }
 }

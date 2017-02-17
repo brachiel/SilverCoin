@@ -22,7 +22,7 @@ public class Trader extends Market {
 
     private final String name;
     private final Credit credit = new Credit(0.0);
-    private final ArrayList<Market> offersPresentAtMarkets = new ArrayList<>();
+    protected final ArrayList<Market> offersPresentAtMarkets = new ArrayList<>();
 
     public Trader(String name) {
         this.name = name;
@@ -65,7 +65,7 @@ public class Trader extends Market {
 
     @Override
     public void addTradeOffer(TradeOffer offer) {
-        System.out.println(this.toString() + " is adding this trade: " + offer);
+        //System.out.println(this.toString() + " is adding this trade: " + offer);
         TradeOffer restOffer = findAndAcceptOppositeTradeOffersInMarkets(offer);
         if (restOffer == null) return; // We could find all trades in markets already. No need to offer this trade anymore.
 
@@ -87,6 +87,7 @@ public class Trader extends Market {
      */
     public TradeOffer findAndAcceptOppositeTradeOffersInMarkets(TradeOffer offer) {
         int leftToTrade = offer.getAmount();
+        if (leftToTrade == 0) throw new RuntimeException("Finding trades with amount=0. This is bug.");
 
         // TODO: If multiple markets exist, this will not choose the best trades.
         for (Market market : offersPresentAtMarkets) {
@@ -101,9 +102,13 @@ public class Trader extends Market {
                 }
 
                 try {
-                    System.out.println("Found opposing trade offer: " + opposingOffer);
+                    //System.out.println("Found opposing trade offer: " + opposingOffer);
                     opposingOffer.accept(offer.getOfferingTrader(), entry.getValue()); // Trade :)
                     leftToTrade -= entry.getValue();
+
+                    if (leftToTrade <= 0) { // We're done.
+                        return null;
+                    }
                 } catch (TradeOfferHasNotEnoughAmountLeft e) { // Someone else already accepted this trade :/. Skip it.
                     e.printStackTrace();
                 }
@@ -127,6 +132,8 @@ public class Trader extends Market {
      * @param price Price of one item
      */
     public void setUniqueTradeOffer(Item item, TradeOffer.TYPE type, int amount, Price price) {
+        if (amount == 0) throw new RuntimeException("Setting unique trade offer with amount=0. This is a bug.");
+
         Optional<TradeOffer> existingTradeOffer = searchOfferedTrades(item, type).findAny();
 
         if (existingTradeOffer.isPresent()) {
@@ -144,6 +151,9 @@ public class Trader extends Market {
 
         if (inventory.containsKey(inventoryItem.getItem())) {
             inventory.get(inventoryItem.getItem()).add(inventoryItem);
+            if (inventory.get(inventoryItem.getItem()).getAmount() < 0) {
+                throw new RuntimeException("We have negative positions. This shouldn't happen (yet). This is a bug.");
+            }
         } else {
             inventory.put(inventoryItem.getItem(), new YieldingItemPosition(inventoryItem));
         }
@@ -151,7 +161,7 @@ public class Trader extends Market {
 
 
     public void executeTrade(Trade trade) throws TraderNotInvolvedException {
-        System.out.println(this + " is executing trade " + trade);
+        // System.out.println(this + " is executing trade " + trade);
 
         PricedItemPosition newItemPosition = trade.getTradersItemPosition(this);
         // newItemPosition might be negative

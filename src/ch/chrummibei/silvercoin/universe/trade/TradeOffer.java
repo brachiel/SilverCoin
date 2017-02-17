@@ -118,9 +118,9 @@ public class TradeOffer {
 
         resultingTrade = toTrade(acceptingTrader, amount);
         try {
-            offeringTrader.offerAccepted(this);
             acceptingTrader.executeTrade(resultingTrade);
             offeringTrader.executeTrade(resultingTrade);
+            offeringTrader.offerAccepted(this);
         } catch (TraderNotInvolvedException e) {
             // Should never happen. This is a bug
             throw new AssertionError("Created a trade where the wrong trader was set.");
@@ -128,6 +128,8 @@ public class TradeOffer {
     }
 
     public Trade toTrade(Trader acceptingTrader, int amount) {
+        if (amount == 0) throw new RuntimeException("Trading amount=0. This is a bug.");
+
         if (isBuying()) {
             // offer is to buy, so the offering Trader is buying
             return new Trade(acceptingTrader, offeringTrader, item, amount, price);
