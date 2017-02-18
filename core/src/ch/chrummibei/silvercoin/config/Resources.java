@@ -2,6 +2,7 @@ package ch.chrummibei.silvercoin.config;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 import java.io.*;
 
@@ -11,18 +12,19 @@ import java.io.*;
 public class Resources {
     private static final String basePath = "./";
 
+    public static FileHandle getFileHandle(String resource) {
+        return Gdx.files.internal(basePath + resource);
+    }
     public static InputStream getStreamFrom(String resource) {
-        FileHandle handle = Gdx.files.internal(basePath + resource);
-        return handle.read();
+        return getFileHandle(resource).read();
     }
 
     public static Reader getReaderFrom(String resource) {
-        FileHandle handle = Gdx.files.internal(basePath + resource);
-        return handle.reader();
+        return getFileHandle(resource).reader();
     }
 
-    public static InputStream getDefaultFontStream() {
-        return getStreamFrom("fonts/fixed_01.png");
+    public static BitmapFont getDefaultFont() {
+        return new BitmapFont(getFileHandle("fonts/fixed_font.fnt"), false);
     }
 
     public static Reader getDefaultModItemConfigReader() {
