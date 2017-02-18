@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 /**
  * The universe contains the world, all actors and manages time and randomness. It is used by the Component to
- * tell the Screen what to render. All simulation is done here.
+ * tell the MainScreen what to render. All simulation is done here.
  */
 public class Universe implements Actor {
     private static final Random random = new Random();

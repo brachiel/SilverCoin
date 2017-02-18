@@ -1,33 +1,24 @@
 package ch.chrummibei.silvercoin.config;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+
 import java.io.*;
 
 /**
  * Central resource handling. Contains paths as constants and converts files to Streams or Readers.
  */
 public class Resources {
-    private static final String basePath = "resources/";
+    private static final String basePath = "./";
 
     public static InputStream getStreamFrom(String resource) {
-        try {
-            return new FileInputStream(basePath + resource);
-        } catch (FileNotFoundException e) {
-            System.out.println("Resource not found: " + basePath + resource);
-            e.printStackTrace();
-            System.exit(1);
-        }
-        return null;
+        FileHandle handle = Gdx.files.internal(basePath + resource);
+        return handle.read();
     }
 
     public static Reader getReaderFrom(String resource) {
-        try {
-            return new FileReader(basePath + resource);
-        } catch (FileNotFoundException e) {
-            System.out.println("Resource not found: " + basePath + resource);
-            e.printStackTrace();
-            System.exit(1);
-        }
-        return null;
+        FileHandle handle = Gdx.files.internal(basePath + resource);
+        return handle.reader();
     }
 
     public static InputStream getDefaultFontStream() {
