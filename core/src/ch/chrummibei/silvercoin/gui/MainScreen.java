@@ -13,7 +13,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ public class MainScreen implements Screen {
 
     private OrthographicCamera cam;
     private SpriteBatch batch;
+    private Sprite backgroundSprite = new Sprite(new Texture("images/ngc253.jpg"));
 
     public int WIDTH;
     public int HEIGHT;
@@ -67,8 +70,14 @@ public class MainScreen implements Screen {
         batch.setProjectionMatrix(cam.combined);
 
         // Clear screen
-        Gdx.gl.glClearColor(0, 0, 0.2f, 0);
+        Gdx.gl.glClearColor(0, 0, 0, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        batch.begin();
+        backgroundSprite.setCenter(WIDTH/2, HEIGHT/2);
+        backgroundSprite.setColor(0.3f,0.3f,0.3f,1f);
+        backgroundSprite.draw(batch);
+        batch.end();
 
         batch.begin();
 
