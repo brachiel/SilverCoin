@@ -84,12 +84,29 @@ public class MainScreen implements Screen {
         Market market = universe.getMarkets().findFirst().get();
 
         final int lineHeight = (int) font.getLineHeight() + 1;
+        int currentY = HEIGHT - lineHeight;
 
-        final int itemNameCol = 5;
+        final int factoryNameCol = 5;
+        final int stockCol = factoryNameCol + 200;
+        final int priceCol = stockCol + 50;
+
+
+        writeString("FACTORY", factoryNameCol, currentY);
+        writeString("STOCK", stockCol, currentY);
+        writeString("PRICE", priceCol, currentY);
+
+        for (Factory factory : universe.getFactories().stream().limit(50).collect(Collectors.toList())) {
+            currentY -= lineHeight;
+            writeString(factory.getName(), factoryNameCol, currentY);
+            writeString(String.valueOf(factory.getProductStock()), stockCol, currentY);
+            writeString(factory.getProductPrice().map(Price::toString).orElse("-"), priceCol, currentY);
+        }
+
+        final int itemNameCol = priceCol + 70;
         final int sellCol = itemNameCol + 150;
-        final int buyCol = sellCol + 100;
+        final int buyCol = sellCol + 80;
 
-        int currentY = HEIGHT - 2*lineHeight;
+        currentY = HEIGHT - lineHeight;
 
         font.setColor(1, 1, 1, 1);
         writeString("ITEM", itemNameCol, currentY);
@@ -107,23 +124,6 @@ public class MainScreen implements Screen {
             writeString(market.searchBestBuyingTrade(item)
                     .map(TradeOffer::getPrice)
                     .map(Price::toString).orElse("-"), buyCol, currentY);
-        }
-
-        final int factoryNameCol = buyCol + 100;
-        final int stockCol = factoryNameCol + 200;
-        final int priceCol = stockCol + 100;
-
-        currentY = HEIGHT - 2*lineHeight;
-
-        writeString("FACTORY", factoryNameCol, currentY);
-        writeString("STOCK", stockCol, currentY);
-        writeString("PRICE", priceCol, currentY);
-
-        for (Factory factory : universe.getFactories().stream().limit(50).collect(Collectors.toList())) {
-            currentY -= lineHeight;
-            writeString(factory.getName(), factoryNameCol, currentY);
-            writeString(String.valueOf(factory.getProductStock()), stockCol, currentY);
-            writeString(factory.getProductPrice().map(Price::toString).orElse("-"), priceCol, currentY);
         }
 
         batch.end();
