@@ -79,53 +79,49 @@ public class MainScreen implements Screen {
         backgroundSprite.draw(batch);
         batch.end();
 
-        batch.begin();
 
         Market market = universe.getMarkets().findFirst().get();
 
-        final int lineHeight = (int) font.getLineHeight() + 1;
-        int currentY = HEIGHT - lineHeight;
-
-        final int factoryNameCol = 5;
-        final int stockCol = factoryNameCol + 200;
-        final int priceCol = stockCol + 50;
-
-
-        writeString("FACTORY", factoryNameCol, currentY);
-        writeString("STOCK", stockCol, currentY);
-        writeString("PRICE", priceCol, currentY);
+        TableWidget factoryTable = new TableWidget(font);
+        factoryTable.addColumn("FACTORY", 180, Color.FIREBRICK);
+        factoryTable.addColumn("STOCK", 50, TableWidget.STYLE.RIGHT_ALIGN);
+        factoryTable.addColumn("PRICE", 90, TableWidget.STYLE.RIGHT_ALIGN);
+        factoryTable.get(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
+        factoryTable.get(0).setColor(Color.CHARTREUSE);
 
         for (Factory factory : universe.getFactories().stream().limit(50).collect(Collectors.toList())) {
-            currentY -= lineHeight;
-            writeString(factory.getName(), factoryNameCol, currentY);
-            writeString(String.valueOf(factory.getProductStock()), stockCol, currentY);
-            writeString(factory.getProductPrice().map(Price::toString).orElse("-"), priceCol, currentY);
+            TableRow row = new TableRow();
+            row.add(factory.getName());
+            row.add(String.valueOf(factory.getProductStock()));
+            row.add(factory.getProductPrice().map(Price::toString).orElse("-"));
+            factoryTable.add(row);
         }
 
-        final int itemNameCol = priceCol + 70;
-        final int sellCol = itemNameCol + 150;
-        final int buyCol = sellCol + 80;
-
-        currentY = HEIGHT - lineHeight;
-
-        font.setColor(1, 1, 1, 1);
-        writeString("ITEM", itemNameCol, currentY);
-        writeString("SELL", sellCol, currentY);
-        writeString("BUY", buyCol, currentY);
+        TableWidget itemTable = new TableWidget(font);
+        itemTable.addColumn("ITEM", 150, Color.SALMON);
+        itemTable.addColumn("SELL", 80, TableWidget.STYLE.RIGHT_ALIGN, Color.FIREBRICK);
+        itemTable.addColumn("BUY",80, TableWidget.STYLE.RIGHT_ALIGN, Color.GOLDENROD);
+        itemTable.get(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
+        itemTable.get(0).setColor(Color.FIREBRICK);
 
         ArrayList<Item> items = universe.getItems();
         items.sort(Comparator.comparing(item -> item.getName()));
         for (Item item : items) {
-            currentY -= lineHeight;
-            writeString(item.toString(), itemNameCol, currentY);
-            writeString(market.searchBestSellingTrade(item)
+            TableRow row = new TableRow();
+            row.add(item.toString());
+            row.add(market.searchBestSellingTrade(item)
                     .map(TradeOffer::getPrice)
-                    .map(Price::toString).orElse("-"), sellCol, currentY);
-            writeString(market.searchBestBuyingTrade(item)
+                    .map(Price::toString).orElse("-"));
+            row.add(market.searchBestBuyingTrade(item)
                     .map(TradeOffer::getPrice)
-                    .map(Price::toString).orElse("-"), buyCol, currentY);
+                    .map(Price::toString).orElse("-"));
+            itemTable.add(row);
         }
 
+
+        batch.begin();
+        factoryTable.draw(batch, 5, HEIGHT-5);
+        itemTable.draw(batch, (int) factoryTable.getWidth() + 20, HEIGHT-5);
         batch.end();
 
         universe.tick((long) Math.floor(100*delta));
