@@ -1,0 +1,144 @@
+{"recipes": [
+  { "product": "Transport ship",
+    "ingredients": {
+      "Engine": 4,
+      "Power core": 1,
+      "Structural component": 40,
+      "Drone": 5,
+      "AI core": 2
+    },
+    "buildTime": 5000
+  },
+  { "product": "Engine",
+    "ingredients": {
+      "Electronic coil": 15,
+      "Heavy water": 30
+    },
+    "buildTime": 2000
+  },
+  { "product": "Engine",
+    "ingredients": {
+      "Water": 40,
+      "Thorium": 30
+    },
+    "buildTime": 2500
+  },
+  { "product": "Structural component",
+    "ingredients": {
+      "Iron": 30
+    },
+    "buildTime": 1000
+  },
+  { "product": "Structural component",
+    "ingredients": {
+      "Aluminum": 40
+    },
+    "buildTime": 1500
+  },
+  { "product": "Power core",
+    "ingredients": {
+      "Thorium": 30,
+      "Water": 80,
+      "Heavy water": 5
+    },
+    "buildTime": 3000
+  },
+  { "product": "Power core",
+    "ingredients": {
+      "Heavy water": 170,
+      "Electronic coil": 80
+    },
+    "buildTime": 5000
+  },
+  { "product": "Heavy water",
+    "ingredients": {
+      "Water": 30,
+      "Energy": 50
+    },
+    "buildTime": 500
+  },
+  { "product": "Electronic coil",
+    "ingredients": {
+      "Copper": 5
+    },
+    "buildTime": 700
+  },
+  { "product": "Electronics",
+    "ingredients": {
+      "Copper": 3,
+      "Silicon": 5,
+      "Electronic coil": 1
+    },
+    "buildTime": 1500
+  },
+  { "product": "Drone",
+    "ingredients": {
+      "Electronics": 3,
+      "AI core": 1
+    },
+    "buildTime": 4000
+  },
+  { "product": "AI core",
+    "ingredients": {
+      "Electronics": 5
+    },
+    "buildTime": 500
+  },
+  { "product": "Food",
+    "ingredients": {
+      "Algae": 100
+    },
+    "buildTime": 500
+  },
+  { "product": "Algae",
+    "ingredients": {
+      "Energy": 2
+    },
+    "buildTime": 20
+  },
+  { "product": "Oxygen",
+    "ingredients": {
+      "Energy": 5
+    },
+    "buildTime": 100
+  },
+  { "product": "Energy",
+    "buildTime": 10
+  },
+  { "product": "Water",
+    "ingredients": {
+      "Energy": 5
+    },
+    "buildTime": 300
+  },
+  { "product": "Thorium",
+    "ingredients": {
+      "Energy": 55
+    },
+    "buildTime": 1000
+  },
+  { "product": "Copper",
+    "ingredients": {
+      "Energy": 7
+    },
+    "buildTime": 500
+  },
+  { "product": "Iron",
+    "ingredients": {
+      "Energy": 8
+    },
+    "buildTime": 450
+  },
+  { "product": "Aluminum",
+    "ingredients": {
+      "Energy": 20
+    },
+    "buildTime": 450
+  },
+  { "product": "Silicon",
+    "ingredients": {
+      "Energy": 30
+    },
+    "buildTime": 700
+  }
+]}

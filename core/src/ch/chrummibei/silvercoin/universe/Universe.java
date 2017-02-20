@@ -50,7 +50,7 @@ public class Universe implements Actor {
     }
 
     public ArrayList<Item> getItems() {
-        return universeConfig.item().getItems();
+        return universeConfig.catalogue().getItems();
     }
 
     public void addActor(Actor actor) {
@@ -75,7 +75,7 @@ public class Universe implements Actor {
     }
 
     void initialise() {
-        catalogue.addAll(universeConfig.item().getItems());
+        catalogue.addAll(universeConfig.catalogue().getItems());
 
         // Create random traders
         for (int i = 0; i < 5; ++ i) {
@@ -98,20 +98,20 @@ public class Universe implements Actor {
         }
 
         // Create 1 to 3 factories for every recipe with a goal stock of 5 to 15 items
-        universeConfig.item().getRecipes().stream()
+        universeConfig.recipeBook().getRecipes().stream()
                 .flatMap(recipe -> Stream.iterate(recipe,r -> r)
-                                         .limit(universeConfig.factory().getRandomisedIntSetting("factoriesPerRecipe")))
+                                         .limit(universeConfig.factory().getRandomInt("factoriesPerRecipe")))
                 .forEach(recipe -> {
-            FactoryActor factory = new FactoryActor(recipe, universeConfig.factory().getRandomisedIntSetting("goalStock"));
-            factory.setSpread(universeConfig.factory().getRandomisedDoubleSetting("spreadFactor"));
-            factory.addCredits(new Credit(universeConfig.factory().getRandomisedDoubleSetting("startingCredit")));
+            FactoryActor factory = new FactoryActor(recipe, universeConfig.factory().getRandomInt("goalStock"));
+            factory.setSpread(universeConfig.factory().getRandomDouble("spreadFactor"));
+            factory.addCredits(new Credit(universeConfig.factory().getRandomDouble("startingCredit")));
             factory.offerTradesAt(market);
             factory.adaptPricesFor(market);
 
             recipe.ingredients.keySet().forEach(ingredient -> {
                 int startingAmount = (int) Math.round(factory.calcWantedAmountOfIngredient(ingredient)
-                        * universeConfig.factory().getRandomisedDoubleSetting("inventoryPerIngredient"));
-                Price purchasePrice = new Price(universeConfig.factory().getRandomisedDoubleSetting("purchasePricePerIngredient"));
+                        * universeConfig.factory().getRandomDouble("inventoryPerIngredient"));
+                Price purchasePrice = new Price(universeConfig.factory().getRandomDouble("purchasePricePerIngredient"));
                 factory.addToInventory(new PricedItemPosition(ingredient, startingAmount, purchasePrice));
             });
 

@@ -8,8 +8,11 @@ I always wanted to do this; I don't know what the result will be - maybe a progr
 * Introduce actual space actors (moving actors).
 * Introduce multiple markets.
 * Factories that cannot buy due to lacking sell offers should instead place a buy order.
-* Rewrite JSON Parsing to use libGDX and proper JSON<->Class packing.
-* Introduce a script language (possibly LUA) to implement Actor logic (makes it modable and easily extendible).
+* Use gdx-Ashley's Entity System to clean up Actor-inheritance mess
+* Use gdxAI to implement Actor AI-logic.
+* Introduce a script language (possibly LUA) to implement behaviour tree leaf tasks.
+* Replace Resources class by libGDX AssetManager
+
 
 # Known Bugs
 * Debugging reveals, that factories have inventory items with item=null.

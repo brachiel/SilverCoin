@@ -4,12 +4,14 @@ package ch.chrummibei.silvercoin.universe.item;
  * Tradeable item
  */
 public class Item {
-    private final String name;
+    private String name;
 
+    public Item() {}
     public Item(String name) {
-        this.name = name;
+        setName(name);
     }
 
+    public void setName(String name) { this.name = name; }
     public String getName() {
         return name;
     }

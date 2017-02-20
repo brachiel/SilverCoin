@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * A Factory is a trader who is able to convert Items to a specific CraftableItem.
- * Each Factory can only produce a single CraftableItem.
+ * A Factory is a trader who is able to convert Items into a specific product.
+ * Each Factory can only produce a single item.
  */
 public class Factory extends Trader {
     private static int factoryNameSequence = 0;
