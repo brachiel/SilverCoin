@@ -7,11 +7,12 @@ import ch.chrummibei.silvercoin.universe.actor.BigSpenderActor;
 import ch.chrummibei.silvercoin.universe.actor.FactoryActor;
 import ch.chrummibei.silvercoin.universe.credit.Credit;
 import ch.chrummibei.silvercoin.universe.credit.Price;
+import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
-import ch.chrummibei.silvercoin.universe.trade.Market;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import ch.chrummibei.silvercoin.universe.trade.Trader;
+import com.badlogic.ashley.core.Engine;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -28,9 +29,11 @@ public class Universe implements Actor {
 
     private final UniverseConfig universeConfig;
     private final ArrayList<Item> catalogue = new ArrayList<>();
-    private final Market market = new Market();
+    private final MarketUtil market = new MarketUtil();
     private final ArrayList<Actor> actors = new ArrayList<>();
     private final ArrayList<FactoryActor> factories = new ArrayList<>();
+
+    private final Engine engine = new Engine();
 
     public Universe(UniverseConfig universeConfig) {
         this.universeConfig = universeConfig;
@@ -130,7 +133,7 @@ public class Universe implements Actor {
     }
 
     // Return a stream of all markets
-    public Stream<Market> getMarkets() {
+    public Stream<MarketUtil> getMarkets() {
         return Stream.of(market);
     }
 

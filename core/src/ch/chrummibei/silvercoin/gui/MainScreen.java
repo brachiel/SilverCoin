@@ -4,9 +4,9 @@ import ch.chrummibei.silvercoin.config.Resources;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.credit.Price;
+import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.Factory;
-import ch.chrummibei.silvercoin.universe.trade.Market;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -80,7 +80,7 @@ public class MainScreen implements Screen {
         batch.end();
 
 
-        Market market = universe.getMarkets().findFirst().get();
+        MarketUtil market = universe.getMarkets().findFirst().get();
 
         TableWidget factoryTable = new TableWidget(font);
         factoryTable.addColumn("FACTORY", 180, Color.FIREBRICK);

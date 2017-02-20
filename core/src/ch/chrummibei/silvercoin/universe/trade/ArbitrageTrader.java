@@ -1,5 +1,7 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
+import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
+
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -7,9 +9,9 @@ import java.util.stream.Stream;
  * An ArbitrageTrader is a Trader who is able to find Arbitrages
  */
 public class ArbitrageTrader extends Trader {
-    Market market;
+    MarketUtil market;
 
-    public ArbitrageTrader(Market market) {
+    public ArbitrageTrader(MarketUtil market) {
         this.market = market;
     }
 
@@ -54,7 +56,7 @@ public class ArbitrageTrader extends Trader {
         inventory.values().forEach(pos -> System.out.println(pos.getItem() + " for a profit of: " + pos.getRealisedProfit()));
     }
 
-    public Market getMarket() {
+    public MarketUtil getMarket() {
         return market;
     }
 }

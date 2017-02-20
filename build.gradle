@@ -56,6 +56,7 @@ project(":html") {
         compile "com.badlogicgames.gdx:gdx-box2d-gwt:$gdxVersion:sources"
         compile "com.badlogicgames.gdx:gdx-ai:$aiVersion:sources"
         compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion:sources"
+        compile "com.badlogicgames.ashley:ashley:$ashleyVersion:sources"
     }
 }
 
@@ -67,6 +68,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         compile "com.badlogicgames.box2dlights:box2dlights:$box2DLightsVersion"
+        compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
         compile fileTree(dir: "lib", include: ["*.jar"])
     }
 }

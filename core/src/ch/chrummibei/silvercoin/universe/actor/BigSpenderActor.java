@@ -1,7 +1,7 @@
 package ch.chrummibei.silvercoin.universe.actor;
 
+import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
 import ch.chrummibei.silvercoin.universe.item.Item;
-import ch.chrummibei.silvercoin.universe.trade.Market;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import ch.chrummibei.silvercoin.universe.trade.TradeOfferHasNotEnoughAmountLeft;
 
@@ -22,7 +22,7 @@ public class BigSpenderActor extends TimeStepTraderActor {
     }
 
     public void buyItemIfAvailable(long timeDiffMillis) {
-        for (Market market : offersPresentAtMarkets) {
+        for (MarketUtil market : offersPresentAtMarkets) {
             Optional<TradeOffer> tradeOffer = market.searchBestSellingTrade(itemToConsume);
             if (! tradeOffer.isPresent()) {
                 continue;

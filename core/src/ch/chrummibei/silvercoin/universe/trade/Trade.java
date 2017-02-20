@@ -1,6 +1,6 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
-import ch.chrummibei.silvercoin.universe.credit.Price;
+import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
@@ -12,22 +12,28 @@ public class Trade {
     private final Item item;
     private final int amount;
     private final TotalValue totalValue;
-    private Trader buyer = null;
-    private Trader seller = null;
+    private TraderComponent buyer = null;
+    private TraderComponent seller = null;
+    public TradeOffer fromTradeOffer;
 
     public String toString() {
         return "Trade: " + amount + " " + item + ": " + seller + " -> " + buyer + " for " + totalValue;
     }
 
-    public Trade(Trader seller, Trader buyer, Item item, int amount, Price price) {
-        this.seller = seller;
-        this.buyer = buyer;
+    public Trade(TradeOffer tradeOffer, TraderComponent acceptingTrader, int acceptingAmount) {
+        if (acceptingAmount == 0) throw new RuntimeException("Trading amount=0. This is a bug.");
 
-        this.item = item;
-        this.amount = amount;
-        this.totalValue = new TotalValue(amount * price.toDouble());
+        if (tradeOffer.getType() == TradeOffer.TYPE.BUYING) {
+            this.seller = acceptingTrader;
+            this.buyer = tradeOffer.getOfferingTrader();
+        } else {
+            this.buyer = acceptingTrader;
+            this.seller = tradeOffer.getOfferingTrader();
+        }
 
-        System.out.println(toString());
+        this.item = tradeOffer.getItem();
+        this.amount = acceptingAmount;
+        this.totalValue = new TotalValue(acceptingAmount * tradeOffer.getPrice().toDouble());
     }
 
     public Item getItem() {
@@ -45,15 +51,15 @@ public class Trade {
         return totalValue.toDouble();
     }
 
-    public Trader getBuyer() {
+    public TraderComponent getBuyer() {
         return buyer;
     }
 
-    public Trader getSeller() {
+    public TraderComponent getSeller() {
         return seller;
     }
 
-    public PricedItemPosition getTradersItemPosition(Trader trader) throws TraderNotInvolvedException {
+    public PricedItemPosition getTradersItemPosition(TraderComponent trader) throws TraderNotInvolvedException {
         if (amount == 0) {
             throw new RuntimeException("Trading item positions with amount = 0 doesn't make sense. This is a bug.");
         }

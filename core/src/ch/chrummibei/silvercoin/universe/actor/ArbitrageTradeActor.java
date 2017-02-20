@@ -1,9 +1,9 @@
 package ch.chrummibei.silvercoin.universe.actor;
 
 import ch.chrummibei.silvercoin.universe.Universe;
+import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
 import ch.chrummibei.silvercoin.universe.trade.Arbitrage;
 import ch.chrummibei.silvercoin.universe.trade.ArbitrageTrader;
-import ch.chrummibei.silvercoin.universe.trade.Market;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 public class ArbitrageTradeActor extends ArbitrageTrader implements TimeStepActor {
     final Map<Consumer<Long>,Timekeeper> actions = new HashMap<>();
 
-    public ArbitrageTradeActor(Market market) {
+    public ArbitrageTradeActor(MarketUtil market) {
         super(market);
         addAction(this::findAndExecuteArbitrage, Universe.getRandomInt(1500, 3000));
     }

@@ -3,26 +3,20 @@ package ch.chrummibei.silvercoin.universe.trade;
 import ch.chrummibei.silvercoin.universe.credit.Credit;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
+import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
 import ch.chrummibei.silvercoin.universe.item.Item;
-import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 /**
  * Unit capable of trading
  */
-public class Trader extends Market {
+public class Trader extends MarketUtil {
     private static int traderNameSequence = 0;
 
-    protected final Map<Item,YieldingItemPosition> inventory = new HashMap<>();
 
-    private final String name;
-    private final Credit credit = new Credit(0.0);
-    protected final ArrayList<Market> offersPresentAtMarkets = new ArrayList<>();
 
     public Trader(String name) {
         this.name = name;
@@ -58,7 +52,7 @@ public class Trader extends Market {
         return name;
     }
 
-    public void offerTradesAt(Market market) {
+    public void offerTradesAt(MarketUtil market) {
         market.addAllOffers(getOfferedTrades());
         offersPresentAtMarkets.add(market);
     }
@@ -90,7 +84,7 @@ public class Trader extends Market {
         if (leftToTrade == 0) throw new RuntimeException("Finding trades with amount=0. This is bug.");
 
         // TODO: If multiple markets exist, this will not choose the best trades.
-        for (Market market : offersPresentAtMarkets) {
+        for (MarketUtil market : offersPresentAtMarkets) {
             for (Map.Entry<TradeOffer, Integer> entry : market.getTradeOffersToTradeAmount(offer.getItem(), offer.getType().opposite(), offer.getAmount()).entrySet()) {
                 TradeOffer opposingOffer = entry.getKey();
 
@@ -144,31 +138,8 @@ public class Trader extends Market {
         }
     }
 
-    public void addToInventory(PricedItemPosition inventoryItem) {
-        if (inventoryItem.getAmount() == 0) {
-            throw new RuntimeException("Trying to add a position with amount 0. This is a bug.");
-        }
-
-        if (inventory.containsKey(inventoryItem.getItem())) {
-            inventory.get(inventoryItem.getItem()).add(inventoryItem);
-            if (inventory.get(inventoryItem.getItem()).getAmount() < 0) {
-                throw new RuntimeException("We have negative positions. This shouldn't happen (yet). This is a bug.");
-            }
-        } else {
-            inventory.put(inventoryItem.getItem(), new YieldingItemPosition(inventoryItem));
-        }
-    }
 
 
-    public void executeTrade(Trade trade) throws TraderNotInvolvedException {
-        // System.out.println(this + " is executing trade " + trade);
-
-        PricedItemPosition newItemPosition = trade.getTradersItemPosition(this);
-        // newItemPosition might be negative
-
-        credit.iSubtract(newItemPosition.getPurchaseValue());
-        addToInventory(newItemPosition);
-    }
 
     public void offerAccepted(TradeOffer offer) {
         if (offer.getAmount() <= 0) {

@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
+import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
@@ -28,14 +29,14 @@ public class TradeOffer {
         public TYPE opposite() { if (this == BUYING) return SELLING; else return BUYING; }
     }
 
-    private final Trader offeringTrader;
+    private final TraderComponent offeringTrader;
     private final Item item;
     private final TYPE type;
     private int amount;
     private Price price;
     private Trade resultingTrade = null;
 
-    public TradeOffer(Trader offeringTrader, Item item, TYPE type, int amount, Price price) {
+    public TradeOffer(TraderComponent offeringTrader, Item item, TYPE type, int amount, Price price) {
         this.offeringTrader = offeringTrader;
         this.item = item;
         this.type = type;
@@ -52,7 +53,7 @@ public class TradeOffer {
         return type == TYPE.BUYING;
     }
 
-    public Trader getOfferingTrader() {
+    public TraderComponent getOfferingTrader() {
         return offeringTrader;
     }
 
@@ -60,7 +61,15 @@ public class TradeOffer {
         return amount;
     }
 
-    public void updateAmount(int amount, Price price) { // Same price
+    public void reduceAmountBy(int amount) {
+        this.amount -= amount;
+    }
+
+    public void updateAmount(int amount) { // Same price
+        this.amount = amount;
+    }
+
+    public void updateAmount(int amount, Price price) {
         this.amount = amount;
         this.price = price;
     }
@@ -108,33 +117,16 @@ public class TradeOffer {
     }
 
 
-    public void accept(Trader acceptingTrader, int amount) throws TradeOfferHasNotEnoughAmountLeft {
-        if (this.amount < amount) {
+    public void accept(TraderComponent acceptingTrader, int acceptingAmount) throws TradeOfferHasNotEnoughAmountLeft {
+        if (this.amount < acceptingAmount) {
             throw new TradeOfferHasNotEnoughAmountLeft();
         }
 
-        // The offer decreases its amount that is offered.
-        this.amount -= amount;
+        // The offer decreases its acceptingAmount that is offered.
+        this.amount -= acceptingAmount;
 
-        resultingTrade = toTrade(acceptingTrader, amount);
-        try {
-            acceptingTrader.executeTrade(resultingTrade);
-            offeringTrader.executeTrade(resultingTrade);
-            offeringTrader.offerAccepted(this);
-        } catch (TraderNotInvolvedException e) {
-            // Should never happen. This is a bug
-            throw new AssertionError("Created a trade where the wrong trader was set.");
-        }
-    }
-
-    public Trade toTrade(Trader acceptingTrader, int amount) {
-        if (amount == 0) throw new RuntimeException("Trading amount=0. This is a bug.");
-
-        if (isBuying()) {
-            // offer is to buy, so the offering Trader is buying
-            return new Trade(acceptingTrader, offeringTrader, item, amount, price);
-        } else {
-            return new Trade(offeringTrader, acceptingTrader, item, amount, price);
-        }
+        resultingTrade = new Trade(this, acceptingTrader, acceptingAmount);
+        acceptingTrader.acceptedTrades.add(resultingTrade);
+        offeringTrader.acceptedTrades.add(resultingTrade);
     }
 }
