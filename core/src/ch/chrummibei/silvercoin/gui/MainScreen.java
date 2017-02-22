@@ -3,11 +3,13 @@ package ch.chrummibei.silvercoin.gui;
 import ch.chrummibei.silvercoin.config.Resources;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.Universe;
+import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.credit.Price;
+import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
 import ch.chrummibei.silvercoin.universe.item.Item;
-import ch.chrummibei.silvercoin.universe.trade.Factory;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -80,7 +82,7 @@ public class MainScreen implements Screen {
         batch.end();
 
 
-        MarketUtil market = universe.getMarkets().findFirst().get();
+        MarketComponent market = universe.getMarketComponents().findFirst().get();
 
         TableWidget factoryTable = new TableWidget(font);
         factoryTable.addColumn("FACTORY", 180, Color.FIREBRICK);
@@ -89,11 +91,11 @@ public class MainScreen implements Screen {
         factoryTable.get(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
         factoryTable.get(0).setColor(Color.CHARTREUSE);
 
-        for (Factory factory : universe.getFactories().stream().limit(50).collect(Collectors.toList())) {
+        for (Entity factory : universe.getFactories().stream().limit(50).collect(Collectors.toList())) {
             TableRow row = new TableRow();
-            row.add(factory.getName());
-            row.add(String.valueOf(factory.getProductStock()));
-            row.add(factory.getProductPrice().map(Price::toString).orElse("-"));
+            row.add(Mappers.named.get(factory).name);
+            //TODO: row.add(String.valueOf(factory.getProductStock()));
+            //TODO: row.add(factory.getProductPrice().map(Price::toString).orElse("-"));
             factoryTable.add(row);
         }
 
@@ -109,10 +111,10 @@ public class MainScreen implements Screen {
         for (Item item : items) {
             TableRow row = new TableRow();
             row.add(item.toString());
-            row.add(market.searchBestSellingTrade(item)
+            row.add(MarketUtil.searchBestSellingTrade(market, item)
                     .map(TradeOffer::getPrice)
                     .map(Price::toString).orElse("-"));
-            row.add(market.searchBestBuyingTrade(item)
+            row.add(MarketUtil.searchBestBuyingTrade(market, item)
                     .map(TradeOffer::getPrice)
                     .map(Price::toString).orElse("-"));
             itemTable.add(row);
@@ -124,7 +126,7 @@ public class MainScreen implements Screen {
         itemTable.draw(batch, (int) factoryTable.getWidth() + 20, HEIGHT-5);
         batch.end();
 
-        universe.tick((long) Math.floor(100*delta));
+        universe.update(delta);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
 import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
+import ch.chrummibei.silvercoin.universe.components.NamedComponent;
 import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.components.WalletComponent;
 import ch.chrummibei.silvercoin.universe.item.Item;
@@ -24,60 +25,72 @@ public class TraderSystem extends IteratingSystem {
                                                     WalletComponent.class,
                                                     InventoryComponent.class).get();
 
-    public TraderSystem(Family family) {
+    public TraderSystem() {
         super(family);
     }
 
-    public TraderSystem(Family family, int priority) {
+    public TraderSystem(int priority) {
         super(family, priority);
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         TraderComponent trader = Mappers.trader.get(entity);
-        WalletComponent wallet = Mappers.wallet.get(entity);
-        InventoryComponent inventory = Mappers.inventory.get(entity);
+        if (trader.acceptedTrades.size() > 0) {
+            processTrades(entity);
+        }
 
-        processTrades(trader, wallet, inventory);
+        if (trader.ownTradeOffers.size() > 0) {
+            removeOwnEmptyTradeOffers(entity);
+        }
     }
 
-    public void processTrades(TraderComponent trader, WalletComponent wallet, InventoryComponent inventory) {
+    public static void removeOwnEmptyTradeOffers(Entity entity) {
+        TraderComponent trader = Mappers.trader.get(entity);
+        trader.ownTradeOffers.removeIf(offer -> offer.getAmount() == 0);
+    }
+
+    public static void processTrades(Entity entity) {
+        TraderComponent trader = Mappers.trader.get(entity);
+        WalletComponent wallet = Mappers.wallet.get(entity);
+
+        // The amount in trade offers is decreased automatically by the trade offer upon accepting
         for (Trade trade : trader.acceptedTrades) {
+            System.out.println(Mappers.named.get(entity).name + " processing accepted " + trade);
+            System.out.println("Before process: " + Mappers.inventory.get(entity).positions.get(trade.getItem()));
+            trader.ownTradeOffers.forEach(offer ->
+                    System.out.println("   " + offer)
+            );
+
             try {
-                PricedItemPosition newItemPosition = trade.getTradersItemPosition(trader);
+                PricedItemPosition newItemPosition = trade.getTradersItemPosition(entity);
                 wallet.credit.iSubtract(newItemPosition.getPurchaseValue());
-                addPricedPositionToInventory(inventory, newItemPosition);
-
-                // Reduce the offer if this was my trade
-                if (trader.ownTradeOffers.contains(trade.fromTradeOffer)) {
-                    trade.fromTradeOffer.reduceAmountBy(trade.getAmount());
-
-                    if (trade.fromTradeOffer.getAmount() <= 0) {
-                        trader.ownTradeOffers.remove(trade.fromTradeOffer);
-                    }
-                }
+                addPricedPositionToInventory(entity, newItemPosition);
             } catch (TraderNotInvolvedException e) {
                 e.printStackTrace();
             }
+
+            System.out.println("After process: " + Mappers.inventory.get(entity).positions.get(trade.getItem()));
         }
 
         // Remove all accepted trades
         trader.acceptedTrades.clear();
     }
 
-    public void addPricedPositionToInventory(InventoryComponent inventoryComponent, PricedItemPosition inventoryItem) {
-        Map<Item, YieldingItemPosition> inventory = inventoryComponent.inventory;
+    public static void addPricedPositionToInventory(Entity entity, PricedItemPosition inventoryItem) {
+        InventoryComponent inventory = Mappers.inventory.get(entity);
+
         if (inventoryItem.getAmount() == 0) {
             throw new RuntimeException("Trying to add a position with amount 0. This is a bug.");
         }
 
-        if (inventory.containsKey(inventoryItem.getItem())) {
-            inventory.get(inventoryItem.getItem()).add(inventoryItem);
-            if (inventory.get(inventoryItem.getItem()).getAmount() < 0) {
+        if (inventory.positions.containsKey(inventoryItem.getItem())) {
+            inventory.positions.get(inventoryItem.getItem()).add(inventoryItem);
+            if (inventory.positions.get(inventoryItem.getItem()).getAmount() < 0) {
                 throw new RuntimeException("We have negative positions. This shouldn't happen (yet). This is a bug.");
             }
         } else {
-            inventory.put(inventoryItem.getItem(), new YieldingItemPosition(inventoryItem));
+            inventory.positions.put(inventoryItem.getItem(), new YieldingItemPosition(inventoryItem));
         }
     }
 

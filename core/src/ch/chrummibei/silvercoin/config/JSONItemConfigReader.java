@@ -20,7 +20,7 @@ public class JSONItemConfigReader {
 
     public JSONItemConfigReader() {
         super();
-        //json.setElementType(Catalogue.class, "items", Item.class);
+        //json.setElementType(Catalogue.class, "positions", Item.class);
     }
 
 

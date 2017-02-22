@@ -6,7 +6,7 @@ import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
 
 /**
- * An amount of items that can be held by a trader
+ * An amount of positions that can be held by a trader
  */
 public class PricedItemPosition extends ItemPosition {
     private final TotalValue purchaseValue = new TotalValue(0);
@@ -35,8 +35,8 @@ public class PricedItemPosition extends ItemPosition {
     }
 
     /**
-     * Add to the inventory, increasing the purchase value by unit.
-     * @param amount The amount of items to add to the inventory.
+     * Add to the positions, increasing the purchase value by unit.
+     * @param amount The amount of positions to add to the positions.
      * @param pricePerUnit The price of one unit of item.
      */
     public void addItems(int amount, Price pricePerUnit) {
@@ -44,9 +44,9 @@ public class PricedItemPosition extends ItemPosition {
     }
 
     /**
-     * Add to the inventory, increasing the purchase value by the given value.
-     * @param amount The amount of items to add to the inventory.
-     * @param totalValue The total value of the added items.
+     * Add to the positions, increasing the purchase value by the given value.
+     * @param amount The amount of positions to add to the positions.
+     * @param totalValue The total value of the added positions.
      */
     public void addItems(int amount, TotalValue totalValue) {
         if (amount == 0) throw new RuntimeException("addItems was called with amount to add = 0. This is a bug.");
@@ -91,13 +91,13 @@ public class PricedItemPosition extends ItemPosition {
     }
 
     public void removeItems(int amount) {
-        if (amount == 0) throw new RuntimeException("Cannot remove " + amount + " items from empty position.");
+        if (amount == 0) throw new RuntimeException("Cannot remove " + amount + " positions from empty position.");
         this.addItems(-amount, purchaseValue.toPriceNotNull(this.amount).toTotalValue(-amount));
     }
 
     /**
-     * Remove the given amount of items worth the given price. This will influence the realised profit.
-     * @param amount The amount to reduce the inventory by.
+     * Remove the given amount of positions worth the given price. This will influence the realised profit.
+     * @param amount The amount to reduce the positions by.
      * @param pricePerUnit The price of one unit of removed item.
      */
     public void removeItems(int amount, Price pricePerUnit) {
@@ -105,9 +105,9 @@ public class PricedItemPosition extends ItemPosition {
     }
 
     /**
-     * Remove the given amount of items worth the given price. This will influence the realised profit.
-     * @param amount The amount to reduce the inventory by.
-     * @param totalValue The positive total value of the removed items.
+     * Remove the given amount of positions worth the given price. This will influence the realised profit.
+     * @param amount The amount to reduce the positions by.
+     * @param totalValue The positive total value of the removed positions.
      */
     public void removeItems(int amount, TotalValue totalValue) {
         addItems(-amount, totalValue.invert());
@@ -123,7 +123,7 @@ public class PricedItemPosition extends ItemPosition {
 
     /**
      * The purchase value of the whole amount of this item currently in stock.
-     * @return TotalValue of all owned items.
+     * @return TotalValue of all owned positions.
      */
     public TotalValue getPurchaseValue() {
         return purchaseValue;

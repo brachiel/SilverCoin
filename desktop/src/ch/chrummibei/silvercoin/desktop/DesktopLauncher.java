@@ -1,8 +1,8 @@
 package ch.chrummibei.silvercoin.desktop;
 
+import ch.chrummibei.silvercoin.SilverCoin;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import ch.chrummibei.silvercoin.SilverCoin;
 
 public class DesktopLauncher {
     public static void main (String[] arg) {

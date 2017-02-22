@@ -8,4 +8,12 @@ import com.badlogic.ashley.core.Component;
  */
 public class WalletComponent implements Component {
     public Credit credit = new Credit(0.0);
+
+    public WalletComponent(Credit credit) {
+        this.credit = credit;
+    }
+
+    public WalletComponent(double startingCredit) {
+        this.credit.iAdd(startingCredit);
+    }
 }

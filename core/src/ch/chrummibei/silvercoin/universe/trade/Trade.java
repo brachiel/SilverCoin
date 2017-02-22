@@ -2,8 +2,10 @@ package ch.chrummibei.silvercoin.universe.trade;
 
 import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
+import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
+import com.badlogic.ashley.core.Entity;
 
 /**
  * Trade containing amount and price of item to be traded.
@@ -12,15 +14,17 @@ public class Trade {
     private final Item item;
     private final int amount;
     private final TotalValue totalValue;
-    private TraderComponent buyer = null;
-    private TraderComponent seller = null;
+    private Entity buyer = null;
+    private Entity seller = null;
     public TradeOffer fromTradeOffer;
 
     public String toString() {
-        return "Trade: " + amount + " " + item + ": " + seller + " -> " + buyer + " for " + totalValue;
+        return "Trade: " + amount + " " + item + ": " +
+                Mappers.named.get(seller).name + " -> " +
+                Mappers.named.get(buyer).name + " for " + totalValue;
     }
 
-    public Trade(TradeOffer tradeOffer, TraderComponent acceptingTrader, int acceptingAmount) {
+    public Trade(TradeOffer tradeOffer, Entity acceptingTrader, int acceptingAmount) {
         if (acceptingAmount == 0) throw new RuntimeException("Trading amount=0. This is a bug.");
 
         if (tradeOffer.getType() == TradeOffer.TYPE.BUYING) {
@@ -51,15 +55,15 @@ public class Trade {
         return totalValue.toDouble();
     }
 
-    public TraderComponent getBuyer() {
+    public Entity getBuyer() {
         return buyer;
     }
 
-    public TraderComponent getSeller() {
+    public Entity getSeller() {
         return seller;
     }
 
-    public PricedItemPosition getTradersItemPosition(TraderComponent trader) throws TraderNotInvolvedException {
+    public PricedItemPosition getTradersItemPosition(Entity trader) throws TraderNotInvolvedException {
         if (amount == 0) {
             throw new RuntimeException("Trading item positions with amount = 0 doesn't make sense. This is a bug.");
         }

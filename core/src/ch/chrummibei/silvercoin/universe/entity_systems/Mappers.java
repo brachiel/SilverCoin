@@ -13,5 +13,6 @@ public class Mappers {
     public static final ComponentMapper<NamedComponent> named = ComponentMapper.getFor(NamedComponent.class);
     public static final ComponentMapper<TraderComponent> trader = ComponentMapper.getFor(TraderComponent.class);
     public static final ComponentMapper<WalletComponent> wallet = ComponentMapper.getFor(WalletComponent.class);
-    public static final ComponentMapper<InventoryComponent> inventory = ComponentMapper.getFor(InventoryComponent.class);;
+    public static final ComponentMapper<InventoryComponent> inventory = ComponentMapper.getFor(InventoryComponent.class);
+    public static final ComponentMapper<BigSpenderComponent> bigSpender = ComponentMapper.getFor(BigSpenderComponent.class);
 }

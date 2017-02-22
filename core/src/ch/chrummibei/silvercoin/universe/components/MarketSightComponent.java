@@ -9,4 +9,8 @@ import java.util.HashSet;
  */
 public class MarketSightComponent implements Component {
     public HashSet<MarketComponent> markets = new HashSet<>();
+
+    public MarketSightComponent(MarketComponent market) {
+        markets.add(market);
+    }
 }

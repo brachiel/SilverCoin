@@ -11,6 +11,10 @@ import ch.chrummibei.silvercoin.universe.item.Item;
 public class YieldingItemPosition extends PricedItemPosition {
     private final TotalValue realisedProfit = new TotalValue(0);
 
+    public String toString() {
+        return this.getAmount() + " valued " + this.getPurchaseValue() + " profit: " + this.getRealisedProfit();
+    }
+
     public YieldingItemPosition(Item item, int amount, TotalValue purchaseValue) {
         super(item, amount, purchaseValue);
     }
@@ -21,6 +25,10 @@ public class YieldingItemPosition extends PricedItemPosition {
 
     public YieldingItemPosition(PricedItemPosition position) {
         this(position.getItem(), position.getAmount(), position.getPurchaseValue());
+    }
+
+    public YieldingItemPosition(Item product) {
+        super(product, 0, new TotalValue(0));
     }
 
     // PricedItemPosition gives us callbacks for the interesting operations:

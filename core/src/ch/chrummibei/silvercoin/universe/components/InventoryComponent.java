@@ -11,5 +11,5 @@ import java.util.Map;
  * Created by brachiel on 20/02/2017.
  */
 public class InventoryComponent implements Component {
-    public Map<Item,YieldingItemPosition> inventory = new HashMap<>();
+    public Map<Item,YieldingItemPosition> positions = new HashMap<>();
 }

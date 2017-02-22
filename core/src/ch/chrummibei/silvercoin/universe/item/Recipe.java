@@ -3,8 +3,8 @@ package ch.chrummibei.silvercoin.universe.item;
 import java.util.Map;
 
 /**
- * A recipe defined a set and amount of ingredient items and a product. Recipes are used by factories to produce items
- * from other items.
+ * A recipe defined a set and amount of ingredient positions and a product. Recipes are used by factories to produce positions
+ * from other positions.
  */
 public class Recipe {
     public final Item product;

@@ -4,10 +4,12 @@ import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
+import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.item.Item;
+import com.badlogic.ashley.core.Entity;
 
 /**
- * A TradeOffer is a potential Trade offered by a Trader.
+ * A TradeOffer is a potential Trade offered by a TraderComponent.
  */
 public class TradeOffer {
     public enum TYPE {
@@ -29,14 +31,14 @@ public class TradeOffer {
         public TYPE opposite() { if (this == BUYING) return SELLING; else return BUYING; }
     }
 
-    private final TraderComponent offeringTrader;
+    private final Entity offeringTrader;
     private final Item item;
     private final TYPE type;
     private int amount;
     private Price price;
     private Trade resultingTrade = null;
 
-    public TradeOffer(TraderComponent offeringTrader, Item item, TYPE type, int amount, Price price) {
+    public TradeOffer(Entity offeringTrader, Item item, TYPE type, int amount, Price price) {
         this.offeringTrader = offeringTrader;
         this.item = item;
         this.type = type;
@@ -53,7 +55,7 @@ public class TradeOffer {
         return type == TYPE.BUYING;
     }
 
-    public TraderComponent getOfferingTrader() {
+    public Entity getOfferingTrader() {
         return offeringTrader;
     }
 
@@ -109,7 +111,13 @@ public class TradeOffer {
     }
 
     public String toString() {
-        return offeringTrader + " " + type.verb + " " + item.getName() + " for " + price;
+        String string;
+        if (Mappers.named.has(offeringTrader)) {
+            string = Mappers.named.get(offeringTrader).name;
+        } else {
+            string = offeringTrader.toString();
+        }
+        return string + " " + type.verb + " " + getAmount() + " " + item.getName() + " for " + price;
     }
 
     public String compactString() {
@@ -117,16 +125,16 @@ public class TradeOffer {
     }
 
 
-    public void accept(TraderComponent acceptingTrader, int acceptingAmount) throws TradeOfferHasNotEnoughAmountLeft {
+    public void accept(Entity acceptingTrader, int acceptingAmount) throws TradeOfferHasNotEnoughAmountLeft {
         if (this.amount < acceptingAmount) {
             throw new TradeOfferHasNotEnoughAmountLeft();
         }
 
+        resultingTrade = new Trade(this, acceptingTrader, acceptingAmount);
         // The offer decreases its acceptingAmount that is offered.
         this.amount -= acceptingAmount;
 
-        resultingTrade = new Trade(this, acceptingTrader, acceptingAmount);
-        acceptingTrader.acceptedTrades.add(resultingTrade);
-        offeringTrader.acceptedTrades.add(resultingTrade);
+        Mappers.trader.get(acceptingTrader).acceptedTrades.add(resultingTrade);
+        Mappers.trader.get(offeringTrader).acceptedTrades.add(resultingTrade);
     }
 }

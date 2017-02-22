@@ -1,7 +1,7 @@
 package ch.chrummibei.silvercoin.universe.credit;
 
 /**
- * A TotalValue is the total price of items. Can be converted to Price per unit.
+ * A TotalValue is the total price of positions. Can be converted to Price per unit.
  */
 public class TotalValue extends Credit<TotalValue> {
     public TotalValue(double balance) {

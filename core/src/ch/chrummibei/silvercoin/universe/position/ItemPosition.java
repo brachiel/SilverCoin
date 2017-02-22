@@ -3,7 +3,7 @@ package ch.chrummibei.silvercoin.universe.position;
 import ch.chrummibei.silvercoin.universe.item.Item;
 
 /**
- * An amount of items that can be held by a trader
+ * An amount of positions that can be held by a trader
  */
 public class ItemPosition {
     final Item item;
@@ -28,7 +28,7 @@ public class ItemPosition {
      */
     public void add(ItemPosition other) {
         if (item != other.getItem()) {
-            throw new IllegalArgumentException("Inventory items must be the same when adding");
+            throw new IllegalArgumentException("Inventory positions must be the same when adding");
         }
 
         amount += other.getAmount();
@@ -36,7 +36,7 @@ public class ItemPosition {
 
     /**
      * Add to the position
-     * @param amount The amount of items to add to the position.
+     * @param amount The amount of positions to add to the position.
      */
     public void addItems(int amount) {
         this.amount += amount;

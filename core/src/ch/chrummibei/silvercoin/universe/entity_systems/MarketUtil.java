@@ -82,6 +82,7 @@ public class MarketUtil {
         int amountLeftToTrade = amount;
 
         List<TradeOffer> sortedTradeOffers = searchOfferedTrades(marketSight, item, type)
+                .filter(offer -> offer.getAmount() != 0)
                 .sorted(bestPriceComparator())
                 .collect(Collectors.toList());
 
