@@ -118,6 +118,7 @@ public class Universe {
     }
 
     public void update(float delta) {
+        System.out.println("---- TICK ----------------------------------------------------------");
         engine.update(delta);
     }
 }

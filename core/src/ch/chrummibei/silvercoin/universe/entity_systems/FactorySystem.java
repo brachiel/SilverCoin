@@ -36,11 +36,6 @@ public class FactorySystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        FactoryComponent factory = Mappers.factory.get(entity);
-        MarketSightComponent marketSight = Mappers.marketSight.get(entity);
-        InventoryComponent inventory = Mappers.inventory.get(entity);
-        TraderComponent trader = Mappers.trader.get(entity);
-
         if (! produceProduct(entity, deltaTime)) {
             // Was unable to produce product due to missing ingredients.
         } else if (! buyIngredients(entity)) {
@@ -61,25 +56,33 @@ public class FactorySystem extends IteratingSystem {
         List<TradeOffer> myTradeOffers = TraderSystem.getOwnTradeOffers(
                 trader, factory.recipe.product, TradeOffer.TYPE.SELLING).collect(Collectors.toList());
 
+        myTradeOffers.forEach(offer -> System.out.println("      " + offer));
+
         // Delete all product sell offers from own offers and from all markets
         trader.ownTradeOffers.removeAll(myTradeOffers);
         marketSight.markets.forEach(market -> market.offeredTrades.removeAll(myTradeOffers));
 
-        Price price;
-        try {
-            price = getProductPosition(factory, inventory).getPurchasePrice().multiply(factory.priceSpreadFactor);
-        } catch (InvalidPriceException e) {
-            price = new Price(100.0); // Fallback
-        }
-
-        // Add new trade offers to all markets
         int availableProductAmount = getProductPosition(factory, inventory).getAmount();
-        // We cannot offer more than we have; so we split up the offered amount to the different markets.
-        TradeOffer newTradeOffer = new TradeOffer(entity,
-                factory.recipe.product, TradeOffer.TYPE.SELLING, availableProductAmount, price);
+        if (availableProductAmount > 0) {
+            Price price;
+            try {
+                price = getProductPosition(factory, inventory).getPurchasePrice().multiply(factory.priceSpreadFactor);
+            } catch (InvalidPriceException e) {
+                e.printStackTrace();
+                return;
+            }
 
-        marketSight.markets.forEach(market -> market.offeredTrades.add(newTradeOffer));
-        trader.ownTradeOffers.add(newTradeOffer);
+            // Add new trade offers to all markets
+
+            // We cannot offer more than we have; so we split up the offered amount to the different markets.
+            TradeOffer newTradeOffer = new TradeOffer(entity,
+                    factory.recipe.product, TradeOffer.TYPE.SELLING, availableProductAmount, price);
+
+            marketSight.markets.forEach(market -> market.offeredTrades.add(newTradeOffer));
+            trader.ownTradeOffers.add(newTradeOffer);
+
+            trader.ownTradeOffers.forEach(offer -> System.out.println(offer));
+        }
     }
 
 
@@ -212,8 +215,7 @@ public class FactorySystem extends IteratingSystem {
     private void putBuyOffers(Entity entity) {
         FactoryComponent factory = Mappers.factory.get(entity);
         TraderComponent trader = Mappers.trader.get(entity);
-        InventoryComponent inventory = Mappers.inventory.get(entity);
-        
+
         Map<Item,Integer> futureInventory = correctInventoryWithAcceptedTrades(entity);
 
         factory.recipe.ingredients.keySet().forEach(item -> {
