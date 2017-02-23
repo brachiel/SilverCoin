@@ -1,11 +1,13 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
-import ch.chrummibei.silvercoin.universe.components.TraderComponent;
+import ch.chrummibei.silvercoin.universe.components.NamedComponent;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import com.badlogic.ashley.core.Entity;
+
+import java.util.Optional;
 
 /**
  * Trade containing amount and price of item to be traded.
@@ -20,8 +22,8 @@ public class Trade {
 
     public String toString() {
         return "Trade: " + amount + " " + item + ": " +
-                Mappers.named.get(seller).name + " -> " +
-                Mappers.named.get(buyer).name + " for " + totalValue;
+                Optional.ofNullable(Mappers.named.get(seller)).orElse(new NamedComponent("NoNameEntity")).name + " -> " +
+                Optional.ofNullable(Mappers.named.get(buyer)).orElse(new NamedComponent("NoNameEntity")).name + " for " + totalValue;
     }
 
     public Trade(TradeOffer tradeOffer, Entity acceptingTrader, int acceptingAmount) {

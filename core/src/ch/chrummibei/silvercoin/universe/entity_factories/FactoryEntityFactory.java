@@ -3,7 +3,6 @@ package ch.chrummibei.silvercoin.universe.entity_factories;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.credit.Price;
-import ch.chrummibei.silvercoin.universe.entity_systems.FactorySystem;
 import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
 import ch.chrummibei.silvercoin.universe.item.Recipe;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
@@ -23,12 +22,6 @@ public class FactoryEntityFactory {
                 universeConfig.factory().getRandomInt("goalStock"),
                 universeConfig.factory().getRandomDouble("spreadFactor"));
         InventoryComponent inventory = new InventoryComponent();
-
-        // Add logging for Energy factory since it's the one failing most of the time
-        if (recipe.product.getName().equals("Energy")) {
-            System.out.println("Just added logger component to energy");
-            entity.add(new LoggerComponent());
-        }
 
         entity.add(factory);
         entity.add(inventory);

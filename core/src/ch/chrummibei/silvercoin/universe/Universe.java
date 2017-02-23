@@ -1,7 +1,7 @@
 package ch.chrummibei.silvercoin.universe;
 
 import ch.chrummibei.silvercoin.config.UniverseConfig;
-import ch.chrummibei.silvercoin.universe.components.*;
+import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.entity_factories.BigSpenderEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.FactoryEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.TraderEntityFactory;
@@ -102,9 +102,7 @@ public class Universe {
         addActor(arbitrageTradeActor);
         */
 
-        catalogue.stream().forEach(item -> System.out.println(item.getName()));
         Item transportShipItem = catalogue.stream().filter(item -> item.getName().equals("Transport ship")).findFirst().get();
-
         Entity entity = BigSpenderEntityFactory.BigSpender(transportShipItem, market);
         engine.addEntity(entity);
     }

@@ -14,7 +14,6 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 
-import javax.xml.namespace.NamespaceContext;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -82,12 +81,6 @@ public class TraderSystem extends IteratingSystem {
 
         // The amount in trade offers is decreased automatically by the trade offer upon accepting
         for (Trade trade : trader.acceptedTrades) {
-            System.out.println(Mappers.named.get(entity).name + " processing accepted " + trade);
-            System.out.println("Before process: " + Mappers.inventory.get(entity).positions.get(trade.getItem()));
-            trader.ownTradeOffers.forEach(offer ->
-                    System.out.println("   " + offer)
-            );
-
             try {
                 PricedItemPosition newItemPosition = trade.getTradersItemPosition(entity);
                 wallet.credit.iSubtract(newItemPosition.getPurchaseValue());
@@ -95,8 +88,6 @@ public class TraderSystem extends IteratingSystem {
             } catch (TraderNotInvolvedException e) {
                 e.printStackTrace();
             }
-
-            System.out.println("After process: " + Mappers.inventory.get(entity).positions.get(trade.getItem()));
         }
 
         // Remove all accepted trades

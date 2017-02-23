@@ -1,19 +1,19 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
-import ch.chrummibei.silvercoin.universe.components.*;
+import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
+import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
+import ch.chrummibei.silvercoin.universe.components.MarketSightComponent;
+import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
-import ch.chrummibei.silvercoin.universe.trade.Trade;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import ch.chrummibei.silvercoin.universe.trade.TradeOfferHasNotEnoughAmountLeft;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,54 +36,41 @@ public class FactorySystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        if (! produceProduct(entity, deltaTime)) {
+        if (produceProduct(entity, deltaTime)) {
             // Was unable to produce product due to missing ingredients.
+            updateSellTrade(entity);
+
         } else if (! buyIngredients(entity)) {
             // Was unable to buy any ingredients. Put buy offers on the markets.
             putBuyOffers(entity);
+
         }
-
-        updateSellTrade(entity);
-
-        TraderSystem.logStatus(entity);
     }
 
     private void updateSellTrade(Entity entity) {
         FactoryComponent factory = Mappers.factory.get(entity);
-        InventoryComponent inventory = Mappers.inventory.get(entity);
         TraderComponent trader = Mappers.trader.get(entity);
         MarketSightComponent marketSight = Mappers.marketSight.get(entity);
 
-        // Search all my product trade offers
-        List<TradeOffer> myTradeOffers = TraderSystem.getOwnTradeOffers(
-                trader, factory.recipe.product, TradeOffer.TYPE.SELLING).collect(Collectors.toList());
-
-        myTradeOffers.forEach(offer -> System.out.println("      " + offer));
-
-        // Delete all product sell offers from own offers and from all markets
-        trader.ownTradeOffers.removeAll(myTradeOffers);
-        marketSight.markets.forEach(market -> market.offeredTrades.removeAll(myTradeOffers));
-
         int availableProductAmount = TraderSystem.correctAmountWithAcceptedTrades(entity, factory.recipe.product);
-        if (availableProductAmount > 0) {
-            Price price;
-            try {
-                price = getProductPosition(entity).getPurchasePrice().multiply(factory.priceSpreadFactor);
-            } catch (InvalidPriceException e) {
-                e.printStackTrace();
-                return;
-            }
+        Price price;
+        try {
+            price = getProductPosition(entity).getPurchasePrice().multiply(factory.priceSpreadFactor);
+        } catch (InvalidPriceException e) {
+            e.printStackTrace();
+            return;
+        }
 
-            // Add new trade offers to all markets
-
-            // We cannot offer more than we have; so we split up the offered amount to the different markets.
-            TradeOffer newTradeOffer = new TradeOffer(entity,
-                    factory.recipe.product, TradeOffer.TYPE.SELLING, availableProductAmount, price);
-
-            marketSight.markets.forEach(market -> market.offeredTrades.add(newTradeOffer));
-            trader.ownTradeOffers.add(newTradeOffer);
-
-            trader.ownTradeOffers.forEach(offer -> System.out.println(offer));
+        // TODO: This is ugly and doesn't work if we don't copy trade offers to new marketSights.
+        if (trader.ownTradeOffers.stream().anyMatch(offer -> offer.getItem() == factory.recipe.product && offer.getType() == TradeOffer.TYPE.SELLING)) {
+            trader.ownTradeOffers.forEach(offer -> {
+                offer.updateAmount(availableProductAmount);
+                offer.getPrice().set(price);
+            });
+        } else {
+            TradeOffer myNewTrade = new TradeOffer(entity, factory.recipe.product, TradeOffer.TYPE.SELLING, availableProductAmount, price);
+            trader.ownTradeOffers.add(myNewTrade);
+            marketSight.markets.forEach(market -> market.offeredTrades.add(myNewTrade));
         }
     }
 
@@ -128,7 +115,6 @@ public class FactorySystem extends IteratingSystem {
             }
         }
 
-
         // Add the produced products
         getProductPosition(entity).addItems(producingAmount, productPrice);
 
@@ -156,7 +142,7 @@ public class FactorySystem extends IteratingSystem {
         return productPrice;
     }
 
-    private YieldingItemPosition getProductPosition(Entity entity) {
+    public static YieldingItemPosition getProductPosition(Entity entity) {
         FactoryComponent factory = Mappers.factory.get(entity);
         InventoryComponent inventory = Mappers.inventory.get(entity);
 

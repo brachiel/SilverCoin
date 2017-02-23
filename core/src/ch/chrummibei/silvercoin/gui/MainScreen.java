@@ -4,10 +4,13 @@ import ch.chrummibei.silvercoin.config.Resources;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
+import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.credit.Price;
+import ch.chrummibei.silvercoin.universe.entity_systems.FactorySystem;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
 import ch.chrummibei.silvercoin.universe.item.Item;
+import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
@@ -91,11 +94,19 @@ public class MainScreen implements Screen {
         factoryTable.get(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
         factoryTable.get(0).setColor(Color.CHARTREUSE);
 
-        for (Entity factory : universe.getFactories().stream().limit(50).collect(Collectors.toList())) {
+        for (Entity entity : universe.getFactories().stream().limit(50).collect(Collectors.toList())) {
             TableRow row = new TableRow();
-            row.add(Mappers.named.get(factory).name);
-            //TODO: row.add(String.valueOf(factory.getProductStock()));
-            //TODO: row.add(factory.getProductPrice().map(Price::toString).orElse("-"));
+            TraderComponent trader = Mappers.trader.get(entity);
+            YieldingItemPosition productPos = FactorySystem.getProductPosition(entity);
+
+            row.add(Mappers.named.get(entity).name);
+            row.add(String.valueOf(productPos.getAmount()));
+            row.add(trader.ownTradeOffers.stream()
+                            .filter(offer -> offer.getItem() == productPos.getItem() && offer.getAmount() > 0)
+                            .findAny()
+                            .map(TradeOffer::getPrice)
+                            .map(Price::toString)
+                            .orElse("-"));
             factoryTable.add(row);
         }
 

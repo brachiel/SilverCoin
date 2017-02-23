@@ -7,15 +7,10 @@ I always wanted to do this; I don't know what the result will be - maybe a progr
 # TODO
 * Introduce actual space actors (moving actors).
 * Introduce multiple markets.
-* Factories that cannot buy due to lacking sell offers should instead place a buy order.
-* Use gdx-Ashley's Entity System to clean up Actor-inheritance mess
+* Factories should accept buy orders directly instead of placing sell orders only.
 * Use gdxAI to implement Actor AI-logic.
 * Introduce a script language (possibly LUA) to implement behaviour tree leaf tasks.
 * Replace Resources class by libGDX AssetManager
 
-
-# Known Bugs
-* Debugging reveals, that factories have inventory items with item=null.
-
-# Screenshot
+# Screen shot
 ![SilverCoin screenshot](https://raw.githubusercontent.com/brachiel/SilverCoin/master/SilverCoin.png)

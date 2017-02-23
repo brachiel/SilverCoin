@@ -9,6 +9,7 @@ public class DesktopLauncher {
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
         config.width = 1600;
         config.height = 800;
+        config.foregroundFPS = 10;
         new LwjglApplication(new SilverCoin(), config);
     }
 }
