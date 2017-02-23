@@ -5,10 +5,7 @@ import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.entity_factories.BigSpenderEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.FactoryEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.TraderEntityFactory;
-import ch.chrummibei.silvercoin.universe.entity_systems.BigSpenderSystem;
-import ch.chrummibei.silvercoin.universe.entity_systems.FactorySystem;
-import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
-import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
+import ch.chrummibei.silvercoin.universe.entity_systems.*;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.ashley.core.Engine;
@@ -78,6 +75,7 @@ public class Universe {
         engine.addSystem(new TraderSystem(1));
         engine.addSystem(new FactorySystem(2));
         engine.addSystem(new BigSpenderSystem(3));
+        engine.addSystem(new AISystem(4));
     }
 
     void generateEntities() {

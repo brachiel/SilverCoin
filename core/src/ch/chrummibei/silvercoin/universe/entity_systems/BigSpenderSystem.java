@@ -39,7 +39,6 @@ public class BigSpenderSystem extends IteratingSystem {
     public static boolean buyItems(Entity entity) {
         BigSpenderComponent bigSpender = Mappers.bigSpender.get(entity);
         MarketSightComponent marketSight = Mappers.marketSight.get(entity);
-        TraderComponent trader = Mappers.trader.get(entity);
         WalletComponent wallet = Mappers.wallet.get(entity);
 
         int itemsToBuy = (int) Math.floor(bigSpender.timeReservoir / bigSpender.consumptionTime);

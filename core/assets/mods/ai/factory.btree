@@ -1,0 +1,28 @@
+#
+# Factory tree
+#
+
+import produceProduct:"ch.chrummibei.silvercoin.ai.tasks.factory.ProduceProductTask"
+import updateSellTrade:"ch.chrummibei.silvercoin.ai.tasks.factory.UpdateSellTradeTask"
+import buyIngredients:"ch.chrummibei.silvercoin.ai.tasks.factory.BuyIngredientsTask"
+import putBuyOffers:"ch.chrummibei.silvercoin.ai.tasks.factory.PutBuyOffersTask"
+import isProductStockEmpty?:"ch.chrummibei.silvercoin.ai.tasks.factory.ProductStockEmptyCondition"
+import isProductStockFull?:"ch.chrummibei.silvercoin.ai.tasks.factory.ProductStockFullCondition"
+import changeSpread:"ch.chrummibei.silvercoin.ai.tasks.factory.ChangeSpreadTask"
+
+root
+  selector
+    sequence # if stock is full, decrease spread and succeed
+      isProductStockFull?
+      alwaysSucceed
+        changeSpread spreadChange:-0.01
+    alwaysFail  # even if we make it more expensive, never stop producing
+      sequence
+        isProductStockEmpty?  # if we're empty, everyone is buying our stuff, so we can make it more expensive
+        changeSpread spreadChange:0.001
+    sequence
+      produceProduct
+      updateSellTrade
+    sequence
+      buyIngredients
+      putBuyOffers

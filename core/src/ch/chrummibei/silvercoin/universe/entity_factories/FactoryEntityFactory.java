@@ -8,12 +8,20 @@ import ch.chrummibei.silvercoin.universe.item.Recipe;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.ai.btree.utils.BehaviorTreeLibrary;
+import com.badlogic.gdx.ai.btree.utils.BehaviorTreeLibraryManager;
+import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
 
 /**
  * Created by brachiel on 21/02/2017.
  */
 public class FactoryEntityFactory {
     public static int factorySequence = 0;
+
+    static {
+        // Make the behavior tree library parser log
+        BehaviorTreeLibraryManager.getInstance().setLibrary(new BehaviorTreeLibrary(BehaviorTreeParser.DEBUG_HIGH));
+    }
 
     public static Entity FactoryEntity(UniverseConfig universeConfig, MarketComponent market, Recipe recipe) {
         Entity entity = new Entity();
@@ -29,6 +37,9 @@ public class FactoryEntityFactory {
         entity.add(new TraderComponent());
         entity.add(new MarketSightComponent(market));
         entity.add(new WalletComponent(universeConfig.factory().getRandomDouble("startingCredit")));
+
+        BehaviorTreeLibraryManager behaviorTreeLibraryManager = BehaviorTreeLibraryManager.getInstance();
+        entity.add(new AIComponent(behaviorTreeLibraryManager.createBehaviorTree("mods/ai/factory.btree", entity)));
 
         recipe.ingredients.forEach((ingredient, amount) -> {
             int wantedAmount = amount * factory.goalStock;
