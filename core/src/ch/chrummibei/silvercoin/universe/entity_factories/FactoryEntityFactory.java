@@ -24,6 +24,12 @@ public class FactoryEntityFactory {
                 universeConfig.factory().getRandomDouble("spreadFactor"));
         InventoryComponent inventory = new InventoryComponent();
 
+        // Add logging for Energy factory since it's the one failing most of the time
+        if (recipe.product.getName().equals("Energy")) {
+            System.out.println("Just added logger component to energy");
+            entity.add(new LoggerComponent());
+        }
+
         entity.add(factory);
         entity.add(inventory);
         entity.add(new NamedComponent(recipe.product.getName() + " factory " + factorySequence++));

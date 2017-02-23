@@ -44,6 +44,8 @@ public class FactorySystem extends IteratingSystem {
         }
 
         updateSellTrade(entity);
+
+        TraderSystem.logStatus(entity);
     }
 
     private void updateSellTrade(Entity entity) {
@@ -62,11 +64,11 @@ public class FactorySystem extends IteratingSystem {
         trader.ownTradeOffers.removeAll(myTradeOffers);
         marketSight.markets.forEach(market -> market.offeredTrades.removeAll(myTradeOffers));
 
-        int availableProductAmount = getProductPosition(factory, inventory).getAmount();
+        int availableProductAmount = TraderSystem.correctAmountWithAcceptedTrades(entity, factory.recipe.product);
         if (availableProductAmount > 0) {
             Price price;
             try {
-                price = getProductPosition(factory, inventory).getPurchasePrice().multiply(factory.priceSpreadFactor);
+                price = getProductPosition(entity).getPurchasePrice().multiply(factory.priceSpreadFactor);
             } catch (InvalidPriceException e) {
                 e.printStackTrace();
                 return;
@@ -90,10 +92,10 @@ public class FactorySystem extends IteratingSystem {
         FactoryComponent factory = Mappers.factory.get(entity);
         InventoryComponent inventory = Mappers.inventory.get(entity);
         
-        int producingAmount = calcProducibleAmountWithIngredients(factory, inventory);
+        int producingAmount = calcProducibleAmountWithIngredients(entity);
         // Do not produce more than needed
         producingAmount = Math.min(producingAmount,
-                                   factory.goalStock - getProductPosition(factory, inventory).getAmount());
+                                   factory.goalStock - getProductPosition(entity).getAmount());
 
         if (producingAmount == 0) {
             // We don't have enough ingredients, so we can't start to produce. Resetting time reservoir.
@@ -128,7 +130,7 @@ public class FactorySystem extends IteratingSystem {
 
 
         // Add the produced products
-        getProductPosition(factory, inventory).addItems(producingAmount, productPrice);
+        getProductPosition(entity).addItems(producingAmount, productPrice);
 
         return true;
     }
@@ -154,31 +156,38 @@ public class FactorySystem extends IteratingSystem {
         return productPrice;
     }
 
-    private YieldingItemPosition getProductPosition(FactoryComponent factory, InventoryComponent inventoryComponent) {
-        return inventoryComponent.positions.get(factory.recipe.product);
+    private YieldingItemPosition getProductPosition(Entity entity) {
+        FactoryComponent factory = Mappers.factory.get(entity);
+        InventoryComponent inventory = Mappers.inventory.get(entity);
+
+        return inventory.positions.get(factory.recipe.product);
     }
 
+    public int calcProducibleAmountWithIngredients(Entity entity) {
+        FactoryComponent factory =  Mappers.factory.get(entity);
+        InventoryComponent inventory = Mappers.inventory.get(entity);
 
-    public int calcProducibleAmountWithIngredients(FactoryComponent factory, InventoryComponent inventory) {
         if (factory.recipe.ingredients.size() == 0) { // This recipe needs no ingredients. Production only depends on time
             return Integer.MAX_VALUE;
         }
 
         return factory.recipe.ingredients.keySet().stream()
-                .mapToInt(item -> calcProducibleAmount(factory, inventory, item))
+                .mapToInt(item -> calcProducibleAmount(entity, item))
                 .min()
                 .orElse(0);
     }
 
-    private int calcProducibleAmount(FactoryComponent factory, InventoryComponent inventoryComponent, Item item) {
-        return inventoryComponent.positions.get(item).getAmount() / factory.recipe.ingredients.get(item);
+    private int calcProducibleAmount(Entity entity, Item item) {
+        FactoryComponent factory =  Mappers.factory.get(entity);
+        InventoryComponent inventory = Mappers.inventory.get(entity);
+
+        return inventory.positions.get(item).getAmount() / factory.recipe.ingredients.get(item);
     }
 
 
     public boolean buyIngredients(Entity entity) {
         FactoryComponent factory = Mappers.factory.get(entity);
         InventoryComponent inventory = Mappers.inventory.get(entity);
-        TraderComponent trader = Mappers.trader.get(entity);
         MarketSightComponent marketSight = Mappers.marketSight.get(entity);
 
         boolean acceptedATrade = false;
@@ -216,7 +225,7 @@ public class FactorySystem extends IteratingSystem {
         FactoryComponent factory = Mappers.factory.get(entity);
         TraderComponent trader = Mappers.trader.get(entity);
 
-        Map<Item,Integer> futureInventory = correctInventoryWithAcceptedTrades(entity);
+        Map<Item,Integer> futureInventory = TraderSystem.correctInventoryWithAcceptedTrades(entity);
 
         factory.recipe.ingredients.keySet().forEach(item -> {
             int stockAmount = futureInventory.get(item);
@@ -236,27 +245,5 @@ public class FactorySystem extends IteratingSystem {
         return factory.recipe.ingredients.get(item) * factory.goalStock;
     }
 
-    public Map<Item,Integer> correctInventoryWithAcceptedTrades(Entity entity) {
-        InventoryComponent inventory = Mappers.inventory.get(entity);
-        TraderComponent trader = Mappers.trader.get(entity);
-
-        HashMap<Item,Integer> correctedInventory = new HashMap<>();
-        inventory.positions.forEach((item, position) -> correctedInventory.put(item,position.getAmount()));
-
-        for (Trade trade : trader.acceptedTrades) {
-            int oldAmount = correctedInventory.get(trade.getItem());
-            if (trade.getBuyer() == entity) {
-                // I am buying
-                correctedInventory.put(trade.getItem(), oldAmount + trade.getAmount());
-            } else if (trade.getSeller() == entity) {
-                // I am selling
-                correctedInventory.put(trade.getItem(), oldAmount - trade.getAmount());
-            } else {
-                throw new RuntimeException("I am not part of this trade. This is a bug");
-            }
-        }
-
-        return correctedInventory;
-    }
 
 }

@@ -3,6 +3,8 @@ package ch.chrummibei.silvercoin.universe.entity_systems;
 import ch.chrummibei.silvercoin.universe.components.*;
 import com.badlogic.ashley.core.ComponentMapper;
 
+import java.util.logging.Logger;
+
 /**
  * Convenience static class with component mappers. These are needed for lookup-complexity O(1)
  */
@@ -15,4 +17,5 @@ public class Mappers {
     public static final ComponentMapper<WalletComponent> wallet = ComponentMapper.getFor(WalletComponent.class);
     public static final ComponentMapper<InventoryComponent> inventory = ComponentMapper.getFor(InventoryComponent.class);
     public static final ComponentMapper<BigSpenderComponent> bigSpender = ComponentMapper.getFor(BigSpenderComponent.class);
+    public static final ComponentMapper<LoggerComponent> logger = ComponentMapper.getFor(LoggerComponent.class);
 }
