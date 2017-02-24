@@ -5,6 +5,7 @@ import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 import ch.chrummibei.silvercoin.universe.trade.Trade;
+import ch.chrummibei.silvercoin.universe.trade.TradeNeed;
 import ch.chrummibei.silvercoin.universe.trade.TraderNotInvolvedException;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -44,7 +45,19 @@ public class TraderSystem extends IteratingSystem {
             removeOwnEmptyTradeOffers(entity);
         }
 
+        if (trader.tradeNeeds.size() > 0) {
+            updateTradeOffersFromNeeds(entity);
+        }
+
         if (Mappers.logger.has(entity)) logStatus(entity);
+    }
+
+    private void updateTradeOffersFromNeeds(Entity entity) {
+        TraderComponent trader = Mappers.trader.get(entity);
+
+        for (TradeNeed need : trader.tradeNeeds) {
+
+        }
     }
 
 
