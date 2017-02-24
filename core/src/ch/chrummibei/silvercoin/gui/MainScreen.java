@@ -91,8 +91,8 @@ public class MainScreen implements Screen {
         factoryTable.addColumn("FACTORY", 180, Color.FIREBRICK);
         factoryTable.addColumn("STOCK", 50, TableWidget.STYLE.RIGHT_ALIGN);
         factoryTable.addColumn("PRICE", 90, TableWidget.STYLE.RIGHT_ALIGN);
-        factoryTable.get(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
-        factoryTable.get(0).setColor(Color.CHARTREUSE);
+        factoryTable.getColumn(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
+        factoryTable.getColumn(0).setColor(Color.CHARTREUSE);
 
         for (Entity entity : universe.getFactories().stream().limit(50).collect(Collectors.toList())) {
             TableRow row = new TableRow();
@@ -107,15 +107,15 @@ public class MainScreen implements Screen {
                             .map(TradeOffer::getPrice)
                             .map(Price::toString)
                             .orElse("-"));
-            factoryTable.add(row);
+            factoryTable.addRow(row);
         }
 
         TableWidget itemTable = new TableWidget(font);
         itemTable.addColumn("ITEM", 150, Color.SALMON);
         itemTable.addColumn("SELL", 80, TableWidget.STYLE.RIGHT_ALIGN, Color.FIREBRICK);
         itemTable.addColumn("BUY",80, TableWidget.STYLE.RIGHT_ALIGN, Color.GOLDENROD);
-        itemTable.get(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
-        itemTable.get(0).setColor(Color.FIREBRICK);
+        itemTable.getColumn(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
+        itemTable.getColumn(0).setColor(Color.FIREBRICK);
 
         ArrayList<Item> items = universe.getItems();
         items.sort(Comparator.comparing(item -> item.getName()));
@@ -128,11 +128,13 @@ public class MainScreen implements Screen {
             row.add(MarketUtil.searchBestBuyingTrade(market, item)
                     .map(TradeOffer::getPrice)
                     .map(Price::toString).orElse("-"));
-            itemTable.add(row);
+            itemTable.addRow(row);
         }
 
+        //ScrollPane factoryTableScroll = new ScrollPane(factoryTable);
 
         batch.begin();
+        //factoryTableScroll.draw(batch, 1);
         factoryTable.draw(batch, 5, HEIGHT-5);
         itemTable.draw(batch, (int) factoryTable.getWidth() + 20, HEIGHT-5);
         batch.end();

@@ -3,6 +3,7 @@ package ch.chrummibei.silvercoin.gui;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.utils.Align;
 
 import java.util.ArrayList;
@@ -11,11 +12,13 @@ import java.util.Optional;
 /**
  * Created by brachiel on 19/02/2017.
  */
-public class TableWidget extends ArrayList<TableRow> {
+public class TableWidget extends WidgetGroup {
     public enum STYLE { LEFT_ALIGN, RIGHT_ALIGN, CENTER }
+    private final ArrayList<ColumnConfiguration> columnConfigurations = new ArrayList<>();
+    private final ArrayList<TableRow> rows = new ArrayList<>();
+
     private BitmapFont font;
     private float cellMargin = 0f;
-    private ArrayList<ColumnConfiguration> columnConfigurations = new ArrayList<>();
 
     private class ColumnConfiguration {
         final float width;
@@ -35,7 +38,7 @@ public class TableWidget extends ArrayList<TableRow> {
     }
 
     public void add(String ... cols) {
-        add(new TableRow(cols));
+        rows.add(new TableRow(cols));
     }
 
 
@@ -50,14 +53,14 @@ public class TableWidget extends ArrayList<TableRow> {
     }
     public void addColumn(String header, float columnWidth, STYLE style, Color color) {
         if (header != null) {
-            if (this.size() == 0) { this.add(new TableRow()); }
-            this.get(0).add(header);
+            if (rows.size() == 0) { rows.add(new TableRow()); }
+            rows.get(0).add(header);
         }
         columnConfigurations.add(new ColumnConfiguration(columnWidth, style, color));
     }
 
     public void addRow(TableRow rowData) {
-        this.add(rowData);
+        rows.add(rowData);
     }
 
     public float defaultLineHeight() {
@@ -65,7 +68,7 @@ public class TableWidget extends ArrayList<TableRow> {
     }
 
     public float getHeight() {
-        return (float) this.stream()
+        return (float) rows.stream()
                 .map(TableRow::getRowHeight)
                 .mapToDouble(o -> o.orElse(defaultLineHeight()).doubleValue())
                 .sum();
@@ -79,15 +82,14 @@ public class TableWidget extends ArrayList<TableRow> {
         Color defaultColor = font.getColor().cpy();
 
         float rowPosY = posY;
-        for (int i = 0; i < this.size(); ++i) {
-            TableRow row = this.get(i);
+        for (int i = 0; i < rows.size(); ++i) {
+            TableRow row = rows.get(i);
             float cellPosX = posX;
-            Optional<Color> rowColor = row.getColor();
+            Optional<Color> rowColor = Optional.ofNullable(row.hasColorSet ? row.getColor() : null);
 
             for (int j = 0; j < row.size(); ++j) {
                 String cell = row.get(j);
                 ColumnConfiguration columnConfiguration = columnConfigurations.get(j);
-
                 font.setColor(rowColor.orElse(columnConfiguration.color.orElse(defaultColor)));
 
                 // TODO: Font style
@@ -103,5 +105,9 @@ public class TableWidget extends ArrayList<TableRow> {
         }
 
         font.setColor(defaultColor);
+    }
+
+    public TableRow getColumn(int i) {
+        return rows.get(i);
     }
 }
