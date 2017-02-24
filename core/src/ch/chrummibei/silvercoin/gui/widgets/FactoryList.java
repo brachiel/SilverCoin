@@ -59,7 +59,7 @@ public class FactoryList extends Table {
             TraderComponent trader = Mappers.trader.get(entity);
             YieldingItemPosition productPosition = FactorySystem.getProductPosition(entity);
 
-            Optional<TradeOffer> productSellOffer = trader.ownTradeOffers.stream()
+            Optional<TradeOffer> productSellOffer = trader.tradeOffers.stream()
                                 .filter(offer -> offer.getItem() == productPosition.getItem() && offer.getAmount() > 0)
                                 .findAny();
             ++i;

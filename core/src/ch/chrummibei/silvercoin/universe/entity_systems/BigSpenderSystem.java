@@ -46,8 +46,9 @@ public class BigSpenderSystem extends IteratingSystem {
             return false;
         }
 
-        MarketUtil.getTradeOffersToTradeAmount(marketSight, bigSpender.itemToConsume,
-                TradeOffer.TYPE.SELLING, itemsToBuy).forEach((offer, amount) -> {
+        marketSight.markets.forEach(market -> {
+            market.searchTradeOffersToTradeAmount(bigSpender.itemToConsume, TradeOffer.TYPE.SELLING, itemsToBuy)
+                .forEach((offer, amount) -> {
                     try {
                         // Generate money for the BigSpender out of nothing
                         wallet.credit.iAdd(offer.getPrice().toTotalValue(amount));
@@ -56,8 +57,8 @@ public class BigSpenderSystem extends IteratingSystem {
                     } catch (TradeOfferHasNotEnoughAmountLeft tradeOfferHasNotEnoughAmountLeft) {
                         tradeOfferHasNotEnoughAmountLeft.printStackTrace();
                     }
-                }
-        );
+                });
+        });
 
         return true;
     }

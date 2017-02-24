@@ -5,7 +5,6 @@ import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.credit.Credit;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
-import ch.chrummibei.silvercoin.universe.item.Catalogue;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
@@ -38,7 +37,7 @@ public class TraderEntityFactory {
                     new Price(Universe.getRandomDouble(10,90)));
             TraderSystem.addPricedPositionToInventory(entity,
                     new PricedItemPosition(offer.getItem(), offer.getAmount(), offer.getTotalValue()));
-            trader.ownTradeOffers.add(offer);
+            trader.tradeOffers.add(offer);
         }
 
         for (int j = 0, maxJ = Universe.getRandomInt(1,3); j < maxJ; ++j) {
@@ -47,7 +46,7 @@ public class TraderEntityFactory {
                     Universe.getRandomInt(1,10),
                     new Price(Universe.getRandomDouble(10,90)));
             credit.iAdd(offer.getTotalValue());
-            trader.ownTradeOffers.add(offer);
+            trader.tradeOffers.add(offer);
         }
 
         return entity;

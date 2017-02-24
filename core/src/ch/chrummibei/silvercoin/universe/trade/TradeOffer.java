@@ -1,12 +1,13 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
-import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import com.badlogic.ashley.core.Entity;
+
+import java.util.Comparator;
 
 /**
  * A TradeOffer is a potential Trade offered by a TraderComponent.
@@ -30,6 +31,9 @@ public class TradeOffer {
 
         public TYPE opposite() { if (this == BUYING) return SELLING; else return BUYING; }
     }
+
+    public static final Comparator<TradeOffer> bestPriceComparator
+            = Comparator.comparingDouble(TradeOffer::getSignedPriceDouble);
 
     private final Entity offeringTrader;
     private final Item item;

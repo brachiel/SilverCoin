@@ -2,7 +2,7 @@ package ch.chrummibei.silvercoin.universe.entity_systems;
 
 import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
 import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
-import ch.chrummibei.silvercoin.universe.components.MarketSightComponent;
+import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
@@ -17,7 +17,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
  */
 public class FactorySystem extends IteratingSystem {
     private static Family family = Family.all(FactoryComponent.class,
-                                              MarketSightComponent.class,
+                                              MarketComponent.class,
                                               InventoryComponent.class,
                                               TraderComponent.class).get();
     public FactorySystem() {

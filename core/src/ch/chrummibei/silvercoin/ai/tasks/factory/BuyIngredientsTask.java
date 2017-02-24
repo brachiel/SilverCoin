@@ -2,9 +2,8 @@ package ch.chrummibei.silvercoin.ai.tasks.factory;
 
 import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
 import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
-import ch.chrummibei.silvercoin.universe.components.MarketSightComponent;
+import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
-import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import ch.chrummibei.silvercoin.universe.trade.TradeOfferHasNotEnoughAmountLeft;
@@ -22,7 +21,7 @@ public class BuyIngredientsTask extends LeafTask<Entity> {
     public Status execute() {
         FactoryComponent factory = Mappers.factory.get(this.getObject());
         InventoryComponent inventory = Mappers.inventory.get(this.getObject());
-        MarketSightComponent marketSight = Mappers.marketSight.get(this.getObject());
+        MarketComponent market = Mappers.market.get(this.getObject());
 
         Status acceptedATrade = Status.FAILED;
 
@@ -33,8 +32,7 @@ public class BuyIngredientsTask extends LeafTask<Entity> {
 
             // Find the cheapest TradeOffers
 
-            Map<TradeOffer, Integer> tradeOffers = MarketUtil.getTradeOffersToTradeAmount(
-                    marketSight,
+            Map<TradeOffer, Integer> tradeOffers = market.searchTradeOffersToTradeAmount(
                     entry.getKey(),
                     TradeOffer.TYPE.SELLING,
                     amountToBuy);

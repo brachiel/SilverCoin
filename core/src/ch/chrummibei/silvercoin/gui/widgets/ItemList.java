@@ -3,7 +3,6 @@ package ch.chrummibei.silvercoin.gui.widgets;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.credit.Price;
-import ch.chrummibei.silvercoin.universe.entity_systems.MarketUtil;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -39,12 +38,8 @@ public class ItemList extends Table {
             row();
 
             add(item.getName()).align(Align.left);
-            add(MarketUtil.searchBestSellingTrade(market, item)
-                    .map(TradeOffer::getPrice)
-                    .map(Price::toString).orElse("-")).align(Align.right);
-            add(MarketUtil.searchBestBuyingTrade(market, item)
-                    .map(TradeOffer::getPrice)
-                    .map(Price::toString).orElse("-")).align(Align.right);
+            add("").align(Align.right);
+            add("").align(Align.right);
         }
     }
 
@@ -55,11 +50,11 @@ public class ItemList extends Table {
         for (Item item : items) {
             ++i;
             ((Label) cells.get(++i).getActor()).setText(
-                    MarketUtil.searchBestSellingTrade(market, item)
+                    market.searchBestSellingTrade(item)
                         .map(TradeOffer::getPrice)
                         .map(Price::toString).orElse("-"));
             ((Label) cells.get(++i).getActor()).setText(
-                    MarketUtil.searchBestBuyingTrade(market, item)
+                    market.searchBestBuyingTrade(item)
                         .map(TradeOffer::getPrice)
                         .map(Price::toString).orElse("-"));
         }

@@ -4,7 +4,10 @@ import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.entity_factories.BigSpenderEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.FactoryEntityFactory;
-import ch.chrummibei.silvercoin.universe.entity_systems.*;
+import ch.chrummibei.silvercoin.universe.entity_systems.AISystem;
+import ch.chrummibei.silvercoin.universe.entity_systems.BigSpenderSystem;
+import ch.chrummibei.silvercoin.universe.entity_systems.FactorySystem;
+import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.ashley.core.Engine;
@@ -51,8 +54,8 @@ public class Universe {
 
     public void printStatus() {
         catalogue.forEach(item -> {
-            Optional<TradeOffer> bestBuy = MarketUtil.searchBestBuyingTrade(market, item);
-            Optional<TradeOffer> bestSell = MarketUtil.searchBestSellingTrade(market, item);
+            Optional<TradeOffer> bestBuy = market.searchBestBuyingTrade(item);
+            Optional<TradeOffer> bestSell = market.searchBestSellingTrade(item);
             System.out.println(
                     item + " BUY: " +
                             bestBuy.map(TradeOffer::compactString).orElse("No Buyer") + " SELL: " +

@@ -30,11 +30,11 @@ public class PutBuyOffersTask extends LeafTask<Entity> {
             int stockAmount = futureInventory.get(item);
             int amountToBuy = FactorySystem.calcNeededIngredientAmount(this.getObject(), item) - stockAmount;
 
-            Stream<TradeOffer> myTradeOffers = TraderSystem.getOwnTradeOffers(trader, item, TradeOffer.TYPE.BUYING);
+            Stream<TradeOffer> myTradeOffers = trader.filterTradeOffers(item, TradeOffer.TYPE.BUYING);
             if (amountToBuy > 0) {
                 myTradeOffers.forEach(offer -> offer.updateAmount(amountToBuy));
             } else {
-                trader.ownTradeOffers.removeAll(myTradeOffers.collect(Collectors.toList()));
+                trader.tradeOffers.removeAll(myTradeOffers.collect(Collectors.toList()));
             }
         });
 

@@ -13,6 +13,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
 
+import java.util.Optional;
+
 /**
  * Created by brachiel on 23/02/2017.
  */
@@ -34,15 +36,13 @@ public class UpdateSellTradeTask extends LeafTask<Entity> {
         }
 
         // TODO: This is ugly and doesn't work if we don't copy trade offers to new marketSights.
-        if (trader.ownTradeOffers.stream().anyMatch(offer -> offer.getItem() == factory.recipe.product && offer.getType() == TradeOffer.TYPE.SELLING)) {
-            trader.ownTradeOffers.forEach(offer -> {
-                offer.updateAmount(availableProductAmount);
-                offer.getPrice().set(price);
-            });
+        Optional<TradeOffer> tradeOffer = trader.filterTradeOffers(factory.recipe.product, TradeOffer.TYPE.SELLING).findAny();
+        if (tradeOffer.isPresent()) {
+            tradeOffer.get().updateAmount(availableProductAmount);
+            tradeOffer.get().getPrice().set(price);
         } else {
             TradeOffer myNewTrade = new TradeOffer(this.getObject(), factory.recipe.product, TradeOffer.TYPE.SELLING, availableProductAmount, price);
-            trader.ownTradeOffers.add(myNewTrade);
-            marketSight.markets.forEach(market -> market.offeredTrades.add(myNewTrade));
+            trader.tradeOffers.add(myNewTrade);
         }
 
         return Status.SUCCEEDED;

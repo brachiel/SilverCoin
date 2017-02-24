@@ -1,14 +1,10 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
-import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
-import ch.chrummibei.silvercoin.universe.components.NamedComponent;
-import ch.chrummibei.silvercoin.universe.components.TraderComponent;
-import ch.chrummibei.silvercoin.universe.components.WalletComponent;
+import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 import ch.chrummibei.silvercoin.universe.trade.Trade;
-import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import ch.chrummibei.silvercoin.universe.trade.TraderNotInvolvedException;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -16,7 +12,6 @@ import com.badlogic.ashley.systems.IteratingSystem;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * Created by brachiel on 20/02/2017.
@@ -24,6 +19,7 @@ import java.util.stream.Stream;
 public class TraderSystem extends IteratingSystem {
     private static final Family family = Family.all(TraderComponent.class,
                                                     WalletComponent.class,
+                                                    MarketComponent.class,
                                                     InventoryComponent.class).get();
 
     public TraderSystem() {
@@ -44,7 +40,7 @@ public class TraderSystem extends IteratingSystem {
             processTrades(entity);
         }
 
-        if (trader.ownTradeOffers.size() > 0) {
+        if (trader.tradeOffers.size() > 0) {
             removeOwnEmptyTradeOffers(entity);
         }
 
@@ -63,7 +59,7 @@ public class TraderSystem extends IteratingSystem {
             System.out.println("Logging Entity: " + entity);
         }
         System.out.println("  Own Trades: ");
-        trader.ownTradeOffers.forEach(offer -> System.out.println("    " + offer));
+        trader.tradeOffers.forEach(offer -> System.out.println("    " + offer));
         System.out.println("  Accepted Trades: ");
         trader.acceptedTrades.forEach(trade -> System.out.println("    " + trade));
         System.out.println("  Inventory: ");
@@ -72,7 +68,7 @@ public class TraderSystem extends IteratingSystem {
 
     public static void removeOwnEmptyTradeOffers(Entity entity) {
         TraderComponent trader = Mappers.trader.get(entity);
-        trader.ownTradeOffers.removeIf(offer -> offer.getAmount() == 0);
+        trader.tradeOffers.removeIf(offer -> offer.getAmount() == 0);
     }
 
     public static void processTrades(Entity entity) {
@@ -110,10 +106,6 @@ public class TraderSystem extends IteratingSystem {
         } else {
             inventory.positions.put(inventoryItem.getItem(), new YieldingItemPosition(inventoryItem));
         }
-    }
-
-    public static Stream<TradeOffer> getOwnTradeOffers(TraderComponent trader, Item item, TradeOffer.TYPE type) {
-        return trader.ownTradeOffers.stream().filter(offer -> offer.getItem() == item && offer.getType() == type);
     }
 
 

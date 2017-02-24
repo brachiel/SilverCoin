@@ -25,18 +25,19 @@ public class FactoryEntityFactory {
 
     public static Entity FactoryEntity(UniverseConfig universeConfig, MarketComponent market, Recipe recipe) {
         Entity entity = new Entity();
+        market.addTrader(entity);
 
         FactoryComponent factory = new FactoryComponent(recipe,
                 universeConfig.factory().getRandomInt("goalStock"),
                 universeConfig.factory().getRandomDouble("spreadFactor"));
         InventoryComponent inventory = new InventoryComponent();
 
-        entity.add(factory);
-        entity.add(inventory);
         entity.add(new NamedComponent(recipe.product.getName() + " factory " + factorySequence++));
-        entity.add(new TraderComponent());
-        entity.add(new MarketSightComponent(market));
         entity.add(new WalletComponent(universeConfig.factory().getRandomDouble("startingCredit")));
+        entity.add(market);
+        entity.add(inventory);
+        entity.add(new TraderComponent());
+        entity.add(factory);
 
         BehaviorTreeLibraryManager behaviorTreeLibraryManager = BehaviorTreeLibraryManager.getInstance();
         entity.add(new AIComponent(behaviorTreeLibraryManager.createBehaviorTree("mods/ai/factory.btree", entity)));
