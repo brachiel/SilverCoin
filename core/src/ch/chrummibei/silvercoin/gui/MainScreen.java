@@ -14,7 +14,7 @@ import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -22,6 +22,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,49 +34,56 @@ import java.util.stream.Collectors;
 /**
  * libGDX Screen rendering universe and HUD
  */
-public class MainScreen implements Screen {
+public class MainScreen extends ScreenAdapter {
+    private Stage stage;
+    private Viewport viewport;
+
     private Universe universe;
     private UniverseConfig universeConfig;
 
     BitmapFont font = Resources.getDefaultFont();
 
-    private OrthographicCamera cam;
+    private OrthographicCamera camera;
     private SpriteBatch batch;
     private Sprite backgroundSprite = new Sprite(new Texture("images/ngc253.jpg"));
 
-    public int WIDTH;
-    public int HEIGHT;
+    public int WIDTH = 800;
+    public int HEIGHT = 400;
 
+    public MainScreen() {
+        super();
 
-    private void writeString(String string, int x, int y) {
-        font.draw(batch, string, x, y);
-    }
+        // Set up rendering, camera, viewports
 
+        stage = new Stage(new FitViewport(WIDTH, HEIGHT));
 
-    @Override
-    public void show() {
+        /*
+        camera = new OrthographicCamera(WIDTH, HEIGHT);
+        camera.position.set(stage.getWidth()/2f, stage.getHeight()/2, 0);
+        camera.update();
+        */
+
+        // Set up game
+
         universeConfig = new UniverseConfig();
         universe = new Universe(universeConfig);
 
         WIDTH = Gdx.graphics.getWidth()/2;
         HEIGHT = Gdx.graphics.getHeight()/2;
-
         // Constructs a new OrthographicCamera, using the given viewport width and height
         // Height is multiplied by aspect ratio.
-        cam = new OrthographicCamera(WIDTH, HEIGHT);
-
-        cam.position.set(cam.viewportWidth / 2f, cam.viewportHeight / 2f, 0);
-        cam.update();
 
         batch = new SpriteBatch();
     }
 
 
-
     @Override
     public void render(float delta) {
-        cam.update();
-        batch.setProjectionMatrix(cam.combined);
+        //camera.update();
+        stage.act(delta);
+        stage.draw();
+
+        batch.setProjectionMatrix(camera.combined);
 
         // Clear screen
         Gdx.gl.glClearColor(0, 0, 0, 0);
@@ -91,8 +102,8 @@ public class MainScreen implements Screen {
         factoryTable.addColumn("FACTORY", 180, Color.FIREBRICK);
         factoryTable.addColumn("STOCK", 50, TableWidget.STYLE.RIGHT_ALIGN);
         factoryTable.addColumn("PRICE", 90, TableWidget.STYLE.RIGHT_ALIGN);
-        factoryTable.get(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
-        factoryTable.get(0).setColor(Color.CHARTREUSE);
+        factoryTable.getColumn(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
+        factoryTable.getColumn(0).setColor(Color.CHARTREUSE);
 
         for (Entity entity : universe.getFactories().stream().limit(50).collect(Collectors.toList())) {
             TableRow row = new TableRow();
@@ -102,20 +113,20 @@ public class MainScreen implements Screen {
             row.add(Mappers.named.get(entity).name);
             row.add(String.valueOf(productPos.getAmount()));
             row.add(trader.ownTradeOffers.stream()
-                            .filter(offer -> offer.getItem() == productPos.getItem() && offer.getAmount() > 0)
-                            .findAny()
-                            .map(TradeOffer::getPrice)
-                            .map(Price::toString)
-                            .orElse("-"));
-            factoryTable.add(row);
+                    .filter(offer -> offer.getItem() == productPos.getItem() && offer.getAmount() > 0)
+                    .findAny()
+                    .map(TradeOffer::getPrice)
+                    .map(Price::toString)
+                    .orElse("-"));
+            factoryTable.addRow(row);
         }
 
         TableWidget itemTable = new TableWidget(font);
         itemTable.addColumn("ITEM", 150, Color.SALMON);
         itemTable.addColumn("SELL", 80, TableWidget.STYLE.RIGHT_ALIGN, Color.FIREBRICK);
         itemTable.addColumn("BUY",80, TableWidget.STYLE.RIGHT_ALIGN, Color.GOLDENROD);
-        itemTable.get(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
-        itemTable.get(0).setColor(Color.FIREBRICK);
+        itemTable.getColumn(0).setRowHeight(factoryTable.defaultLineHeight() + 5);
+        itemTable.getColumn(0).setColor(Color.FIREBRICK);
 
         ArrayList<Item> items = universe.getItems();
         items.sort(Comparator.comparing(item -> item.getName()));
@@ -128,12 +139,13 @@ public class MainScreen implements Screen {
             row.add(MarketUtil.searchBestBuyingTrade(market, item)
                     .map(TradeOffer::getPrice)
                     .map(Price::toString).orElse("-"));
-            itemTable.add(row);
+            itemTable.addRow(row);
         }
 
+        ScrollPane factoryTableScroll = new ScrollPane(factoryTable);
 
         batch.begin();
-        factoryTable.draw(batch, 5, HEIGHT-5);
+        factoryTableScroll.draw(batch, 1);
         itemTable.draw(batch, (int) factoryTable.getWidth() + 20, HEIGHT-5);
         batch.end();
 
@@ -144,23 +156,10 @@ public class MainScreen implements Screen {
     public void resize(int width, int height) {
         WIDTH = Gdx.graphics.getWidth()/2;
         HEIGHT = Gdx.graphics.getHeight()/2;
-        cam.setToOrtho(false, WIDTH, HEIGHT);
+        //camera.setToOrtho(false, WIDTH, HEIGHT);
+        stage.getViewport().update(width, height);
     }
 
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
 
     @Override
     public void dispose() {
