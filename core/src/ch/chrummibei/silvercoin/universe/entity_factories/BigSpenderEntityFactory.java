@@ -10,7 +10,7 @@ import com.badlogic.ashley.core.Entity;
 public class BigSpenderEntityFactory {
     public static Entity BigSpender(Item itemToBuy, MarketComponent market) {
         Entity entity = new Entity();
-        entity.add(new BigSpenderComponent(itemToBuy, 2.0f));
+        entity.add(new BigSpenderComponent(itemToBuy, 2000));
         entity.add(new MarketSightComponent(market));
         entity.add(new InventoryComponent());
         entity.add(new WalletComponent(0));

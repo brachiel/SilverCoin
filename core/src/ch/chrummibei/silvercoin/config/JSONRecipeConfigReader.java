@@ -27,6 +27,7 @@ public class JSONRecipeConfigReader {
                 Item product = null;
                 HashMap<Item,Integer> ingredients= new HashMap<>();
                 Long buildTime = null;
+                Float hickUpChance = null;
 
                 for (JsonValue child : jsonData) {
                     switch (child.name()) {
@@ -41,12 +42,15 @@ public class JSONRecipeConfigReader {
                         case "buildTime":
                             buildTime = child.asLong();
                             break;
+                        case "hickUpChance":
+                            hickUpChance = child.asFloat();
+                            break;
                         default:
                             throw new RuntimeException("Error parsing Item Configuration; unknown field " + child.name());
                     }
                 }
 
-                return new Recipe(product, ingredients, buildTime);
+                return new Recipe(product, ingredients, buildTime, hickUpChance);
             }
         });
 

@@ -1,6 +1,6 @@
 package ch.chrummibei.silvercoin.client;
 
-import ch.chrummibei.silvercoin.SilverCoin;
+import ch.chrummibei.silvercoin.gui.SilverCoin;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;

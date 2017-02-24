@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.ai.tasks.factory;
 
+import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
 import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
 import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
@@ -30,7 +31,7 @@ public class ProduceProductTask extends LeafTask<Entity> {
 
         if (producingAmount == 0) {
             // We don't have enough ingredients, so we can't start to produce. Resetting time reservoir.
-            factory.timeReservoirMillis = 0;
+            factory.timeReservoirMillis = Math.min(0, factory.timeReservoirMillis);
             return Status.FAILED;
         }
 
@@ -38,11 +39,16 @@ public class ProduceProductTask extends LeafTask<Entity> {
         producingAmount = Math.min(producingAmount,
                 Math.toIntExact(factory.timeReservoirMillis / factory.recipe.buildTimeMillis));
 
-        if (producingAmount == 0) {
+        if (producingAmount <= 0) {
             return Status.FAILED; // Not enough time has passed to produce.
         }
 
         factory.timeReservoirMillis -= producingAmount * factory.recipe.buildTimeMillis; // Subtract the time we needed from reservoir
+
+        // Check if there was a hick up. If so, we need to repair the factors. This needs some time.
+        if (Universe.getRandomDouble(0, 1) > factory.recipe.hickUpChance) {
+            factory.timeReservoirMillis -= factory.recipe.buildTimeMillis * Universe.getRandomDouble(1, 3);
+        }
 
         // Calculate product price before we start to remove items or else the price may become invalid.
         Price productPrice = FactorySystem.calcProductPriceFromPurchasePrice(this.getObject());

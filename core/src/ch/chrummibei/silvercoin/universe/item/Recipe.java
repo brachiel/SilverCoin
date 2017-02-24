@@ -10,11 +10,13 @@ public class Recipe {
     public final Item product;
     public final Map<Item,Integer> ingredients;
     public final long buildTimeMillis;
+    public final float hickUpChance;
 
-    public Recipe(Item product, Map<Item, Integer> ingredients, long buildTimeMillis) {
+    public Recipe(Item product, Map<Item, Integer> ingredients, long buildTimeMillis, float hickUpChance) {
         this.product = product;
         this.ingredients = ingredients;
         this.buildTimeMillis = buildTimeMillis;
+        this.hickUpChance = hickUpChance;
     }
 
     public int getIngredientAmount(Item item) {

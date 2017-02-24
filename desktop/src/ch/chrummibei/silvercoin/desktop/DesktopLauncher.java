@@ -1,6 +1,6 @@
 package ch.chrummibei.silvercoin.desktop;
 
-import ch.chrummibei.silvercoin.SilverCoin;
+import ch.chrummibei.silvercoin.gui.SilverCoin;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 

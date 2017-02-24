@@ -7,33 +7,38 @@
       "Drone": 5,
       "AI core": 2
     },
-    "buildTime": 5000
+    "buildTime": 5000,
+    "hickUpChance": 0.20
   },
   { "product": "Engine",
     "ingredients": {
       "Electronic coil": 15,
       "Heavy water": 30
     },
-    "buildTime": 2000
+    "buildTime": 1000,
+    "hickUpChance": 0.20
   },
   { "product": "Engine",
     "ingredients": {
       "Water": 40,
       "Thorium": 30
     },
-    "buildTime": 2500
+    "buildTime": 2500,
+    "hickUpChance": 0.20
   },
   { "product": "Structural component",
     "ingredients": {
       "Iron": 30
     },
-    "buildTime": 1000
+    "buildTime": 700,
+    "hickUpChance": 0.20
   },
   { "product": "Structural component",
     "ingredients": {
       "Aluminum": 40
     },
-    "buildTime": 1500
+    "buildTime": 1100,
+    "hickUpChance": 0.20
   },
   { "product": "Power core",
     "ingredients": {
@@ -41,27 +46,31 @@
       "Water": 80,
       "Heavy water": 5
     },
-    "buildTime": 3000
+    "buildTime": 3000,
+    "hickUpChance": 0.20
   },
   { "product": "Power core",
     "ingredients": {
       "Heavy water": 170,
       "Electronic coil": 80
     },
-    "buildTime": 5000
+    "buildTime": 5000,
+    "hickUpChance": 0.20
   },
   { "product": "Heavy water",
     "ingredients": {
       "Water": 30,
       "Energy": 50
     },
-    "buildTime": 500
+    "buildTime": 500,
+    "hickUpChance": 0.20
   },
   { "product": "Electronic coil",
     "ingredients": {
       "Copper": 5
     },
-    "buildTime": 700
+    "buildTime": 700,
+    "hickUpChance": 0.20
   },
   { "product": "Electronics",
     "ingredients": {
@@ -69,76 +78,89 @@
       "Silicon": 5,
       "Electronic coil": 1
     },
-    "buildTime": 1500
+    "buildTime": 1500,
+    "hickUpChance": 0.20
   },
   { "product": "Drone",
     "ingredients": {
       "Electronics": 3,
       "AI core": 1
     },
-    "buildTime": 4000
+    "buildTime": 4000,
+    "hickUpChance": 0.20
   },
   { "product": "AI core",
     "ingredients": {
       "Electronics": 5
     },
-    "buildTime": 500
+    "buildTime": 500,
+    "hickUpChance": 0.20
   },
   { "product": "Food",
     "ingredients": {
       "Algae": 100
     },
-    "buildTime": 500
+    "buildTime": 1000,
+    "hickUpChance": 0.20
   },
   { "product": "Algae",
     "ingredients": {
       "Energy": 2
     },
-    "buildTime": 20
+    "buildTime": 20,
+    "hickUpChance": 0.20
   },
   { "product": "Oxygen",
     "ingredients": {
       "Energy": 5
     },
-    "buildTime": 100
+    "buildTime": 100,
+    "hickUpChance": 0.20
   },
   { "product": "Energy",
-    "buildTime": 10
+    "buildTime": 10,
+    "hickUpChance": 0.10
   },
   { "product": "Water",
     "ingredients": {
       "Energy": 5
     },
-    "buildTime": 300
+    "buildTime": 300,
+    "hickUpChance": 0.20
   },
   { "product": "Thorium",
     "ingredients": {
       "Energy": 55
     },
-    "buildTime": 1000
+    "buildTime": 1000,
+    "hickUpChance": 0.20
   },
   { "product": "Copper",
     "ingredients": {
       "Energy": 7
     },
-    "buildTime": 500
+    "buildTime": 500,
+    "hickUpChance": 0.20
   },
   { "product": "Iron",
     "ingredients": {
       "Energy": 8
     },
-    "buildTime": 450
+    "buildTime": 450,
+    "hickUpChance": 0.20
   },
   { "product": "Aluminum",
     "ingredients": {
       "Energy": 20
     },
-    "buildTime": 450
+    "buildTime": 450,
+    "hickUpChance": 0.20
   },
   { "product": "Silicon",
     "ingredients": {
       "Energy": 30
     },
-    "buildTime": 700
+    "buildTime": 700,
+    "hickUpChance": 0.20
   }
 ]}

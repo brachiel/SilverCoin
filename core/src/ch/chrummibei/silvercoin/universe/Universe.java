@@ -4,7 +4,6 @@ import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.entity_factories.BigSpenderEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.FactoryEntityFactory;
-import ch.chrummibei.silvercoin.universe.entity_factories.TraderEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_systems.*;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
@@ -17,12 +16,10 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 /**
- * The universe contains the world, all actors and manages time and randomness. It is used by the Component to
- * tell the MainScreen what to render. All simulation is done here.
+ * The universe contains the world, all entities and manages randomness.
  */
 public class Universe {
     private static final Random random = new Random();
-    private static final double timeFactor = 10;
 
     private final UniverseConfig universeConfig;
     private final ArrayList<Item> catalogue = new ArrayList<>();
@@ -80,10 +77,12 @@ public class Universe {
 
     void generateEntities() {
         // Create random traders
+        /*
         for (int i = 0; i < 5; ++ i) {
             Entity entity = TraderEntityFactory.RandomisedTraderEntity(catalogue, market);
             engine.addEntity(entity);
         }
+        */
 
         // Create 1 to 3 factories for every recipe with a goal stock of 5 to 15 positions
         universeConfig.recipeBook().getRecipes().stream()
