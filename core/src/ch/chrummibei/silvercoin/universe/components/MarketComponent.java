@@ -82,6 +82,8 @@ public class MarketComponent implements Component {
             int amountToTradeWithThisOffer = Math.min(amountLeftToTrade, tradeOffer.getAmount());
             amountLeftToTrade -= amountToTradeWithThisOffer;
 
+            if (amountToTradeWithThisOffer < 0) throw new RuntimeException("Trading <0? Are you crazy?");
+
             tradeOffersToAccept.put(tradeOffer, amountToTradeWithThisOffer);
 
             if (amountLeftToTrade <= 0) {

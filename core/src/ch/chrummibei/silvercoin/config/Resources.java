@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.config;
 
+import ch.chrummibei.silvercoin.universe.Universe;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -22,9 +23,17 @@ public class Resources {
         return getFileHandle("mods/items.json");
     }
     public static FileHandle getDefaultModRecipeJsonFile() {
-        return getFileHandle("mods/recipes.json");
+        if (Universe.DEBUG) {
+            return getFileHandle("mods/recipes_debug.json");
+        } else {
+            return getFileHandle("mods/recipes.json");
+        }
     }
     public static FileHandle getDefaultModFactoryJsonFile() {
-        return getFileHandle("mods/factories.json");
+        if (Universe.DEBUG) {
+            return getFileHandle("mods/factories_debug.json");
+        } else {
+            return getFileHandle("mods/factories.json");
+        }
     }
 }

@@ -1,0 +1,13 @@
+{"recipes": [
+  { "product": "Energy",
+    "buildTime": 10,
+    "hickUpChance": 0.10
+  },
+  { "product": "Water",
+    "ingredients": {
+      "Energy": 5
+    },
+    "buildTime": 300,
+    "hickUpChance": 0.20
+  }
+]}

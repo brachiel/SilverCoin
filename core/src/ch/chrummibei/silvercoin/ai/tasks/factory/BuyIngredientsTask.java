@@ -2,11 +2,10 @@ package ch.chrummibei.silvercoin.ai.tasks.factory;
 
 import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
 import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
-import ch.chrummibei.silvercoin.universe.components.MarketComponent;
+import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.item.Item;
-import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
-import ch.chrummibei.silvercoin.universe.trade.TradeOfferHasNotEnoughAmountLeft;
+import ch.chrummibei.silvercoin.universe.trade.TradeNeed;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
@@ -21,9 +20,7 @@ public class BuyIngredientsTask extends LeafTask<Entity> {
     public Status execute() {
         FactoryComponent factory = Mappers.factory.get(this.getObject());
         InventoryComponent inventory = Mappers.inventory.get(this.getObject());
-        MarketComponent market = Mappers.market.get(this.getObject());
-
-        Status acceptedATrade = Status.FAILED;
+        TraderComponent trader = Mappers.trader.get(this.getObject());
 
         for (Map.Entry<Item,Integer> entry : factory.recipe.ingredients.entrySet()) {
             int amountToBuy = entry.getValue() * factory.goalStock
@@ -32,25 +29,10 @@ public class BuyIngredientsTask extends LeafTask<Entity> {
 
             // Find the cheapest TradeOffers
 
-            Map<TradeOffer, Integer> tradeOffers = market.searchTradeOffersToTradeAmount(
-                    entry.getKey(),
-                    TradeOffer.TYPE.SELLING,
-                    amountToBuy);
-
-            tradeOffers.forEach((offer, amount) -> {
-                try {
-                    offer.accept(this.getObject(), amount);
-                } catch (TradeOfferHasNotEnoughAmountLeft tradeOfferHasNotEnoughAmountLeft) {
-                    tradeOfferHasNotEnoughAmountLeft.printStackTrace();
-                }
-            });
-
-            if (tradeOffers.size() > 0) {
-                acceptedATrade = Status.SUCCEEDED;
-            }
+            trader.setTradeNeed(new TradeNeed(entry.getKey(), amountToBuy));
         }
 
-        return acceptedATrade;
+        return Status.SUCCEEDED;
     }
 
     @Override

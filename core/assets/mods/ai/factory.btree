@@ -5,7 +5,6 @@
 import produceProduct:"ch.chrummibei.silvercoin.ai.tasks.factory.ProduceProductTask"
 import updateSellTrade:"ch.chrummibei.silvercoin.ai.tasks.factory.UpdateSellTradeTask"
 import buyIngredients:"ch.chrummibei.silvercoin.ai.tasks.factory.BuyIngredientsTask"
-import putBuyOffers:"ch.chrummibei.silvercoin.ai.tasks.factory.PutBuyOffersTask"
 import isProductStockSmallerThan?:"ch.chrummibei.silvercoin.ai.tasks.factory.ProductStockSmallerThanCondition"
 import isProductStockGreaterThan?:"ch.chrummibei.silvercoin.ai.tasks.factory.ProductStockGreaterThanCondition"
 import changeSpread:"ch.chrummibei.silvercoin.ai.tasks.factory.ChangeSpreadTask"
@@ -27,4 +26,3 @@ root
       updateSellTrade
     sequence
       buyIngredients
-      putBuyOffers

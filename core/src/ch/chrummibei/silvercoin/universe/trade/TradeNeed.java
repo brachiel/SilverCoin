@@ -2,7 +2,6 @@ package ch.chrummibei.silvercoin.universe.trade;
 
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.item.Item;
-import com.badlogic.ashley.core.Entity;
 
 import java.util.Optional;
 
@@ -11,34 +10,31 @@ import java.util.Optional;
  */
 public class TradeNeed {
     public Item item;
-    public TradeOffer.TYPE type;
-    public Optional<Integer> maxAmount;
+    public int amount;
     public Optional<Price> priceLimit;
 
-    public TradeNeed(Item item, TradeOffer.TYPE type) {
-        this(item, type, null, null);
+    public TradeNeed(Item item, int amount) {
+        this(item, amount, null);
     }
 
-    public TradeNeed(Item item, TradeOffer.TYPE type, Integer maxAmount, Price price) {
+    public TradeNeed(Item item, int amount, Price price) {
         this.item = item;
-        this.type = type;
-        this.maxAmount = Optional.ofNullable(maxAmount);
+        this.amount = amount;
         this.priceLimit = Optional.ofNullable(price);
+
+        if (amount == 0) throw new RuntimeException("Need with amount = 0 doesn't make sense");
     }
 
-    public TradeOffer toTradeOffer(Entity offeringTrader) {
-        if (! maxAmount.isPresent()) return null;
-        if (! priceLimit.isPresent()) return null;
-        return new TradeOffer(offeringTrader, item, type, maxAmount.get(), priceLimit.get());
+    public String toString() {
+        return "Need " + amount + " of " + item;
     }
 
     public void unify(TradeNeed need) {
-        if (priceLimit.isPresent() && need.priceLimit.isPresent()
-                && maxAmount.isPresent() && need.maxAmount.isPresent()) {
+        if (priceLimit.isPresent() && need.priceLimit.isPresent()) {
             priceLimit = Optional.of(
-                    priceLimit.get().toTotalValue(maxAmount.get())
-                        .add(need.maxAmount.get())
-                                .toPriceNotNull(maxAmount.get() + need.maxAmount.get())
+                    priceLimit.get().toTotalValue(amount)
+                        .add(need.amount)
+                                .toPriceNotNull(amount + need.amount)
             );
         } else {
             if (need.priceLimit.isPresent()) {
@@ -46,12 +42,10 @@ public class TradeNeed {
             }
         }
 
-        if (maxAmount.isPresent() && need.maxAmount.isPresent()) {
-            maxAmount = Optional.of(maxAmount.get() + need.maxAmount.get());
-        } else {
-            if (need.maxAmount.isPresent()) {
-                maxAmount = need.maxAmount;
-            }
-        }
+        amount += need.amount;
+    }
+
+    public TradeOffer.TYPE type() {
+        return TradeOffer.TYPE.fromAmount(amount);
     }
 }

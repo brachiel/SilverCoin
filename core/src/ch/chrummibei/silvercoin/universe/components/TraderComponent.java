@@ -25,17 +25,22 @@ public class TraderComponent implements Component {
         return tradeOffers.stream().filter(offer -> offer.getItem() == item && offer.getType() == type);
     }
 
+    public void setTradeNeed(TradeNeed tradeNeed) {
+        tradeNeeds.removeIf(need -> need.item == tradeNeed.item);
+        tradeNeeds.add(tradeNeed);
+    }
+
     public void addTradeNeed(TradeNeed tradeNeed) {
         // Unify all existing needs for this item and delete them.
         tradeNeeds.removeIf(need -> {
-                if (need.item != tradeNeed.item || need.type != tradeNeed.type) return false;
+                if (need.item != tradeNeed.item) return false;
                 tradeNeed.unify(need);
                 return true;
         });
         tradeNeeds.add(tradeNeed);
     }
 
-    public void removeTradeNeed(Item item, TradeOffer.TYPE type) {
-        tradeNeeds.removeIf(need -> need.item == item && need.type == type);
+    public void removeTradeNeed(Item item) {
+        tradeNeeds.removeIf(need -> need.item == item);
     }
 }

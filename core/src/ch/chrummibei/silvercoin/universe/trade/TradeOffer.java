@@ -30,6 +30,11 @@ public class TradeOffer {
         public final String verb; /* The string representation of this type */
 
         public TYPE opposite() { if (this == BUYING) return SELLING; else return BUYING; }
+
+        public static TYPE fromAmount(int amount) {
+            if (amount == 0) throw new RuntimeException("TYPE amount = 0. This is a bug.");
+            return (amount > 0) ? TYPE.BUYING : TYPE.SELLING;
+        }
     }
 
     public static final Comparator<TradeOffer> bestPriceComparator
@@ -48,6 +53,10 @@ public class TradeOffer {
         this.type = type;
         this.amount = amount;
         this.price = price;
+
+        if (amount <= 0) {
+            throw new RuntimeException("TradeOffer with amount <= 0. This is a bug.");
+        }
     }
 
 
@@ -78,6 +87,10 @@ public class TradeOffer {
     public void updateAmount(int amount, Price price) {
         this.amount = amount;
         this.price = price;
+
+        if (amount < 0) {
+            throw new RuntimeException("TradeOffer with amount < 0. This is a bug.");
+        }
     }
 
     public void addAmount(int amount, Price price) {
@@ -88,6 +101,10 @@ public class TradeOffer {
             e.printStackTrace();
         }
         this.amount += amount;
+
+        if (amount < 0) {
+            throw new RuntimeException("TradeOffer with amount < 0. This is a bug.");
+        }
     }
 
     public Item getItem() {

@@ -27,7 +27,7 @@ public class Trade {
     }
 
     public Trade(TradeOffer tradeOffer, Entity acceptingTrader, int acceptingAmount) {
-        if (acceptingAmount == 0) throw new RuntimeException("Trading amount=0. This is a bug.");
+        if (acceptingAmount <= 0) throw new RuntimeException("Trading amount<=0. This is a bug.");
 
         if (tradeOffer.getType() == TradeOffer.TYPE.BUYING) {
             this.seller = acceptingTrader;
@@ -66,8 +66,8 @@ public class Trade {
     }
 
     public PricedItemPosition getTradersItemPosition(Entity trader) throws TraderNotInvolvedException {
-        if (amount == 0) {
-            throw new RuntimeException("Trading item positions with amount = 0 doesn't make sense. This is a bug.");
+        if (amount <= 0) {
+            throw new RuntimeException("Trading item positions with amount <= 0 doesn't make sense. This is a bug.");
         }
 
         if (trader == buyer) {

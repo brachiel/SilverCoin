@@ -1,6 +1,7 @@
 package ch.chrummibei.silvercoin.universe.entity_factories;
 
 import ch.chrummibei.silvercoin.config.UniverseConfig;
+import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
@@ -38,6 +39,9 @@ public class FactoryEntityFactory {
         entity.add(inventory);
         entity.add(new TraderComponent());
         entity.add(factory);
+        if (Universe.DEBUG) {
+            entity.add(new LoggerComponent());
+        }
 
         BehaviorTreeLibraryManager behaviorTreeLibraryManager = BehaviorTreeLibraryManager.getInstance();
         entity.add(new AIComponent(behaviorTreeLibraryManager.createBehaviorTree("mods/ai/factory.btree", entity)));
