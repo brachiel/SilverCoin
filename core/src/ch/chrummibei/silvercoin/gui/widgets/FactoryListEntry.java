@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.gui.widgets;
 
+import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
 import ch.chrummibei.silvercoin.universe.components.NamedComponent;
 import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.credit.Price;
@@ -12,6 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Align;
+
+import java.util.Optional;
 
 /**
  * Created by brachiel on 24/02/2017.
@@ -44,16 +47,20 @@ public class FactoryListEntry extends HorizontalGroup {
     public void updateLabels() {
         NamedComponent named = Mappers.named.get(entity);
         TraderComponent trader = Mappers.trader.get(entity);
+        FactoryComponent factory = Mappers.factory.get(entity);
         YieldingItemPosition productPosition = FactorySystem.getProductPosition(entity);
 
         nameLabel.setText(named.name);
-        amountLabel.setText(String.valueOf(productPosition.getAmount()));
-        priceLabel.setText(trader.ownTradeOffers.stream()
+        Optional<TradeOffer> productSellOffer = trader.ownTradeOffers.stream()
                 .filter(offer -> offer.getItem() == productPosition.getItem() && offer.getAmount() > 0)
-                .findAny()
-                .map(TradeOffer::getPrice)
-                .map(Price::toString)
-                .orElse("-"));
+                .findAny();
+
+        amountLabel.setText(productSellOffer.map(TradeOffer::getAmount)
+                                .map(String::valueOf)
+                                .orElse("-") + "/ " + factory.goalStock);
+        priceLabel.setText(productSellOffer.map(TradeOffer::getPrice)
+                                .map(Price::toString)
+                                .orElse("-"));
 
         nameLabel.invalidate();
         amountLabel.invalidate();
