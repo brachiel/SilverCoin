@@ -1,6 +1,7 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
 import ch.chrummibei.silvercoin.universe.components.*;
+import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
@@ -36,10 +37,6 @@ public class TraderSystem extends IteratingSystem {
         TraderComponent trader = Mappers.trader.get(entity);
 
         if (Mappers.logger.has(entity)) logStatus(entity);
-
-        System.out.println("Before process");
-        TraderSystem.logStatus(entity);
-        System.out.println("---");
 
         if (trader.acceptedTrades.size() > 0) {
             processTrades(entity);
@@ -99,6 +96,7 @@ public class TraderSystem extends IteratingSystem {
     /** Accept as many trades as possible, and return the amount that is left to trade */
     private int acceptPossibleTrades(Entity entity, TradeNeed need) {
         MarketComponent market = Mappers.market.get(entity);
+        WalletComponent wallet = Mappers.wallet.get(entity);
 
         int toTrade = calcAmountToTrade(entity, need);
         if (toTrade == 0) return 0;
@@ -108,6 +106,19 @@ public class TraderSystem extends IteratingSystem {
 
         for (Map.Entry<TradeOffer, Integer> entry :
                 market.searchTradeOffersToTradeAmount(need.item, type.opposite(), toTradeAbs).entrySet()) {
+            TradeOffer offer = entry.getKey();
+
+            if (type == TradeOffer.TYPE.BUYING) {
+                // Check how many we can buy
+                TotalValue totalPrice = entry.getKey().getPrice().toTotalValue(entry.getValue());
+                if (totalPrice.toDouble() >= wallet.credit.toDouble()) {
+                    int buyInstead = (int) Math.floor(wallet.credit.toDouble() / offer.getPrice().toDouble());
+                    if (buyInstead <= 0) break;
+                    offer.accept(entity, buyInstead);
+                    toTradeAbs -= buyInstead;
+                    break;
+                }
+            }
 
             entry.getKey().accept(entity, entry.getValue());
             toTradeAbs -= entry.getValue();
