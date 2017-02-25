@@ -146,6 +146,8 @@ public class TradeOffer {
             throw new RuntimeException("Trader has not enough amount left. This is a bug");
         }
 
+        System.out.println(Mappers.named.get(acceptingTrader).name + " is accepting " + acceptingAmount + " of tradeOffer: " + this);
+
         resultingTrade = new Trade(this, acceptingTrader, acceptingAmount);
         // The offer decreases its acceptingAmount that is offered.
         this.amount -= acceptingAmount;

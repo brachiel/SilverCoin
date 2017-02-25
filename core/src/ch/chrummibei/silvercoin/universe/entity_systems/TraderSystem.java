@@ -37,6 +37,10 @@ public class TraderSystem extends IteratingSystem {
 
         if (Mappers.logger.has(entity)) logStatus(entity);
 
+        System.out.println("Before process");
+        TraderSystem.logStatus(entity);
+        System.out.println("---");
+
         if (trader.acceptedTrades.size() > 0) {
             processTrades(entity);
         }
@@ -62,28 +66,35 @@ public class TraderSystem extends IteratingSystem {
         for (TradeNeed need : trader.tradeNeeds) {
             int toTrade = acceptPossibleTrades(entity, need);
             if (toTrade == 0) continue;
-            // Now, put an offer for the remaining trades
 
-            int toTradeAbs = Math.abs(toTrade);
-            Optional<TradeOffer> existing = trader.filterTradeOffers(need.item, need.type()).findAny();
-            if (existing.isPresent()) {
-                if (need.priceLimit.isPresent()) {
-                    existing.get().addAmount(toTradeAbs, need.priceLimit.get());
-                } else {
-                    existing.get().updateAmount(existing.get().getAmount() + toTradeAbs);
-                }
+            // Now, put an offer for the remaining trades
+            putTradeOffer(entity, need, toTrade);
+        }
+    }
+
+    private void putTradeOffer(Entity entity, TradeNeed need, int toTrade) {
+        TraderComponent trader = Mappers.trader.get(entity);
+
+        int toTradeAbs = Math.abs(toTrade);
+        Optional<TradeOffer> existing = trader.filterTradeOffers(need.item, need.type()).findAny();
+        if (existing.isPresent()) {
+            if (need.priceLimit.isPresent()) {
+                existing.get().addAmount(toTradeAbs, need.priceLimit.get());
             } else {
-                TradeOffer.TYPE type = TradeOffer.TYPE.fromAmount(toTrade);
-                need.priceLimit.ifPresent(price ->
+                existing.get().updateAmount(existing.get().getAmount() + toTradeAbs);
+            }
+        } else {
+            TradeOffer.TYPE type = TradeOffer.TYPE.fromAmount(toTrade);
+            need.priceLimit.ifPresent(price ->
                     trader.tradeOffers.add(new TradeOffer(entity,
                             need.item,
                             type,
                             toTradeAbs,
                             price))
-                );
-            }
+            );
         }
     }
+
 
     /** Accept as many trades as possible, and return the amount that is left to trade */
     private int acceptPossibleTrades(Entity entity, TradeNeed need) {
