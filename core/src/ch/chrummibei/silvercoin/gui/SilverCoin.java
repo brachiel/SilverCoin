@@ -13,13 +13,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.particles.ParticleChannels;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.Value;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -74,14 +72,20 @@ public class SilverCoin implements ApplicationListener {
 
         Table container = new Table();
 
+        //itemList.setPosition(factoryListScroll.getWidth() + 10, HEIGHT - 5);
+
+        VerticalGroup vSplitter = new VerticalGroup();
         universe.getMarketComponents().forEach(market -> {
             ItemList itemList = new ItemList(universe, market, skin);
-            container.add(itemList).expand().fill();
+            vSplitter.addActor(itemList);
         });
-        //itemList.setPosition(factoryListScroll.getWidth() + 10, HEIGHT - 5);
+
 
 		container.setFillParent(true);
         container.add(factoryListScroll).width(WIDTH/2).fill();
+        container.add(vSplitter).expand().fill();
+
+
 
         // Prepare and set background
         Texture backgroundTexture = new Texture(Gdx.files.internal("images/ngc253.jpg"));

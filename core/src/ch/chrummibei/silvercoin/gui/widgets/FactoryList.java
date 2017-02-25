@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,9 @@ public class FactoryList extends Table {
         add("GOAL").pad(0,0,5,5).align(Align.right).minWidth(40);
         add("PRICE").pad(0,0,5,0).align(Align.right).minWidth(80);
 
-        for (Entity entity : universe.getFactories().stream().collect(Collectors.toList())) {
+        for (Entity entity : universe.getFactories().stream()
+                                .sorted(Comparator.comparing(entity -> Mappers.named.get(entity).name))
+                                .collect(Collectors.toList())) {
             row();
 
             NamedComponent named = Mappers.named.get(entity);

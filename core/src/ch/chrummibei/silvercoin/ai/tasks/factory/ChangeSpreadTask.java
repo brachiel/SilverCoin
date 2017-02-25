@@ -25,7 +25,7 @@ public class ChangeSpreadTask extends LeafTask<Entity> {
     public Status execute() {
         FactoryComponent factory = Mappers.factory.get(this.getObject());
 
-        if (factory.priceSpreadFactor * spreadChangeFactor > 1) {
+        if (factory.priceSpreadFactor * spreadChangeFactor > 1 && factory.priceSpreadFactor * spreadChangeFactor < 3) {
             factory.priceSpreadFactor *= spreadChangeFactor;
             return Status.SUCCEEDED;
         } else {

@@ -29,7 +29,6 @@ public class BigSpenderSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         BigSpenderComponent bigSpender = Mappers.bigSpender.get(entity);
-
         bigSpender.timeReservoir += deltaTime;
 
         buyItems(entity);
@@ -45,15 +44,15 @@ public class BigSpenderSystem extends IteratingSystem {
             return false;
         }
 
-        marketSight.markets.forEach(market -> {
+        marketSight.markets.forEach(market ->
             market.searchTradeOffersToTradeAmount(bigSpender.itemToConsume, TradeOffer.TYPE.SELLING, itemsToBuy)
                 .forEach((offer, amount) -> {
                     // Generate money for the BigSpender out of nothing
                     wallet.credit.iAdd(offer.getPrice().toTotalValue(amount));
 
                     offer.accept(entity, amount);
-                });
-        });
+                })
+        );
 
         return true;
     }
