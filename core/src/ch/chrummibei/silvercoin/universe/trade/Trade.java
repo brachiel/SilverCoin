@@ -65,7 +65,7 @@ public class Trade {
         return seller;
     }
 
-    public PricedItemPosition getTradersItemPosition(Entity trader) throws TraderNotInvolvedException {
+    public PricedItemPosition getTradersItemPosition(Entity trader) {
         if (amount <= 0) {
             throw new RuntimeException("Trading item positions with amount <= 0 doesn't make sense. This is a bug.");
         }
@@ -75,7 +75,7 @@ public class Trade {
         } else if (trader == seller) {
             return new PricedItemPosition(item, -amount, totalValue.invert());
         } else {
-            throw new TraderNotInvolvedException();
+            throw new RuntimeException("This trader is not involved in the trade offer. This is a bug.");
         }
     }
 }

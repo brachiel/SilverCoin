@@ -4,7 +4,6 @@ import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
 import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.components.TraderComponent;
-import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
@@ -46,11 +45,8 @@ public class FactorySystem extends IteratingSystem {
                 return;
             }
 
-            try {
-                productPrice.iAdd(position.getPurchasePrice().toTotalValue(ingredientAmount));
-            } catch (InvalidPriceException e) {
-                e.printStackTrace();
-            }
+
+            productPrice.iAdd(position.getPurchasePrice().toTotalValue(ingredientAmount));
         });
 
         return productPrice;

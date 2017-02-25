@@ -5,7 +5,6 @@ import ch.chrummibei.silvercoin.universe.components.MarketSightComponent;
 import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.components.WalletComponent;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
-import ch.chrummibei.silvercoin.universe.trade.TradeOfferHasNotEnoughAmountLeft;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -49,14 +48,10 @@ public class BigSpenderSystem extends IteratingSystem {
         marketSight.markets.forEach(market -> {
             market.searchTradeOffersToTradeAmount(bigSpender.itemToConsume, TradeOffer.TYPE.SELLING, itemsToBuy)
                 .forEach((offer, amount) -> {
-                    try {
-                        // Generate money for the BigSpender out of nothing
-                        wallet.credit.iAdd(offer.getPrice().toTotalValue(amount));
+                    // Generate money for the BigSpender out of nothing
+                    wallet.credit.iAdd(offer.getPrice().toTotalValue(amount));
 
-                        offer.accept(entity, amount);
-                    } catch (TradeOfferHasNotEnoughAmountLeft tradeOfferHasNotEnoughAmountLeft) {
-                        tradeOfferHasNotEnoughAmountLeft.printStackTrace();
-                    }
+                    offer.accept(entity, amount);
                 });
         });
 

@@ -14,13 +14,13 @@ root
     sequence # if stock is full, decrease spread and succeed
       isProductStockGreaterThan? stockToGoalFactor:1
       alwaysSucceed
-        changeSpread spreadChange:-0.1
+        changeSpread spreadChangeFactor:0.9999  # decrease price spread by 1%
       updateSellTrade
     alwaysFail  # even if we make it more expensive, never stop producing
       sequence
         # if we're empty, everyone is buying our stuff, so we can make it more expensive
         isProductStockSmallerThan? stockToGoalFactor:0
-        changeSpread spreadChange:0.001
+        changeSpread spreadChangeFactor:1.01  # increase price spread by 1%
     sequence
       produceProduct
       updateSellTrade

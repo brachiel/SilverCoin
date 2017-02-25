@@ -1,6 +1,5 @@
 package ch.chrummibei.silvercoin.universe.position;
 
-import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
@@ -71,8 +70,8 @@ public class PricedItemPosition extends ItemPosition {
         int decreasingAmount = -this.amount;
         int increasingAmount = amount+this.amount;
 
-        TotalValue decreasingValue = totalValue.toPriceNotNull(amount).toTotalValue(decreasingAmount);
-        TotalValue increasingValue = totalValue.toPriceNotNull(amount).toTotalValue(increasingAmount);
+        TotalValue decreasingValue = totalValue.toPrice(amount).toTotalValue(decreasingAmount);
+        TotalValue increasingValue = totalValue.toPrice(amount).toTotalValue(increasingAmount);
 
         zeroingPosition(decreasingAmount, decreasingValue);
         increasingPosition(increasingAmount, increasingValue);
@@ -92,7 +91,7 @@ public class PricedItemPosition extends ItemPosition {
 
     public void removeItems(int amount) {
         if (amount == 0) throw new RuntimeException("Cannot remove " + amount + " positions from empty position.");
-        this.addItems(-amount, purchaseValue.toPriceNotNull(this.amount).toTotalValue(-amount));
+        this.addItems(-amount, purchaseValue.toPrice(this.amount).toTotalValue(-amount));
     }
 
     /**
@@ -117,7 +116,7 @@ public class PricedItemPosition extends ItemPosition {
      * The purchase price of one item.
      * @return Price per one item.
      */
-    public Price getPurchasePrice() throws InvalidPriceException {
+    public Price getPurchasePrice() {
         return purchaseValue.toPrice(getAmount());
     }
 

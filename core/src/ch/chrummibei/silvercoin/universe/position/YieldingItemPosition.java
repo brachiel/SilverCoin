@@ -1,6 +1,5 @@
 package ch.chrummibei.silvercoin.universe.position;
 
-import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.item.Item;
@@ -40,15 +39,11 @@ public class YieldingItemPosition extends PricedItemPosition {
 
     @Override
     void decreasingPosition(int amount, TotalValue totalValue) {
-        Price sellingPrice = totalValue.toPriceNotNull(amount);
+        Price sellingPrice = totalValue.toPrice(amount);
 
-        try {
-            Price priceDifference = getPurchasePrice().subtract(sellingPrice);
-            TotalValue profit = priceDifference.toTotalValue(amount);
-            realisedProfit.iAdd(profit);
-        } catch (InvalidPriceException e) {
-            throw new RuntimeException("Purchase Price yielded invalid price. This is a bug.");
-        }
+        Price priceDifference = getPurchasePrice().subtract(sellingPrice);
+        TotalValue profit = priceDifference.toTotalValue(amount);
+        realisedProfit.iAdd(profit);
 
         super.decreasingPosition(amount, totalValue);
     }

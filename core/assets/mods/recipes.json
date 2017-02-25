@@ -107,7 +107,7 @@
     "ingredients": {
       "Energy": 2
     },
-    "buildTime": 20,
+    "buildTime": 200,
     "hickUpChance": 0.20
   },
   { "product": "Oxygen",
@@ -118,7 +118,7 @@
     "hickUpChance": 0.20
   },
   { "product": "Energy",
-    "buildTime": 10,
+    "buildTime": 100,
     "hickUpChance": 0.10
   },
   { "product": "Water",

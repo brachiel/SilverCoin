@@ -33,8 +33,7 @@ public class TradeNeed {
         if (priceLimit.isPresent() && need.priceLimit.isPresent()) {
             priceLimit = Optional.of(
                     priceLimit.get().toTotalValue(amount)
-                        .add(need.amount)
-                                .toPriceNotNull(amount + need.amount)
+                        .add(need.amount).toPrice(amount + need.amount)
             );
         } else {
             if (need.priceLimit.isPresent()) {

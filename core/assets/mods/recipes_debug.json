@@ -3,11 +3,18 @@
     "buildTime": 10,
     "hickUpChance": 0.10
   },
-  { "product": "Water",
+  { "product": "Algae",
     "ingredients": {
-      "Energy": 5
+      "Energy": 2
     },
-    "buildTime": 300,
+    "buildTime": 20,
+    "hickUpChance": 0.20
+  },
+  { "product": "Food",
+    "ingredients": {
+      "Algae": 100
+    },
+    "buildTime": 10,
     "hickUpChance": 0.20
   }
 ]}

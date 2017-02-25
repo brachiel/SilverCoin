@@ -1,6 +1,5 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
-import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
@@ -95,11 +94,7 @@ public class TradeOffer {
 
     public void addAmount(int amount, Price price) {
         if (amount == 0) throw new RuntimeException("Trying to divide by 0");
-        try {
-            this.price = this.price.toTotalValue(this.amount).add(price.toTotalValue(amount)).toPrice(this.amount + amount);
-        } catch (InvalidPriceException e) {
-            e.printStackTrace();
-        }
+        this.price = this.price.toTotalValue(this.amount).add(price.toTotalValue(amount)).toPrice(this.amount + amount);
         this.amount += amount;
 
         if (amount < 0) {
@@ -146,9 +141,9 @@ public class TradeOffer {
     }
 
 
-    public void accept(Entity acceptingTrader, int acceptingAmount) throws TradeOfferHasNotEnoughAmountLeft {
+    public void accept(Entity acceptingTrader, int acceptingAmount) {
         if (this.amount < acceptingAmount) {
-            throw new TradeOfferHasNotEnoughAmountLeft();
+            throw new RuntimeException("Trader has not enough amount left. This is a bug");
         }
 
         resultingTrade = new Trade(this, acceptingTrader, acceptingAmount);

@@ -4,7 +4,9 @@ import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
-import ch.chrummibei.silvercoin.universe.trade.*;
+import ch.chrummibei.silvercoin.universe.trade.Trade;
+import ch.chrummibei.silvercoin.universe.trade.TradeNeed;
+import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -39,9 +41,8 @@ public class TraderSystem extends IteratingSystem {
             processTrades(entity);
         }
 
-        if (trader.tradeOffers.size() > 0) {
-            removeOwnEmptyTradeOffers(entity);
-        }
+        removeOwnEmptyTradeOffers(entity);
+        removeEmptyTradeNeeds(entity);
 
         if (trader.tradeNeeds.size() > 0) {
             tradeAccordingToNeeds(entity);
@@ -50,28 +51,34 @@ public class TraderSystem extends IteratingSystem {
         if (Mappers.logger.has(entity)) logStatus(entity);
     }
 
+    private void removeEmptyTradeNeeds(Entity entity) {
+        TraderComponent trader = Mappers.trader.get(entity);
+        trader.tradeNeeds.removeIf(need -> need.amount == 0);
+    }
+
     private void tradeAccordingToNeeds(Entity entity) {
         TraderComponent trader = Mappers.trader.get(entity);
 
         for (TradeNeed need : trader.tradeNeeds) {
-            int toTrade = acceptPossibleTrades(entity, need.item, need);
+            int toTrade = acceptPossibleTrades(entity, need);
             if (toTrade == 0) continue;
             // Now, put an offer for the remaining trades
 
+            int toTradeAbs = Math.abs(toTrade);
             Optional<TradeOffer> existing = trader.filterTradeOffers(need.item, need.type()).findAny();
             if (existing.isPresent()) {
                 if (need.priceLimit.isPresent()) {
-                    existing.get().updateAmount(toTrade, need.priceLimit.get());
+                    existing.get().addAmount(toTradeAbs, need.priceLimit.get());
                 } else {
-                    existing.get().updateAmount(toTrade);
+                    existing.get().updateAmount(existing.get().getAmount() + toTradeAbs);
                 }
             } else {
-                int tradeAmount = toTrade;
+                TradeOffer.TYPE type = TradeOffer.TYPE.fromAmount(toTrade);
                 need.priceLimit.ifPresent(price ->
                     trader.tradeOffers.add(new TradeOffer(entity,
                             need.item,
-                            TradeOffer.TYPE.fromAmount(tradeAmount),
-                            Math.abs(tradeAmount),
+                            type,
+                            toTradeAbs,
                             price))
                 );
             }
@@ -79,26 +86,27 @@ public class TraderSystem extends IteratingSystem {
     }
 
     /** Accept as many trades as possible, and return the amount that is left to trade */
-    private int acceptPossibleTrades(Entity entity, Item item, TradeNeed need) {
+    private int acceptPossibleTrades(Entity entity, TradeNeed need) {
         MarketComponent market = Mappers.market.get(entity);
 
         int toTrade = calcAmountToTrade(entity, need);
+        if (toTrade == 0) return 0;
+
+        TradeOffer.TYPE type = TradeOffer.TYPE.fromAmount(toTrade);
+        int toTradeAbs = Math.abs(toTrade);
 
         for (Map.Entry<TradeOffer, Integer> entry :
-                market.searchTradeOffersToTradeAmount(item, TradeOffer.TYPE.fromAmount(toTrade), toTrade).entrySet()) {
-            try {
-                entry.getKey().accept(entity, entry.getValue());
-                toTrade -= entry.getValue();
-            } catch (TradeOfferHasNotEnoughAmountLeft tradeOfferHasNotEnoughAmountLeft) {
-                tradeOfferHasNotEnoughAmountLeft.printStackTrace();
-            }
+                market.searchTradeOffersToTradeAmount(need.item, type.opposite(), toTradeAbs).entrySet()) {
 
-            if (toTrade < 0) {
+            entry.getKey().accept(entity, entry.getValue());
+            toTradeAbs -= entry.getValue();
+
+            if (toTradeAbs < 0) {
                 throw new RuntimeException("Less than 0 left. This is a bug.");
             }
         }
 
-        return toTrade;
+        return (toTrade > 0) ? toTradeAbs : -toTradeAbs;
     }
 
     public static int calcAmountToTrade(Entity entity, TradeNeed need) {
@@ -114,7 +122,7 @@ public class TraderSystem extends IteratingSystem {
 
         // Limit the amount by inventory if selling
         if (amount < 0) {
-            amount = Math.max(amount, -inventory.positions.get(need.item).getAmount());
+            amount = -Math.min(-amount, inventory.positions.get(need.item).getAmount());
         }
 
         return amount;
@@ -130,14 +138,11 @@ public class TraderSystem extends IteratingSystem {
 
     public static int sumAcceptedTradeAmount(Entity entity, Item item) {
         TraderComponent trader = Mappers.trader.get(entity);
-        return trader.acceptedTrades.stream().filter(trade -> trade.getItem() == item).map(trade -> {
-            try {
-                return trade.getTradersItemPosition(entity);
-            } catch (TraderNotInvolvedException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }).mapToInt(PricedItemPosition::getAmount).sum();
+        return trader.acceptedTrades.stream()
+                .filter(trade -> trade.getItem() == item)
+                .map(trade -> trade.getTradersItemPosition(entity))
+                .mapToInt(PricedItemPosition::getAmount)
+                .sum();
     }
 
     public static void logStatus(Entity entity) {
@@ -172,31 +177,10 @@ public class TraderSystem extends IteratingSystem {
         // The amount in trade offers is decreased automatically by the trade offer upon accepting
         for (Trade trade : trader.acceptedTrades) {
             Item item = trade.getItem();
-            try {
-                PricedItemPosition newItemPosition = trade.getTradersItemPosition(entity);
-                wallet.credit.iSubtract(newItemPosition.getPurchaseValue());
-                addPricedPositionToInventory(entity, newItemPosition);
 
-                // Update needs
-                /*
-                trader.tradeNeeds.removeIf(need -> {
-                    if (need.item != item) return false;
-
-                    if (Math.signum(need.amount) == Math.signum(newItemPosition.getAmount())) {
-                        // We bought something we need
-                        if (Math.abs(newItemPosition.getAmount()) >= Math.abs(need.maxAmount.get())) {
-                            // We bought more than we need
-                            return true; // Remove
-                        } else {
-                            need.amount = Optional.of(need.amount - newItemPosition.getAmount());
-                        }
-                    }
-                    return false;
-                });
-                */
-            } catch (TraderNotInvolvedException e) {
-                e.printStackTrace();
-            }
+            PricedItemPosition newItemPosition = trade.getTradersItemPosition(entity);
+            wallet.credit.iSubtract(newItemPosition.getPurchaseValue());
+            addPricedPositionToInventory(entity, newItemPosition);
         }
 
         // Remove all accepted trades

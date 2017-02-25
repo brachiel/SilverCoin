@@ -1,7 +1,6 @@
 package ch.chrummibei.silvercoin.ai.tasks.factory;
 
 import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
-import ch.chrummibei.silvercoin.universe.components.TraderComponent;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ai.btree.LeafTask;
@@ -13,22 +12,21 @@ import com.badlogic.gdx.ai.btree.annotation.TaskAttribute;
  */
 public class ChangeSpreadTask extends LeafTask<Entity> {
     @TaskAttribute(required = true)
-    public float spreadChange;
+    public float spreadChangeFactor;
 
     public ChangeSpreadTask() {
         this(0);
     }
     public ChangeSpreadTask(float spreadChange) {
-        this.spreadChange = spreadChange;
+        this.spreadChangeFactor = spreadChange;
     }
 
     @Override
     public Status execute() {
         FactoryComponent factory = Mappers.factory.get(this.getObject());
-        TraderComponent trader = Mappers.trader.get(this.getObject());
 
-        if (factory.priceSpreadFactor + spreadChange > 1) {
-            factory.priceSpreadFactor += spreadChange;
+        if (factory.priceSpreadFactor * spreadChangeFactor > 1) {
+            factory.priceSpreadFactor *= spreadChangeFactor;
             return Status.SUCCEEDED;
         } else {
             return Status.FAILED;
@@ -37,7 +35,7 @@ public class ChangeSpreadTask extends LeafTask<Entity> {
 
     @Override
     protected Task<Entity> copyTo(Task<Entity> task) {
-        ((ChangeSpreadTask) task).spreadChange = spreadChange;
+        ((ChangeSpreadTask) task).spreadChangeFactor = spreadChangeFactor;
         return task;
     }
 }

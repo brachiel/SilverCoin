@@ -54,7 +54,7 @@ public class MarketComponent implements Component {
     }
 
     public Optional<TradeOffer> searchBestBuyingTrade(Item item) {
-        return filterTradeOffers(item, TradeOffer.TYPE.SELLING).max(TradeOffer.bestPriceComparator);
+        return filterTradeOffers(item, TradeOffer.TYPE.BUYING).max(TradeOffer.bestPriceComparator);
     }
 
     /**
@@ -70,7 +70,7 @@ public class MarketComponent implements Component {
                                                                   int amount) {
         HashMap<TradeOffer,Integer> tradeOffersToAccept = new HashMap<>();
 
-        int amountLeftToTrade = amount;
+        int amountLeftToTrade = Math.abs(amount);
 
         List<TradeOffer> sortedTradeOffers = filterTradeOffers(item, type)
                 .filter(offer -> offer.getAmount() != 0)

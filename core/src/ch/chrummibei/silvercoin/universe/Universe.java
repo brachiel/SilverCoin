@@ -23,7 +23,7 @@ import java.util.stream.Stream;
  */
 public class Universe {
     private static final Random random = new Random();
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     private final UniverseConfig universeConfig;
     private final ArrayList<Item> catalogue = new ArrayList<>();

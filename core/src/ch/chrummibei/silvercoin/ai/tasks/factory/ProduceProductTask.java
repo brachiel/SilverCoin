@@ -3,7 +3,6 @@ package ch.chrummibei.silvercoin.ai.tasks.factory;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
 import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
-import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.entity_systems.FactorySystem;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
@@ -56,11 +55,7 @@ public class ProduceProductTask extends LeafTask<Entity> {
             int ingredientAmount = factory.recipe.getIngredientAmount(ingredient);
             YieldingItemPosition position = inventory.positions.get(ingredient);
 
-            try {
-                position.removeItems(producingAmount * ingredientAmount, position.getPurchasePrice());
-            } catch (InvalidPriceException e) {
-                e.printStackTrace();
-            }
+            position.removeItems(producingAmount * ingredientAmount, position.getPurchasePrice());
         }
 
         // Add the produced products

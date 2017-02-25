@@ -2,7 +2,6 @@ package ch.chrummibei.silvercoin.ai.tasks.factory;
 
 import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
 import ch.chrummibei.silvercoin.universe.components.TraderComponent;
-import ch.chrummibei.silvercoin.universe.credit.InvalidPriceException;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.entity_systems.FactorySystem;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
@@ -24,13 +23,10 @@ public class UpdateSellTradeTask extends LeafTask<Entity> {
         int availableProductAmount = FactorySystem.getProductPosition(this.getObject()).getAmount();
         if (availableProductAmount <= 0) return Status.FAILED;
 
-        Price price;
-        try {
-            price = FactorySystem.getProductPosition(this.getObject()).getPurchasePrice().multiply(factory.priceSpreadFactor);
-        } catch (InvalidPriceException e) {
-            e.printStackTrace();
-            return Status.FAILED;
-        }
+        Price price = FactorySystem.getProductPosition(this.getObject())
+                .getPurchasePrice()
+                .multiply(factory.priceSpreadFactor);
+
 
         trader.setTradeNeed(
                 new TradeNeed(factory.recipe.product, -availableProductAmount, price));
