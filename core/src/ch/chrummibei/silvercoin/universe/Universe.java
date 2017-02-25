@@ -4,18 +4,13 @@ import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.entity_factories.BigSpenderEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.FactoryEntityFactory;
-import ch.chrummibei.silvercoin.universe.entity_systems.AISystem;
-import ch.chrummibei.silvercoin.universe.entity_systems.BigSpenderSystem;
-import ch.chrummibei.silvercoin.universe.entity_systems.FactorySystem;
-import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
+import ch.chrummibei.silvercoin.universe.entity_systems.*;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -26,9 +21,9 @@ public class Universe {
     public static final boolean DEBUG = false;
 
     private final UniverseConfig universeConfig;
-    private final ArrayList<Item> catalogue = new ArrayList<>();
-    private final MarketComponent market = new MarketComponent();
-    private final ArrayList<Entity> factories = new ArrayList<>();
+    private final HashSet<Item> catalogue = new HashSet<>();
+    private final HashSet<Entity> markets = new HashSet();
+    private final HashSet<Entity> factories = new HashSet<>();
 
     private final Engine engine = new Engine();
 
@@ -53,7 +48,9 @@ public class Universe {
         return universeConfig.catalogue().getItems();
     }
 
-    public void printStatus() {
+    public void printStatus(Entity entity) {
+        MarketComponent market = Mappers.market.get(entity);
+
         catalogue.forEach(item -> {
             Optional<TradeOffer> bestBuy = market.searchBestBuyingTrade(item);
             Optional<TradeOffer> bestSell = market.searchBestSellingTrade(item);
@@ -80,7 +77,6 @@ public class Universe {
     }
 
     void generateEntities() {
-        // Create random traders
         /*
         for (int i = 0; i < 5; ++ i) {
             Entity entity = TraderEntityFactory.RandomisedTraderEntity(catalogue, market);
@@ -88,14 +84,29 @@ public class Universe {
         }
         */
 
-        // Create 1 to 3 factories for every recipe with a goal stock of 5 to 15 positions
+        // Add two markets
+        markets.add(new Entity().add(new MarketComponent()));
+        markets.add(new Entity().add(new MarketComponent()));
+
+
         universeConfig.recipeBook().getRecipes().stream()
-                .flatMap(recipe -> Stream.iterate(recipe,r -> r)
-                                         .limit(universeConfig.factory().getRandomInt("factoriesPerRecipe")))
-                .forEach(recipe -> {
-            Entity entity = FactoryEntityFactory.FactoryEntity(universeConfig, market, recipe);
-            factories.add(entity);
-            engine.addEntity(entity);
+            .flatMap(recipe -> Stream.iterate(recipe,r -> r)
+                                     .limit(universeConfig.factory().getRandomInt("factoriesPerRecipe")))
+            .forEach(recipe -> {
+                // Choose random market
+                int r = Universe.getRandomInt(0, markets.size()-1);
+                Entity market = null;
+                Iterator<Entity> marketIterator = markets.iterator();
+                for (int i = 0; i <= r; ++i) {
+                    market = marketIterator.next();
+                }
+
+                Entity entity = FactoryEntityFactory.FactoryEntity(
+                        universeConfig,
+                        Mappers.market.get(market),
+                        recipe);
+                factories.add(entity);
+                engine.addEntity(entity);
         });
 
         /* TODO: Rewrite ArbitrageTrader as ComponentSystem
@@ -104,15 +115,17 @@ public class Universe {
         */
 
         Item transportShipItem = catalogue.stream().filter(item -> item.getName().equals("Transport ship")).findFirst().get();
-        Entity entity = BigSpenderEntityFactory.BigSpender(transportShipItem, market);
-        engine.addEntity(entity);
+        markets.forEach(market -> {
+            Entity entity = BigSpenderEntityFactory.BigSpender(transportShipItem, Mappers.market.get(market));
+            engine.addEntity(entity);
+        });
     }
 
     public Stream<MarketComponent> getMarketComponents() {
-        return Stream.of(market);
+        return markets.stream().map(Mappers.market::get);
     }
 
-    public ArrayList<Entity> getFactories() {
+    public HashSet<Entity> getFactories() {
         return factories;
     }
 

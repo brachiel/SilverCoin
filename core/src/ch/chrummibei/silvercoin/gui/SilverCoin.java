@@ -7,13 +7,20 @@ import ch.chrummibei.silvercoin.gui.widgets.ItemList;
 import ch.chrummibei.silvercoin.universe.Universe;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.particles.ParticleChannels;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class SilverCoin implements ApplicationListener {
@@ -53,8 +60,6 @@ public class SilverCoin implements ApplicationListener {
 		backgroundSprite.setColor(0.3f,0.3f,0.3f,1f);
 		backgroundSprite.draw(batch);
 		batch.end();
-
-
 		*/
 
 
@@ -67,13 +72,22 @@ public class SilverCoin implements ApplicationListener {
         //factoryListScroll.setPosition(0, HEIGHT);
         factoryListScroll.setBounds(5, 5, WIDTH/2-5, HEIGHT-10);
 
-        ItemList itemList = new ItemList(universe, skin);
+        Table container = new Table();
+
+        universe.getMarketComponents().forEach(market -> {
+            ItemList itemList = new ItemList(universe, market, skin);
+            container.add(itemList).expand().fill();
+        });
         //itemList.setPosition(factoryListScroll.getWidth() + 10, HEIGHT - 5);
 
-        Table container = new Table();
 		container.setFillParent(true);
-        container.add(factoryListScroll).expand().fill();
-        container.add(itemList).expand().fill();
+        container.add(factoryListScroll).width(WIDTH/2).fill();
+
+        // Prepare and set background
+        Texture backgroundTexture = new Texture(Gdx.files.internal("images/ngc253.jpg"));
+        TextureRegion backgroundRegion = new TextureRegion(backgroundTexture);
+        TextureRegionDrawable backgroundDrawable = new TextureRegionDrawable(backgroundRegion);
+        container.background(backgroundDrawable.tint(new Color(0.4f,0.4f,0.4f,1f)));
 
         stage.addActor(container);
 

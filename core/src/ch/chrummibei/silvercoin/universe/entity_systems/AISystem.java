@@ -23,5 +23,7 @@ public class AISystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         AIComponent ai = Mappers.ai.get(entity);
         ai.btree.step();
+
+        TraderSystem.integrityCheck(entity);
     }
 }

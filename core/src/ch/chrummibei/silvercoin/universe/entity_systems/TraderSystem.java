@@ -50,6 +50,7 @@ public class TraderSystem extends IteratingSystem {
         }
 
         if (Mappers.logger.has(entity)) logStatus(entity);
+        integrityCheck(entity);
     }
 
     private void removeEmptyTradeNeeds(Entity entity) {
@@ -135,19 +136,26 @@ public class TraderSystem extends IteratingSystem {
         InventoryComponent inventory = Mappers.inventory.get(entity);
 
         int amount = need.amount; // Can be positive or negative
-
-        // Correct the amount by the accepted trades
-        amount -= sumAcceptedTradeAmount(entity, need.item);
-
-        // Correct the amount by already existing trade offers
-        amount -= sumOwnTradeOfferAmount(entity, need.item);
+        float signum = Math.signum(amount);
 
         // Limit the amount by inventory if selling
         if (amount < 0) {
             amount = -Math.min(-amount, inventory.positions.get(need.item).getAmount());
         }
 
-        return amount;
+        // Correct the amount by the accepted trades
+        amount -= sumAcceptedTradeAmount(entity, need.item);
+
+        // Correct the amount by already existing trade offers
+        // When we're selling, sumOwn is negative
+        amount -= sumOwnTradeOfferAmount(entity, need.item);
+
+        if (signum != Math.signum(amount)) {
+            // Need says we need to sell, but turns our we have enough. Don't buy now.
+            return 0;
+        } else {
+            return amount;
+        }
     }
 
     public static int sumOwnTradeOfferAmount(Entity entity, Item item) {
@@ -224,6 +232,20 @@ public class TraderSystem extends IteratingSystem {
             }
         } else {
             inventory.positions.put(inventoryItem.getItem(), new YieldingItemPosition(inventoryItem));
+        }
+    }
+
+
+    public static void integrityCheck(Entity entity) {
+        if (! Mappers.factory.has(entity)) return;
+
+        YieldingItemPosition productPosition = FactorySystem.getProductPosition(entity);
+
+        int actualInventoryAmount = productPosition.getAmount();
+        actualInventoryAmount -= sumAcceptedTradeAmount(entity, productPosition.getItem());
+        actualInventoryAmount -= sumOwnTradeOfferAmount(entity, productPosition.getItem());
+        if (actualInventoryAmount < 0) {
+            throw new RuntimeException("Actual inventory is <0. This is a bug");
         }
     }
 }

@@ -3,8 +3,10 @@ package ch.chrummibei.silvercoin.gui.widgets;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.credit.Price;
+import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -23,8 +25,9 @@ public class ItemList extends Table {
     ArrayList<Item> items;
     MarketComponent market;
 
-    public ItemList(Universe universe, Skin skin) {
+    public ItemList(Universe universe, MarketComponent market, Skin skin) {
         super(skin);
+        this.market = market;
 
         add("ITEM").pad(0,0,5,5).align(Align.left);
         add("SELL").pad(0,0,5,5).align(Align.right).minWidth(40);
@@ -32,7 +35,6 @@ public class ItemList extends Table {
 
         items = universe.getItems();
         items.sort(Comparator.comparing(Item::getName));
-        market = universe.getMarketComponents().findAny().get();
 
         for (Item item : items) {
             row();

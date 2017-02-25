@@ -3,6 +3,7 @@ package ch.chrummibei.silvercoin.universe.trade;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
+import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import com.badlogic.ashley.core.Entity;
 
@@ -154,5 +155,7 @@ public class TradeOffer {
 
         Mappers.trader.get(acceptingTrader).acceptedTrades.add(resultingTrade);
         Mappers.trader.get(offeringTrader).acceptedTrades.add(resultingTrade);
+
+        TraderSystem.integrityCheck(offeringTrader);
     }
 }

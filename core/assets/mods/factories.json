@@ -21,6 +21,6 @@
   },
   "goalStock": {
     "min": 5,
-    "max": 120
+    "max": 10
   }
 }

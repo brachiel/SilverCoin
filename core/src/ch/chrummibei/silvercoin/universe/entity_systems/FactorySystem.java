@@ -31,7 +31,7 @@ public class FactorySystem extends IteratingSystem {
     protected void processEntity(Entity entity, float deltaTime) {
         Mappers.factory.get(entity).timeReservoirMillis += deltaTime * 1000;
 
-        // Logic is implemented by AIComponent
+        // Logic is implemented by the AISystem
     }
 
     public static Price calcProductPriceFromPurchasePrice(Entity entity) {
@@ -84,4 +84,5 @@ public class FactorySystem extends IteratingSystem {
         FactoryComponent factory = Mappers.factory.get(entity);
         return factory.recipe.ingredients.get(item) * factory.goalStock;
     }
+
 }
