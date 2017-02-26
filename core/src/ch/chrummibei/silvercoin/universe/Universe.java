@@ -87,8 +87,8 @@ public class Universe {
 
     void generateEntities() {
 
-        Entity player = PlayerEntityFactory.Player();
-        addWithPhysics(player, new Vector2(100, 100));
+        Entity player = PlayerEntityFactory.Player(box2dWorld, new Vector2(100, 100));
+        add(player);
 
         // Add two markets
         markets.add(new Entity().add(new MarketComponent()));
@@ -146,13 +146,6 @@ public class Universe {
     }
 
     public void add(Entity entity) {
-        engine.addEntity(entity);
-    }
-
-    public void addWithPhysics(Entity entity, Vector2 position) {
-        if (Mappers.physics.has(entity)) {
-            PhysicsSystem.createBody(entity, box2dWorld, position);
-        }
         engine.addEntity(entity);
     }
 }

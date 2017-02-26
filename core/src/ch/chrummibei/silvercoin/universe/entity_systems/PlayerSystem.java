@@ -1,6 +1,5 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
-import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
 import ch.chrummibei.silvercoin.universe.components.PhysicsComponent;
 import ch.chrummibei.silvercoin.universe.components.TraderComponent;
@@ -8,7 +7,10 @@ import ch.chrummibei.silvercoin.universe.components.WalletComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 
 /**
  * Created by brachiel on 26/02/2017.
@@ -31,15 +33,29 @@ public class PlayerSystem extends IteratingSystem {
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-        if (Universe.getRandomDouble(0,1) < 0.2) {
-            PhysicsComponent physics = Mappers.physics.get(entity);
-            Vector2 position = physics.body.getPosition();
+        PhysicsComponent physics = Mappers.physics.get(entity);
 
-            // Nudge
-            physics.body.applyLinearImpulse(
-                    (float) Universe.getRandomDouble(-2,2),
-                    (float) Universe.getRandomDouble(-2,2),
-                    position.x, position.y, true);
+        Body body = physics.body;
+        Vector2 velocity = body.getLinearVelocity();
+        Vector2 direction = new Vector2(1,0).rotateRad(body.getAngle());
+
+        final float straightImpulse = 100f;
+        final float angularImpulse = 50f;
+
+        System.out.println(direction);
+
+        // Trivial input handling
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            // Accelerate
+            physics.body.applyLinearImpulse(direction.cpy().setLength(straightImpulse), body.getPosition(), true);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            // Decelerate
+            physics.body.applyLinearImpulse(direction.cpy().setLength(straightImpulse).rotate(180), body.getPosition(), true);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            physics.body.applyAngularImpulse(angularImpulse, true);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            physics.body.applyAngularImpulse(-angularImpulse, true);
         }
+
     }
 }

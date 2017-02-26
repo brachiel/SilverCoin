@@ -5,7 +5,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.World;
 
 /**
  * Created by brachiel on 26/02/2017.
@@ -28,25 +29,11 @@ public class PhysicsSystem extends IteratingSystem {
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position);
 
-        Body body = box2dWorld.createBody(bodyDef);
-
+        physics.body = box2dWorld.createBody(bodyDef);
         physics.bodyDef = bodyDef;
-        physics.body = body;
-
-        CircleShape circle = new CircleShape();
-        circle.setRadius(3f); // 3 meters
-
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = circle;
-        fixtureDef.density = 1.5f;
-        fixtureDef.friction = 0.9f;
-        fixtureDef.restitution = 0.1f;
-
-        body.createFixture(fixtureDef);
     }
 
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
-
     }
 }
