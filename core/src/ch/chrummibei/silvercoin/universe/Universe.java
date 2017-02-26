@@ -4,11 +4,15 @@ import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.entity_factories.BigSpenderEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.FactoryEntityFactory;
+import ch.chrummibei.silvercoin.universe.entity_factories.PlayerEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_systems.*;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Box2D;
+import com.badlogic.gdx.physics.box2d.World;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -24,6 +28,7 @@ public class Universe {
     private final HashSet<Item> catalogue = new HashSet<>();
     private final HashSet<Entity> markets = new HashSet();
     private final HashSet<Entity> factories = new HashSet<>();
+    public final World box2dWorld = new World(new Vector2(0,0), true);
 
     private final Engine engine = new Engine();
 
@@ -67,6 +72,9 @@ public class Universe {
 
         generateEntities();
         generateEntitySystems();
+
+        // Initialise physics system
+        Box2D.init();
     }
 
     private void generateEntitySystems() {
@@ -74,15 +82,13 @@ public class Universe {
         engine.addSystem(new FactorySystem(2));
         engine.addSystem(new BigSpenderSystem(3));
         engine.addSystem(new AISystem(4));
+        engine.addSystem(new PlayerSystem(5));
     }
 
     void generateEntities() {
-        /*
-        for (int i = 0; i < 5; ++ i) {
-            Entity entity = TraderEntityFactory.RandomisedTraderEntity(catalogue, market);
-            engine.addEntity(entity);
-        }
-        */
+
+        Entity player = PlayerEntityFactory.Player();
+        addWithPhysics(player, new Vector2(100, 100));
 
         // Add two markets
         markets.add(new Entity().add(new MarketComponent()));
@@ -106,7 +112,7 @@ public class Universe {
                         Mappers.market.get(market),
                         recipe);
                 factories.add(entity);
-                engine.addEntity(entity);
+                add(entity);
         });
 
         /* TODO: Rewrite ArbitrageTrader as ComponentSystem
@@ -117,7 +123,7 @@ public class Universe {
         Item transportShipItem = catalogue.stream().filter(item -> item.getName().equals("Transport ship")).findFirst().get();
         markets.forEach(market -> {
             Entity entity = BigSpenderEntityFactory.BigSpender(transportShipItem, Mappers.market.get(market));
-            engine.addEntity(entity);
+            add(entity);
         });
     }
 
@@ -131,6 +137,22 @@ public class Universe {
 
     public void update(float delta) {
         System.out.println("---- TICK ----------------------------------------------------------");
+
+        // Game logic update
         engine.update(delta);
+
+        // Physics simulation
+        box2dWorld.step(delta, 6, 2);
+    }
+
+    public void add(Entity entity) {
+        engine.addEntity(entity);
+    }
+
+    public void addWithPhysics(Entity entity, Vector2 position) {
+        if (Mappers.physics.has(entity)) {
+            PhysicsSystem.createBody(entity, box2dWorld, position);
+        }
+        engine.addEntity(entity);
     }
 }

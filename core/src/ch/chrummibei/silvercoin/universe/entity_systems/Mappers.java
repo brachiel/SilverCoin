@@ -9,12 +9,16 @@ import com.badlogic.ashley.core.ComponentMapper;
 public class Mappers {
     public static final ComponentMapper<FactoryComponent> factory = ComponentMapper.getFor(FactoryComponent.class);
     public static final ComponentMapper<MarketComponent> market = ComponentMapper.getFor(MarketComponent.class);
-    public static final ComponentMapper<MarketSightComponent> marketSight = ComponentMapper.getFor(MarketSightComponent.class);
+    public static final ComponentMapper<MarketSightComponent> marketSight =
+                                ComponentMapper.getFor(MarketSightComponent.class);
     public static final ComponentMapper<NamedComponent> named = ComponentMapper.getFor(NamedComponent.class);
     public static final ComponentMapper<TraderComponent> trader = ComponentMapper.getFor(TraderComponent.class);
     public static final ComponentMapper<WalletComponent> wallet = ComponentMapper.getFor(WalletComponent.class);
-    public static final ComponentMapper<InventoryComponent> inventory = ComponentMapper.getFor(InventoryComponent.class);
-    public static final ComponentMapper<BigSpenderComponent> bigSpender = ComponentMapper.getFor(BigSpenderComponent.class);
+    public static final ComponentMapper<InventoryComponent> inventory =
+                                ComponentMapper.getFor(InventoryComponent.class);
+    public static final ComponentMapper<BigSpenderComponent> bigSpender =
+                                ComponentMapper.getFor(BigSpenderComponent.class);
     public static final ComponentMapper<LoggerComponent> logger = ComponentMapper.getFor(LoggerComponent.class);
     public static final ComponentMapper<AIComponent> ai = ComponentMapper.getFor(AIComponent.class);
+    public static final ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
 }
