@@ -77,7 +77,7 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
         PathfinderComponent pathfinder = Mappers.pathfinder.get(Universe.player);
 
         if (button == Input.Buttons.LEFT) {
-            pathfinder.goal = new Vector2(screenX, screenY);
+            pathfinder.goal = new Vector2(screenX/2, (Gdx.graphics.getHeight()-screenY)/2);
             return true;
         }
 

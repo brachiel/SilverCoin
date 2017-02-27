@@ -7,6 +7,7 @@ import ch.chrummibei.silvercoin.gui.widgets.ItemList;
 import ch.chrummibei.silvercoin.universe.Universe;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -16,6 +17,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -76,7 +79,31 @@ public class SilverCoin implements ApplicationListener {
         TextureRegionDrawable backgroundDrawable = new TextureRegionDrawable(backgroundRegion);
         container.background(backgroundDrawable.tint(new Color(0.4f,0.4f,0.4f,1f)));
 
-        // stage.addActor(container);
+
+        // Container contains the background. Hide the children and connect them to TAB
+        factoryListScroll.setVisible(false);
+        vSplitter.setVisible(false);
+
+        stage.addActor(container);
+        stage.addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keyCode) {
+                if (keyCode == Input.Keys.TAB) {
+                    factoryListScroll.setVisible(true);
+                    vSplitter.setVisible(true);
+                }
+                return super.keyDown(event, keyCode);
+            }
+
+            @Override
+            public boolean keyUp(InputEvent event, int keyCode) {
+                if (keyCode == Input.Keys.TAB) {
+                    factoryListScroll.setVisible(false);
+                    vSplitter.setVisible(false);
+                }
+                return super.keyUp(event, keyCode);
+            }
+        });
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(universe.playerSystem);
