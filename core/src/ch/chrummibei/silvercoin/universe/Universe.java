@@ -31,6 +31,8 @@ public class Universe {
     public final World box2dWorld = new World(new Vector2(0,0), true);
 
     private final Engine engine = new Engine();
+    public static Entity player;
+    public PlayerSystem playerSystem;
 
     public Universe(UniverseConfig universeConfig) {
         this.universeConfig = universeConfig;
@@ -82,12 +84,13 @@ public class Universe {
         engine.addSystem(new FactorySystem(2));
         engine.addSystem(new BigSpenderSystem(3));
         engine.addSystem(new AISystem(4));
-        engine.addSystem(new PlayerSystem(5));
+        engine.addSystem(new PathfinderSystem(5));
+        playerSystem = new PlayerSystem(6);
+        engine.addSystem(playerSystem);
     }
 
     void generateEntities() {
-
-        Entity player = PlayerEntityFactory.Player(box2dWorld, new Vector2(100, 100));
+        player = PlayerEntityFactory.Player(box2dWorld, new Vector2(100, 100));
         add(player);
 
         // Add two markets

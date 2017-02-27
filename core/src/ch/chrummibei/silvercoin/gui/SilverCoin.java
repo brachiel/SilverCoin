@@ -7,6 +7,7 @@ import ch.chrummibei.silvercoin.gui.widgets.ItemList;
 import ch.chrummibei.silvercoin.universe.Universe;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -38,7 +39,7 @@ public class SilverCoin implements ApplicationListener {
     private Camera debugCamera;
 
     @Override
-	public void create () {
+	public void create() {
 	    // We must do this all here and not in the constructor since Gdx.files are not ready during constructor
         universeConfig = new UniverseConfig();
         universe = new Universe(universeConfig);
@@ -77,8 +78,11 @@ public class SilverCoin implements ApplicationListener {
 
         // stage.addActor(container);
 
-        Gdx.input.setInputProcessor(stage);
-	}
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(universe.playerSystem);
+        multiplexer.addProcessor(stage);
+        Gdx.input.setInputProcessor(multiplexer);
+    }
 
 	@Override
 	public void resize(int width, int height) {

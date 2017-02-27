@@ -21,4 +21,6 @@ public class Mappers {
     public static final ComponentMapper<LoggerComponent> logger = ComponentMapper.getFor(LoggerComponent.class);
     public static final ComponentMapper<AIComponent> ai = ComponentMapper.getFor(AIComponent.class);
     public static final ComponentMapper<PhysicsComponent> physics = ComponentMapper.getFor(PhysicsComponent.class);
+    public static final ComponentMapper<PathfinderComponent> pathfinder =
+                                ComponentMapper.getFor(PathfinderComponent.class);
 }

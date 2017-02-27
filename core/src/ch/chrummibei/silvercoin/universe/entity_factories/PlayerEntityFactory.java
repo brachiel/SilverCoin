@@ -21,6 +21,7 @@ public class PlayerEntityFactory {
         entity.add(new NamedComponent("Player"));
         PhysicsComponent physics = new PhysicsComponent();
         entity.add(physics);
+        entity.add(new PathfinderComponent());
 
         PhysicsSystem.createBody(entity, box2dWorld, position);
 
