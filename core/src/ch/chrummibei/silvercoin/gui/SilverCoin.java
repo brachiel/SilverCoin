@@ -5,6 +5,7 @@ import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.gui.widgets.FactoryList;
 import ch.chrummibei.silvercoin.gui.widgets.ItemList;
 import ch.chrummibei.silvercoin.gui.widgets.TradeOfferList;
+import ch.chrummibei.silvercoin.messages.Messages;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import com.badlogic.gdx.ApplicationListener;
@@ -30,13 +31,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class SilverCoin implements ApplicationListener {
-    public static SilverCoin self; // TODO: This is not ok
-
 	private Stage stage;
 	private Universe universe;
 	private UniverseConfig universeConfig;
 	private Skin skin;
-	private TradeOfferList tradeOfferList;
 
 	BitmapFont font;
 
@@ -48,8 +46,6 @@ public class SilverCoin implements ApplicationListener {
 
     @Override
 	public void create() {
-        self = this;
-
 	    // We must do this all here and not in the constructor since Gdx.files are not ready during constructor
         universeConfig = new UniverseConfig();
         universe = new Universe(universeConfig);
@@ -58,7 +54,7 @@ public class SilverCoin implements ApplicationListener {
 		font = Resources.getDefaultFont();
 
 		skin = new Skin(Gdx.files.internal("skins/uiskin.json"),
-                new TextureAtlas(Gdx.files.internal("skins/uiskin.atlas")));
+               new TextureAtlas(Gdx.files.internal("skins/uiskin.atlas")));
 
 		debugRenderer = new Box2DDebugRenderer();
 
@@ -76,12 +72,23 @@ public class SilverCoin implements ApplicationListener {
         });
 
 
-        tradeOfferList = new TradeOfferList(universe, skin);
-        vSplitter.addActor(tradeOfferList);
+        TradeOfferList tradeOfferList = new TradeOfferList(universe, skin);
+        universe.messageDispatcher.addListeners(msg -> {
+            switch (msg.message) {
+                case Messages.PLAYER_JOINED_MARKET:
+                    tradeOfferList.market = (MarketComponent) msg.extraInfo;
+                    container.add(tradeOfferList);
+                    break;
+                case Messages.PLAYER_LEFT_MARKET:
+                    tradeOfferList.market = null;
+                    container.removeActor(tradeOfferList);
+                    break;
+            }
+            return true;
+        }, Messages.PLAYER_JOINED_MARKET, Messages.PLAYER_LEFT_MARKET);
 
         // Pack everything to the main container
 		container.setFillParent(true);
-		container.add(tradeOfferList);
 
         // Prepare and set background
         Texture backgroundTexture = new Texture(Gdx.files.internal("images/ngc253.jpg"));
@@ -117,15 +124,6 @@ public class SilverCoin implements ApplicationListener {
         Gdx.input.setInputProcessor(multiplexer);
     }
 
-    // TODO: This is not ok.
-    public void playerJoinedMarket(MarketComponent market) {
-        tradeOfferList.market = market;
-    }
-
-    // TODO: This is not ok.
-    public void playerLeftMarket() {
-        tradeOfferList.market = null;
-    }
 
 	@Override
 	public void resize(int width, int height) {

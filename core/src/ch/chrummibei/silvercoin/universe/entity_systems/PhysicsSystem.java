@@ -1,6 +1,6 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
-import ch.chrummibei.silvercoin.gui.SilverCoin;
+import ch.chrummibei.silvercoin.messages.Messages;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.components.PhysicsComponent;
@@ -44,7 +44,7 @@ public class PhysicsSystem extends IteratingSystem implements ContactListener {
         traderEntity.add(market);
 
         if (traderEntity == Universe.player) {
-            SilverCoin.self.playerJoinedMarket(market);
+            Universe.messageDispatcher.dispatchMessage(Messages.PLAYER_JOINED_MARKET, market);
         }
     }
 
@@ -53,7 +53,7 @@ public class PhysicsSystem extends IteratingSystem implements ContactListener {
         traderEntity.remove(MarketComponent.class);
 
         if (traderEntity == Universe.player) {
-            SilverCoin.self.playerLeftMarket();
+            Universe.messageDispatcher.dispatchMessage(Messages.PLAYER_LEFT_MARKET);
         }
     }
 
@@ -81,9 +81,9 @@ public class PhysicsSystem extends IteratingSystem implements ContactListener {
         Entity entityA = (Entity) contact.getFixtureA().getBody().getUserData();
         Entity entityB = (Entity) contact.getFixtureB().getBody().getUserData();
 
-        if (Mappers.trader.has(entityA) && Mappers.market.has(entityB) && !Mappers.market.has(entityA)) {
+        if (Mappers.trader.has(entityA) && Mappers.market.has(entityB) && !Mappers.trader.has(entityB)) {
             endContactTraderMarket(entityA, entityB);
-        } else if (Mappers.trader.has(entityB) && Mappers.market.has(entityA) && !Mappers.market.has(entityB)) {
+        } else if (Mappers.trader.has(entityB) && Mappers.market.has(entityA) && !Mappers.trader.has(entityA)) {
             endContactTraderMarket(entityB, entityA);
         }
     }

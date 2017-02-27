@@ -11,6 +11,7 @@ import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.World;
@@ -22,8 +23,11 @@ import java.util.stream.Stream;
  * The universe contains the world, all entities and manages randomness.
  */
 public class Universe {
-    private static final Random random = new Random();
     public static final boolean DEBUG = false;
+
+    private static final Random random = new Random();
+    public static final MessageDispatcher messageDispatcher = new MessageDispatcher();
+    public enum EVENTS { PLAYER_JOINED_MARKET, PLAYER_LEFT_MARKET }
 
     private final UniverseConfig universeConfig;
     private final HashSet<Item> catalogue = new HashSet<>();
@@ -74,6 +78,9 @@ public class Universe {
 
     void initialise() {
         catalogue.addAll(universeConfig.catalogue().getItems());
+
+        // Turn on message debugger
+        messageDispatcher.setDebugEnabled(true);
 
         generateEntities();
         generateEntitySystems();
@@ -146,7 +153,10 @@ public class Universe {
     }
 
     public void update(float delta) {
-        System.out.println("---- TICK ----------------------------------------------------------");
+        //System.out.println("---- TICK ----------------------------------------------------------");
+
+        // Message update
+        messageDispatcher.update();
 
         // Game logic update
         engine.update(delta);
@@ -158,4 +168,5 @@ public class Universe {
     public void add(Entity entity) {
         engine.addEntity(entity);
     }
+
 }
