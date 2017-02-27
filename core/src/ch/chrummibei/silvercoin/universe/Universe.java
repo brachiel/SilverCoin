@@ -4,6 +4,7 @@ import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.entity_factories.BigSpenderEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.FactoryEntityFactory;
+import ch.chrummibei.silvercoin.universe.entity_factories.MarketEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.PlayerEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_systems.*;
 import ch.chrummibei.silvercoin.universe.item.Item;
@@ -32,7 +33,9 @@ public class Universe {
 
     private final Engine engine = new Engine();
     public static Entity player;
+
     public PlayerSystem playerSystem;
+    public PhysicsSystem physicsSystem;
 
     public Universe(UniverseConfig universeConfig) {
         this.universeConfig = universeConfig;
@@ -77,6 +80,9 @@ public class Universe {
 
         // Initialise physics system
         Box2D.init();
+
+        // Have the physics system handle collisions
+        box2dWorld.setContactListener(physicsSystem);
     }
 
     private void generateEntitySystems() {
@@ -84,8 +90,10 @@ public class Universe {
         engine.addSystem(new FactorySystem(2));
         engine.addSystem(new BigSpenderSystem(3));
         engine.addSystem(new AISystem(4));
-        engine.addSystem(new PathfinderSystem(5));
-        playerSystem = new PlayerSystem(6);
+        physicsSystem = new PhysicsSystem(6);
+        // engine.addSystem(physicsSystem); // The entity processor does nothing, so far.
+        engine.addSystem(new PathfinderSystem(7));
+        playerSystem = new PlayerSystem(8);
         engine.addSystem(playerSystem);
     }
 
@@ -94,9 +102,8 @@ public class Universe {
         add(player);
 
         // Add two markets
-        markets.add(new Entity().add(new MarketComponent()));
-        markets.add(new Entity().add(new MarketComponent()));
-
+        markets.add(MarketEntityFactory.Market(box2dWorld, new Vector2(300,200)));
+        markets.add(MarketEntityFactory.Market(box2dWorld, new Vector2(400,100)));
 
         universeConfig.recipeBook().getRecipes().stream()
             .flatMap(recipe -> Stream.iterate(recipe,r -> r)

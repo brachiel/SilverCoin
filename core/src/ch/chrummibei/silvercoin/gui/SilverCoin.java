@@ -4,7 +4,9 @@ import ch.chrummibei.silvercoin.config.Resources;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.gui.widgets.FactoryList;
 import ch.chrummibei.silvercoin.gui.widgets.ItemList;
+import ch.chrummibei.silvercoin.gui.widgets.TradeOfferList;
 import ch.chrummibei.silvercoin.universe.Universe;
+import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -28,10 +30,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class SilverCoin implements ApplicationListener {
+    public static SilverCoin self; // TODO: This is not ok
+
 	private Stage stage;
 	private Universe universe;
 	private UniverseConfig universeConfig;
 	private Skin skin;
+	private TradeOfferList tradeOfferList;
 
 	BitmapFont font;
 
@@ -43,6 +48,8 @@ public class SilverCoin implements ApplicationListener {
 
     @Override
 	public void create() {
+        self = this;
+
 	    // We must do this all here and not in the constructor since Gdx.files are not ready during constructor
         universeConfig = new UniverseConfig();
         universe = new Universe(universeConfig);
@@ -68,10 +75,13 @@ public class SilverCoin implements ApplicationListener {
             vSplitter.addActor(itemList);
         });
 
+
+        tradeOfferList = new TradeOfferList(universe, skin);
+        vSplitter.addActor(tradeOfferList);
+
         // Pack everything to the main container
 		container.setFillParent(true);
-        container.add(factoryListScroll).width(WIDTH/2).fill();
-        container.add(vSplitter).expand().fill();
+		container.add(tradeOfferList);
 
         // Prepare and set background
         Texture backgroundTexture = new Texture(Gdx.files.internal("images/ngc253.jpg"));
@@ -80,17 +90,13 @@ public class SilverCoin implements ApplicationListener {
         container.background(backgroundDrawable.tint(new Color(0.4f,0.4f,0.4f,1f)));
 
 
-        // Container contains the background. Hide the children and connect them to TAB
-        factoryListScroll.setVisible(false);
-        vSplitter.setVisible(false);
-
         stage.addActor(container);
         stage.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keyCode) {
                 if (keyCode == Input.Keys.TAB) {
-                    factoryListScroll.setVisible(true);
-                    vSplitter.setVisible(true);
+                    container.add(factoryListScroll).width(WIDTH/2).fill();
+                    container.add(vSplitter).expand().fill();
                 }
                 return super.keyDown(event, keyCode);
             }
@@ -98,8 +104,8 @@ public class SilverCoin implements ApplicationListener {
             @Override
             public boolean keyUp(InputEvent event, int keyCode) {
                 if (keyCode == Input.Keys.TAB) {
-                    factoryListScroll.setVisible(false);
-                    vSplitter.setVisible(false);
+                    container.removeActor(factoryListScroll);
+                    container.removeActor(vSplitter);
                 }
                 return super.keyUp(event, keyCode);
             }
@@ -109,6 +115,16 @@ public class SilverCoin implements ApplicationListener {
         multiplexer.addProcessor(universe.playerSystem);
         multiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(multiplexer);
+    }
+
+    // TODO: This is not ok.
+    public void playerJoinedMarket(MarketComponent market) {
+        tradeOfferList.market = market;
+    }
+
+    // TODO: This is not ok.
+    public void playerLeftMarket() {
+        tradeOfferList.market = null;
     }
 
 	@Override
@@ -129,7 +145,6 @@ public class SilverCoin implements ApplicationListener {
 		debugRenderer.render(universe.box2dWorld, stage.getCamera().combined);
 
         universe.update(deltaTime); // Game Tick
-
 	}
 
 	@Override
