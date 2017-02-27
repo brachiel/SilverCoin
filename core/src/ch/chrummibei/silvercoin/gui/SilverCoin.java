@@ -4,10 +4,13 @@ import ch.chrummibei.silvercoin.config.Resources;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.gui.widgets.FactoryList;
 import ch.chrummibei.silvercoin.gui.widgets.ItemList;
+import ch.chrummibei.silvercoin.gui.widgets.ShipActor;
 import ch.chrummibei.silvercoin.gui.widgets.TradeOfferList;
 import ch.chrummibei.silvercoin.messages.Messages;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;
+import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -19,6 +22,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -28,6 +32,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class SilverCoin implements ApplicationListener {
@@ -76,10 +81,12 @@ public class SilverCoin implements ApplicationListener {
         universe.messageDispatcher.addListeners(msg -> {
             switch (msg.message) {
                 case Messages.PLAYER_JOINED_MARKET:
+                    if (tradeOfferList.market != null) return true;
                     tradeOfferList.market = (MarketComponent) msg.extraInfo;
                     container.add(tradeOfferList);
                     break;
                 case Messages.PLAYER_LEFT_MARKET:
+                    if (tradeOfferList.market == null) return true;
                     tradeOfferList.market = null;
                     container.removeActor(tradeOfferList);
                     break;
@@ -118,6 +125,17 @@ public class SilverCoin implements ApplicationListener {
             }
         });
 
+        // Add Ships
+        Texture shipTexture = new Texture(Gdx.files.internal("skins/ship.png"));
+        Array<Body> bodies = new Array<>();
+        universe.box2dWorld.getBodies(bodies);
+        for (Body body : bodies) {
+            if (Mappers.trader.has((Entity) body.getUserData())) {
+                stage.addActor(new ShipActor(body, shipTexture));
+            }
+        }
+
+
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(universe.playerSystem);
         multiplexer.addProcessor(stage);
@@ -145,7 +163,7 @@ public class SilverCoin implements ApplicationListener {
         universe.update(deltaTime); // Game Tick
 	}
 
-	@Override
+    @Override
 	public void pause() {
 
 	}

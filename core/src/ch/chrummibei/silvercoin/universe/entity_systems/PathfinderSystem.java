@@ -5,6 +5,7 @@ import ch.chrummibei.silvercoin.universe.components.PhysicsComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 
@@ -12,7 +13,7 @@ import com.badlogic.gdx.physics.box2d.Body;
  * Created by brachiel on 26/02/2017.
  */
 public class PathfinderSystem extends IteratingSystem {
-    public static final float MAX_VELOCITY = 50;
+    public static final float MAX_VELOCITY = 200;
 
     public static Family family = Family.all(
                 PhysicsComponent.class,
@@ -36,6 +37,10 @@ public class PathfinderSystem extends IteratingSystem {
 
         Body body = physics.body;
         Vector2 directPath = pathfinder.goal.cpy().sub(body.getPosition());
+        float angleDiff = directPath.angleRad() - body.getAngle() * MathUtils.degreesToRadians;
+
+        // Turn into direction
+        body.setTransform(body.getPosition(), angleDiff);
 
         // Check if we're on target
         if (directPath.len() <= pathfinder.precision) {
