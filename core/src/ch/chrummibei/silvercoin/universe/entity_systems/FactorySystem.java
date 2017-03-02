@@ -59,21 +59,20 @@ public class FactorySystem extends IteratingSystem {
         return inventory.positions.get(factory.recipe.product);
     }
 
-    public static int calcProducibleAmountWithIngredients(Entity entity) {
+    public static int calcProducibleBulksWithIngredients(Entity entity) {
         FactoryComponent factory =  Mappers.factory.get(entity);
-        InventoryComponent inventory = Mappers.inventory.get(entity);
 
         if (factory.recipe.ingredients.size() == 0) { // This recipe needs no ingredients. Production only depends on time
             return Integer.MAX_VALUE;
         }
 
         return factory.recipe.ingredients.keySet().stream()
-                .mapToInt(item -> FactorySystem.calcProducibleAmount(entity, item))
+                .mapToInt(item -> FactorySystem.calcProducibleBulks(entity, item))
                 .min()
                 .orElse(0);
     }
 
-    public static int calcProducibleAmount(Entity entity, Item item) {
+    public static int calcProducibleBulks(Entity entity, Item item) {
         FactoryComponent factory =  Mappers.factory.get(entity);
         InventoryComponent inventory = Mappers.inventory.get(entity);
 

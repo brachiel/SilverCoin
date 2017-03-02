@@ -1,8 +1,10 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
-import ch.chrummibei.silvercoin.messages.Messages;
+import ch.chrummibei.silvercoin.constants.Messages;
 import ch.chrummibei.silvercoin.universe.Universe;
-import ch.chrummibei.silvercoin.universe.components.*;
+import ch.chrummibei.silvercoin.universe.components.MarketAccessComponent;
+import ch.chrummibei.silvercoin.universe.components.MarketComponent;
+import ch.chrummibei.silvercoin.universe.components.PhysicsComponent;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -82,9 +84,6 @@ public class PhysicsSystem extends IteratingSystem implements ContactListener {
     }
 
     private void beginContactTransportTrader(Entity transport, Entity trader) {
-        TraderComponent traderComponent = Mappers.trader.get(trader);
-        TransportComponent transportComponent = Mappers.transport.get(transport);
-
         // TODO: This doesn't belong here.
         if (TraderSystem.doesAcceptDelivery(trader, transport)) {
             TraderSystem.processDeliveredTrade(trader, transport);

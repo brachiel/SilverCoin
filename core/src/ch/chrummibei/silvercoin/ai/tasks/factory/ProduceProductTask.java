@@ -23,26 +23,26 @@ public class ProduceProductTask extends LeafTask<Entity> {
         FactoryComponent factory = Mappers.factory.get(this.getObject());
         InventoryComponent inventory = Mappers.inventory.get(this.getObject());
 
-        int producingAmount = FactorySystem.calcProducibleAmountWithIngredients(this.getObject());
+        int producingBulks = FactorySystem.calcProducibleBulksWithIngredients(this.getObject());
         // Do not produce more than needed
-        producingAmount = Math.min(producingAmount,
+        producingBulks = Math.min(producingBulks,
                 factory.goalStock - FactorySystem.getProductPosition(this.getObject()).getAmount());
 
-        if (producingAmount == 0) {
+        if (producingBulks == 0) {
             // We don't have enough ingredients, so we can't start to produce. Resetting time reservoir.
             factory.timeReservoirMillis = Math.min(0, factory.timeReservoirMillis);
             return Status.FAILED;
         }
 
-        // Calculate how many we can produce with the time reservoir
-        producingAmount = Math.min(producingAmount,
+        // Calculate how many bulks we can produce with the time reservoir
+        producingBulks = Math.min(producingBulks,
                 Math.toIntExact(factory.timeReservoirMillis / factory.recipe.buildTimeMillis));
 
-        if (producingAmount <= 0) {
+        if (producingBulks <= 0) {
             return Status.FAILED; // Not enough time has passed to produce.
         }
 
-        factory.timeReservoirMillis -= producingAmount * factory.recipe.buildTimeMillis; // Subtract the time we needed from reservoir
+        factory.timeReservoirMillis -= producingBulks * factory.recipe.buildTimeMillis; // Subtract the time we needed from reservoir
 
         // Check if there was a hick up. If so, we need to repair the factors. This needs some time.
         if (Universe.getRandomDouble(0, 1) > factory.recipe.hickUpChance) {
@@ -55,11 +55,12 @@ public class ProduceProductTask extends LeafTask<Entity> {
             int ingredientAmount = factory.recipe.getIngredientAmount(ingredient);
             YieldingItemPosition position = inventory.positions.get(ingredient);
 
-            position.removeItems(producingAmount * ingredientAmount, position.getPurchasePrice());
+            position.removeItems(producingBulks * ingredientAmount, position.getPurchasePrice());
         }
 
         // Add the produced products
-        FactorySystem.getProductPosition(this.getObject()).addItems(producingAmount, productPrice);
+        FactorySystem.getProductPosition(this.getObject())
+                .addItems(producingBulks * factory.recipe.amountPerBulk, productPrice);
 
         return Status.SUCCEEDED;
     }

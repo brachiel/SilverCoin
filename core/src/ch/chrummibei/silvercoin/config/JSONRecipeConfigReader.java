@@ -25,6 +25,7 @@ public class JSONRecipeConfigReader {
             @Override
             public Recipe read(Json json, JsonValue jsonData, Class type) {
                 Item product = null;
+                int amountPerBulk = 1;
                 HashMap<Item,Integer> ingredients= new HashMap<>();
                 Long buildTime = null;
                 Float hickUpChance = null;
@@ -33,6 +34,9 @@ public class JSONRecipeConfigReader {
                     switch (child.name()) {
                         case "product":
                             product = itemConfig.getItemByName(child.asString());
+                            break;
+                        case "amountPerBulk":
+                            amountPerBulk = child.asInt();
                             break;
                         case "ingredients":
                             for (JsonValue ingredient : child) {
@@ -50,7 +54,7 @@ public class JSONRecipeConfigReader {
                     }
                 }
 
-                return new Recipe(product, ingredients, buildTime, hickUpChance);
+                return new Recipe(product, amountPerBulk, ingredients, buildTime, hickUpChance);
             }
         });
 

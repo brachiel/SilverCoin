@@ -24,6 +24,8 @@ root
     sequence
       produceProduct
       updateSellTrade
-      wait seconds:"uniform,0.0001,0.01"
     sequence
-      buyIngredients
+      random success:"uniform,0.1" # success in 10% of cases
+        success
+      buyIngredients # succeeds if we were able to buy ingredients
+      #wait seconds:"uniform,1,2" # After buying ingredients, we wait between 1 and 2 seconds

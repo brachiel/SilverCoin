@@ -2,12 +2,12 @@ package ch.chrummibei.silvercoin.gui;
 
 import ch.chrummibei.silvercoin.config.Resources;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
+import ch.chrummibei.silvercoin.constants.Messages;
 import ch.chrummibei.silvercoin.gui.actors.MarketActor;
 import ch.chrummibei.silvercoin.gui.actors.ShipActor;
 import ch.chrummibei.silvercoin.gui.widgets.FactoryList;
 import ch.chrummibei.silvercoin.gui.widgets.ItemList;
 import ch.chrummibei.silvercoin.gui.widgets.TradeOfferList;
-import ch.chrummibei.silvercoin.messages.Messages;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.ActorComponent;
 import ch.chrummibei.silvercoin.universe.components.PhysicsComponent;

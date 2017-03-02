@@ -1,6 +1,6 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
-import ch.chrummibei.silvercoin.messages.Messages;
+import ch.chrummibei.silvercoin.constants.Messages;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
@@ -280,6 +280,8 @@ public class TraderSystem extends IteratingSystem {
     public static void processDeliveredTrade(Entity entity, Entity transportEntity) {
         TraderComponent trader = Mappers.trader.get(entity);
         TransportComponent transport = Mappers.transport.get(transportEntity);
+
+        System.out.println("Delivery of " + transport.trade);
 
         // This trade was delivered to us. So we can add it to our inventory
         PricedItemPosition newItemPosition = transport.trade.getTradersItemPosition(entity);

@@ -23,8 +23,8 @@ public class BuyIngredientsTask extends LeafTask<Entity> {
         TraderComponent trader = Mappers.trader.get(this.getObject());
 
         for (Map.Entry<Item,Integer> entry : factory.recipe.ingredients.entrySet()) {
-            int amountToBuy = entry.getValue() * factory.goalStock
-                    - inventory.positions.get(entry.getKey()).getAmount();
+            int amountToBuy = (int) Math.ceil(entry.getValue() * factory.goalStock / factory.recipe.amountPerBulk
+                    - inventory.positions.get(entry.getKey()).getAmount());
             if (amountToBuy <= 0) continue;
 
             // Find the cheapest TradeOffers

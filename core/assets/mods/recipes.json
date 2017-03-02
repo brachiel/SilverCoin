@@ -27,13 +27,15 @@
     "hickUpChance": 0.20
   },
   { "product": "Structural component",
+    "amountPerBulk": 3,
     "ingredients": {
       "Iron": 30
     },
-    "buildTime": 700,
+    "buildTime": 1000,
     "hickUpChance": 0.20
   },
   { "product": "Structural component",
+    "amountPerBulk": 3,
     "ingredients": {
       "Aluminum": 40
     },
@@ -58,18 +60,20 @@
     "hickUpChance": 0.20
   },
   { "product": "Heavy water",
+    "amountPerBulk": 10,
     "ingredients": {
       "Water": 30,
       "Energy": 50
     },
-    "buildTime": 500,
+    "buildTime": 1500,
     "hickUpChance": 0.20
   },
   { "product": "Electronic coil",
+    "amountPerBulk": 2,
     "ingredients": {
       "Copper": 5
     },
-    "buildTime": 700,
+    "buildTime": 1100,
     "hickUpChance": 0.20
   },
   { "product": "Electronics",
@@ -90,42 +94,48 @@
     "hickUpChance": 0.20
   },
   { "product": "AI core",
+    "amountPerBulk": 5,
     "ingredients": {
       "Electronics": 5
     },
-    "buildTime": 500,
+    "buildTime": 1500,
     "hickUpChance": 0.20
   },
   { "product": "Food",
+    "amountPerBulk": 5,
     "ingredients": {
       "Algae": 100
     },
-    "buildTime": 1000,
+    "buildTime": 1100,
     "hickUpChance": 0.20
   },
   { "product": "Algae",
+    "amountPerBulk": 15,
     "ingredients": {
       "Energy": 2
     },
-    "buildTime": 200,
+    "buildTime": 1100,
     "hickUpChance": 0.20
   },
   { "product": "Oxygen",
+    "amountPerBulk": 30,
     "ingredients": {
       "Energy": 5
     },
-    "buildTime": 100,
+    "buildTime": 1200,
     "hickUpChance": 0.20
   },
   { "product": "Energy",
-    "buildTime": 100,
+    "amountPerBulk": 20,
+    "buildTime": 1000,
     "hickUpChance": 0.10
   },
   { "product": "Water",
+    "amountPerBulk": 10,
     "ingredients": {
       "Energy": 5
     },
-    "buildTime": 300,
+    "buildTime": 1700,
     "hickUpChance": 0.20
   },
   { "product": "Thorium",
@@ -136,31 +146,35 @@
     "hickUpChance": 0.20
   },
   { "product": "Copper",
+    "amountPerBulk": 3,
     "ingredients": {
       "Energy": 7
     },
-    "buildTime": 500,
+    "buildTime": 1300,
     "hickUpChance": 0.20
   },
   { "product": "Iron",
+    "amountPerBulk": 20,
     "ingredients": {
       "Energy": 8
     },
-    "buildTime": 450,
+    "buildTime": 1450,
     "hickUpChance": 0.20
   },
   { "product": "Aluminum",
+    "amountPerBulk": 30,
     "ingredients": {
       "Energy": 20
     },
-    "buildTime": 450,
+    "buildTime": 2050,
     "hickUpChance": 0.20
   },
   { "product": "Silicon",
+    "amountPerBulk": 7,
     "ingredients": {
       "Energy": 30
     },
-    "buildTime": 700,
+    "buildTime": 1400,
     "hickUpChance": 0.20
   }
 ]}

@@ -1,6 +1,7 @@
 package ch.chrummibei.silvercoin.universe.entity_factories;
 
 import ch.chrummibei.silvercoin.config.UniverseConfig;
+import ch.chrummibei.silvercoin.constants.Categories;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.credit.Price;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.ai.btree.utils.BehaviorTreeLibraryManager;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Filter;
 
 /**
  * Created by brachiel on 21/02/2017.
@@ -40,7 +42,10 @@ public class FactoryEntityFactory {
                 universeConfig.factory().getRandomDouble("spreadFactor"));
         InventoryComponent inventory = new InventoryComponent();
 
-        PhysicsComponent physics = new PhysicsComponent(entity, position, BodyDef.BodyType.StaticBody, 3);
+        Filter filter = new Filter();
+        filter.categoryBits = Categories.FACTORY;
+        filter.maskBits = Categories.TRANSPORT | Categories.SHIP;
+        PhysicsComponent physics = new PhysicsComponent(entity, position, BodyDef.BodyType.StaticBody, 3, filter);
 
         entity.add(new NamedComponent(recipe.product.getName() + " factory " + factorySequence++));
         entity.add(new WalletComponent(universeConfig.factory().getRandomDouble("startingCredit")));

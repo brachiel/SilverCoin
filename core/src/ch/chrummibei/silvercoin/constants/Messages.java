@@ -1,4 +1,4 @@
-package ch.chrummibei.silvercoin.messages;
+package ch.chrummibei.silvercoin.constants;
 
 /**
  * Created by brachiel on 27/02/2017.

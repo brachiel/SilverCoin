@@ -15,11 +15,11 @@ public class PhysicsComponent implements Component {
     public Body body;
 
     public PhysicsComponent(Entity entity, Vector2 position, BodyDef.BodyType type) {
-        this(entity, position, type, createCircleFixtureDef(3));
+        this(entity, position, type, createCircleFixtureDef(3, null));
     }
 
-    public PhysicsComponent(Entity entity, Vector2 position, BodyDef.BodyType type, float radius) {
-        this(entity, position, type, createCircleFixtureDef(radius));
+    public PhysicsComponent(Entity entity, Vector2 position, BodyDef.BodyType type, float radius, Filter filter) {
+        this(entity, position, type, createCircleFixtureDef(radius, filter));
     }
 
     public PhysicsComponent(Entity entity, Vector2 position, BodyDef.BodyType type, FixtureDef fixtureDef) {
@@ -34,13 +34,18 @@ public class PhysicsComponent implements Component {
         fixtureDef.shape.dispose();
     }
 
-    public static FixtureDef createCircleFixtureDef(float radius) {
+    public static FixtureDef createCircleFixtureDef(float radius, Filter filter) {
         CircleShape circle = new CircleShape();
         circle.setRadius(radius);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
         fixtureDef.friction = 0;
+        if (filter != null) {
+            fixtureDef.filter.categoryBits = filter.categoryBits;
+            fixtureDef.filter.groupIndex = filter.groupIndex;
+            fixtureDef.filter.maskBits = filter.maskBits;
+        }
 
         return fixtureDef;
     }
