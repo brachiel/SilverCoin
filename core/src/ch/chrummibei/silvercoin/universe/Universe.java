@@ -138,14 +138,19 @@ public class Universe {
                 Entity entity = FactoryEntityFactory.FactoryEntity(
                         universeConfig,
                         market,
-                        new Vector2(
-                                (float) getRandomDouble(0,800),
-                                (float) getRandomInt(0,400)
-                        ),
+                        getRandomPosition(new Vector2(400,200),400,200),
                         recipe);
                 factories.add(entity);
                 add(entity);
         });
+
+        // Find colliding factories and move them
+        box2dWorld.step(1, 1, 1);
+        box2dWorld.getContactList().forEach(collision -> {
+            Body bodyB = collision.getFixtureB().getBody();
+            bodyB.setTransform(getRandomPosition(bodyB.getPosition(), 50, 50), 0);
+        });
+
 
         /* TODO: Rewrite ArbitrageTrader as ComponentSystem
         ArbitrageTradeActor arbitrageTradeActor = new ArbitrageTradeActor(market);

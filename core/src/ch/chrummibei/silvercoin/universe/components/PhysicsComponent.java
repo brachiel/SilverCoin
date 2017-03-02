@@ -40,6 +40,7 @@ public class PhysicsComponent implements Component {
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
+        fixtureDef.friction = 0;
 
         return fixtureDef;
     }
