@@ -18,13 +18,13 @@ import java.util.ArrayList;
 public class TraderEntityFactory {
     public static int traderSequence = 0;
 
-    public static Entity RandomisedTraderEntity(ArrayList<Item> catalogue, MarketComponent market) {
+    public static Entity RandomisedTraderEntity(ArrayList<Item> catalogue, Entity market) {
         Entity entity = new Entity();
         Credit credit = new Credit(0);
         InventoryComponent inventory = new InventoryComponent();
         TraderComponent trader = new TraderComponent();
 
-        entity.add(new MarketSightComponent(market));
+        entity.add(new MarketAccessComponent(market));
         entity.add(new WalletComponent(credit));
         entity.add(trader);
         entity.add(inventory);

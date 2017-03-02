@@ -2,18 +2,32 @@ package ch.chrummibei.silvercoin.universe.entity_systems;
 
 import ch.chrummibei.silvercoin.messages.Messages;
 import ch.chrummibei.silvercoin.universe.Universe;
-import ch.chrummibei.silvercoin.universe.components.MarketComponent;
-import ch.chrummibei.silvercoin.universe.components.PhysicsComponent;
+import ch.chrummibei.silvercoin.universe.components.*;
+import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Manifold;
+
+import java.util.Optional;
 
 /**
  * Created by brachiel on 26/02/2017.
  */
 public class PhysicsSystem extends IteratingSystem implements ContactListener {
+    class EntityContact {
+        Entity a;
+        Entity b;
+
+        public EntityContact(Entity a, Entity b) {
+            this.a = a;
+            this.b = b;
+        }
+    }
+
     private static Family family = Family.all(PhysicsComponent.class).get();
 
     public PhysicsSystem() {
@@ -24,35 +38,20 @@ public class PhysicsSystem extends IteratingSystem implements ContactListener {
         super(family, priority);
     }
 
-    public static void createBody(Entity entity, World box2dWorld, Vector2 position, BodyDef.BodyType type) {
-        PhysicsComponent physics = Mappers.physics.get(entity);
-
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = type;
-        bodyDef.position.set(position);
-
-        physics.body = box2dWorld.createBody(bodyDef);
-        physics.bodyDef = bodyDef;
-
-        physics.body.setUserData(entity);
-    }
-
-
-    private void beginContactTraderMarket(Entity traderEntity, Entity marketEntity) {
+    private void beginContactTraderMarket(Entity trader, Entity market) {
         // Add trader to be present at market.
-        MarketComponent market = Mappers.market.get(marketEntity);
-        traderEntity.add(market);
+        trader.add(new MarketAccessComponent(market));
 
-        if (traderEntity == Universe.player) {
+        if (trader == Universe.player) {
             Universe.messageDispatcher.dispatchMessage(Messages.PLAYER_JOINED_MARKET, market);
         }
     }
 
-    private void endContactTraderMarket(Entity traderEntity, Entity marketEntity) {
+    private void endContactTraderMarket(Entity trader, Entity market) {
         // Add trader to be present at market.
-        traderEntity.remove(MarketComponent.class);
+        trader.remove(MarketComponent.class);
 
-        if (traderEntity == Universe.player) {
+        if (trader == Universe.player) {
             Universe.messageDispatcher.dispatchMessage(Messages.PLAYER_LEFT_MARKET);
         }
     }
@@ -62,30 +61,42 @@ public class PhysicsSystem extends IteratingSystem implements ContactListener {
         return; // Does nothing so far. If you do something here, you have to activate the system in Universe
     }
 
-
-    @Override
-    public void beginContact(Contact contact) {
+    public Optional<EntityContact> checkContact(Contact contact, ComponentMapper a, ComponentMapper b) {
         Entity entityA = (Entity) contact.getFixtureA().getBody().getUserData();
         Entity entityB = (Entity) contact.getFixtureB().getBody().getUserData();
 
-        if (Mappers.trader.has(entityA) && Mappers.market.has(entityB) && !Mappers.market.has(entityA)) {
-            beginContactTraderMarket(entityA, entityB);
-        } else if (Mappers.trader.has(entityB) && Mappers.market.has(entityA) && !Mappers.market.has(entityB)) {
-            beginContactTraderMarket(entityB, entityA);
+        if (a.has(entityA) && b.has(entityB)) return Optional.of(new EntityContact(entityA, entityB));
+        if (a.has(entityB) && b.has(entityA)) return Optional.of(new EntityContact(entityB, entityA));
+        return Optional.empty();
+    }
+
+
+    @Override
+    public void beginContact(Contact contact) {
+        checkContact(contact, Mappers.trader, Mappers.market).ifPresent(ec ->
+            beginContactTraderMarket(ec.a, ec.b)
+        );
+        checkContact(contact, Mappers.transport, Mappers.trader).ifPresent(ec ->
+            beginContactTransportTrader(ec.a, ec.b)
+        );
+    }
+
+    private void beginContactTransportTrader(Entity transport, Entity trader) {
+        TraderComponent traderComponent = Mappers.trader.get(trader);
+        TransportComponent transportComponent = Mappers.transport.get(transport);
+
+        // TODO: This doesn't belong here.
+        if (TraderSystem.doesAcceptDelivery(trader, transport)) {
+            TraderSystem.processDeliveredTrade(trader, transport);
         }
     }
 
 
     @Override
     public void endContact(Contact contact) {
-        Entity entityA = (Entity) contact.getFixtureA().getBody().getUserData();
-        Entity entityB = (Entity) contact.getFixtureB().getBody().getUserData();
-
-        if (Mappers.trader.has(entityA) && Mappers.market.has(entityB) && !Mappers.trader.has(entityB)) {
-            endContactTraderMarket(entityA, entityB);
-        } else if (Mappers.trader.has(entityB) && Mappers.market.has(entityA) && !Mappers.trader.has(entityA)) {
-            endContactTraderMarket(entityB, entityA);
-        }
+        checkContact(contact, Mappers.trader, Mappers.market).ifPresent(ec ->
+            endContactTraderMarket(ec.a, ec.b)
+        );
     }
 
     @Override

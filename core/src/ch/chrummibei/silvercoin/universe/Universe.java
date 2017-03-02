@@ -13,7 +13,9 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2D;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 
 import java.util.*;
@@ -24,18 +26,21 @@ import java.util.stream.Stream;
  */
 public class Universe {
     public static final boolean DEBUG = false;
+    public static final World box2dWorld = new World(new Vector2(0,0), true);
 
     private static final Random random = new Random();
     public static final MessageDispatcher messageDispatcher = new MessageDispatcher();
+    public static final Engine engine = new Engine();
+    private static final HashSet<Body> deadBodies = new HashSet<>();
+    private static final HashMap<Body, Fixture> deadFixtures = new HashMap<>();
+
     public enum EVENTS { PLAYER_JOINED_MARKET, PLAYER_LEFT_MARKET }
 
     private final UniverseConfig universeConfig;
     private final HashSet<Item> catalogue = new HashSet<>();
     private final HashSet<Entity> markets = new HashSet();
     private final HashSet<Entity> factories = new HashSet<>();
-    public final World box2dWorld = new World(new Vector2(0,0), true);
 
-    private final Engine engine = new Engine();
     public static Entity player;
 
     public PlayerSystem playerSystem;
@@ -52,6 +57,12 @@ public class Universe {
 
     public static double getRandomDouble(double lowBound, double highBound) {
         return lowBound + (highBound-lowBound)*random.nextDouble();
+    }
+
+    public static Vector2 getRandomPosition(Vector2 center, float dx, float dy) {
+        return new Vector2(
+                (float) getRandomDouble(center.x - dx, center.x + dx),
+                (float) getRandomDouble(center.y - dy, center.y + dy));
     }
 
     public UniverseConfig getUniverseConfig() {
@@ -109,8 +120,8 @@ public class Universe {
         add(player);
 
         // Add two markets
-        markets.add(MarketEntityFactory.Market(box2dWorld, new Vector2(300,200)));
-        markets.add(MarketEntityFactory.Market(box2dWorld, new Vector2(400,100)));
+        markets.add(MarketEntityFactory.Market(new Vector2(300,200)));
+        markets.add(MarketEntityFactory.Market(new Vector2(400,100)));
 
         universeConfig.recipeBook().getRecipes().stream()
             .flatMap(recipe -> Stream.iterate(recipe,r -> r)
@@ -126,7 +137,11 @@ public class Universe {
 
                 Entity entity = FactoryEntityFactory.FactoryEntity(
                         universeConfig,
-                        Mappers.market.get(market),
+                        market,
+                        new Vector2(
+                                (float) getRandomDouble(0,800),
+                                (float) getRandomInt(0,400)
+                        ),
                         recipe);
                 factories.add(entity);
                 add(entity);
@@ -139,13 +154,16 @@ public class Universe {
 
         Item transportShipItem = catalogue.stream().filter(item -> item.getName().equals("Transport ship")).findFirst().get();
         markets.forEach(market -> {
-            Entity entity = BigSpenderEntityFactory.BigSpender(transportShipItem, Mappers.market.get(market));
+            Entity entity = BigSpenderEntityFactory.BigSpender(
+                    transportShipItem,
+                    market,
+                    getRandomPosition(new Vector2(0,0), 100, 100));
             add(entity);
         });
     }
 
-    public Stream<MarketComponent> getMarketComponents() {
-        return markets.stream().map(Mappers.market::get);
+    public Stream<Entity> getMarkets() {
+        return markets.stream();
     }
 
     public HashSet<Entity> getFactories() {
@@ -153,7 +171,7 @@ public class Universe {
     }
 
     public void update(float delta) {
-        //System.out.println("---- TICK ----------------------------------------------------------");
+        System.out.println("---- TICK ----------------------------------------------------------");
 
         // Message update
         messageDispatcher.update();
@@ -163,10 +181,25 @@ public class Universe {
 
         // Physics simulation
         box2dWorld.step(delta, 6, 2);
+
+        // We're finished with the simulation. Now it is safe to delete bodies
+        deadFixtures.forEach((body, fixture) -> body.destroyFixture(fixture));
+        deadFixtures.clear();
+        deadBodies.forEach(body -> box2dWorld.destroyBody(body));
+        deadBodies.clear();
     }
 
     public void add(Entity entity) {
         engine.addEntity(entity);
     }
 
+
+
+    public static void addBodyToDestroy(Body body) {
+        deadBodies.add(body);
+    }
+
+    public static void addFixtureToDestroy(Body body, Fixture fixture) {
+        deadFixtures.put(body, fixture);
+    }
 }

@@ -2,7 +2,6 @@ package ch.chrummibei.silvercoin.universe.entity_factories;
 
 import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
-import ch.chrummibei.silvercoin.universe.entity_systems.PhysicsSystem;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -16,15 +15,11 @@ import com.badlogic.gdx.physics.box2d.World;
 public class PlayerEntityFactory {
     public static Entity Player(World box2dWorld, Vector2 position) {
         Entity entity = new Entity();
+        entity.add(new PlayerComponent());
         entity.add(new WalletComponent(new TotalValue(1000)));
         entity.add(new InventoryComponent());
         entity.add(new TraderComponent());
         entity.add(new NamedComponent("Market"));
-        PhysicsComponent physics = new PhysicsComponent();
-        entity.add(physics);
-        entity.add(new PathfinderComponent());
-
-        PhysicsSystem.createBody(entity, box2dWorld, position, BodyDef.BodyType.DynamicBody);
 
         CircleShape circle = new CircleShape();
         circle.setRadius(3f); // 3 meters
@@ -34,12 +29,11 @@ public class PlayerEntityFactory {
         fixtureDef.density = 1.5f;
         fixtureDef.friction = 0.01f;
         fixtureDef.restitution = 0.1f;
-
-        physics.body.createFixture(fixtureDef);
+        PhysicsComponent physics = new PhysicsComponent(entity, position, BodyDef.BodyType.DynamicBody, fixtureDef);
+        entity.add(physics);
+        entity.add(new PathfinderComponent(null));
 
         physics.body.setAngularDamping(2f);
-
-        circle.dispose();
 
         return entity;
     }

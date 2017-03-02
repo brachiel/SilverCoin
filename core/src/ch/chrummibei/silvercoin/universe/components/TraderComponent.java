@@ -14,6 +14,7 @@ import java.util.stream.Stream;
  */
 public class TraderComponent implements Component {
     public HashSet<Trade> acceptedTrades = new HashSet<>();
+    public HashSet<Trade> waitingForDelivery = new HashSet<>();
     public HashSet<TradeOffer> tradeOffers = new HashSet<>();
     public HashSet<TradeNeed> tradeNeeds = new HashSet<>();
 

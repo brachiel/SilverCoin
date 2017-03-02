@@ -1,7 +1,10 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
+import ch.chrummibei.silvercoin.messages.Messages;
+import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
+import ch.chrummibei.silvercoin.universe.entity_factories.TransportEntityFactory;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
@@ -21,7 +24,7 @@ import java.util.Optional;
 public class TraderSystem extends IteratingSystem {
     private static final Family family = Family.all(TraderComponent.class,
                                                     WalletComponent.class,
-                                                    MarketComponent.class,
+                                                    MarketAccessComponent.class,
                                                     InventoryComponent.class).get();
 
     public TraderSystem() {
@@ -38,9 +41,7 @@ public class TraderSystem extends IteratingSystem {
 
         if (Mappers.logger.has(entity)) logStatus(entity);
 
-        if (trader.acceptedTrades.size() > 0) {
-            processTrades(entity);
-        }
+        processAcceptedTrades(entity);
 
         removeOwnEmptyTradeOffers(entity);
         removeEmptyTradeNeeds(entity);
@@ -96,7 +97,7 @@ public class TraderSystem extends IteratingSystem {
 
     /** Accept as many trades as possible, and return the amount that is left to trade */
     private int acceptPossibleTrades(Entity entity, TradeNeed need) {
-        MarketComponent market = Mappers.market.get(entity);
+        MarketAccessComponent marketAccess = Mappers.marketAccess.get(entity);
         WalletComponent wallet = Mappers.wallet.get(entity);
 
         int toTrade = calcAmountToTrade(entity, need);
@@ -106,7 +107,8 @@ public class TraderSystem extends IteratingSystem {
         int toTradeAbs = Math.abs(toTrade);
 
         for (Map.Entry<TradeOffer, Integer> entry :
-                market.searchTradeOffersToTradeAmount(need.item, type.opposite(), toTradeAbs).entrySet()) {
+                marketAccess.getMarket().searchTradeOffersToTradeAmount(need.item, type.opposite(), toTradeAbs)
+                        .entrySet()) {
             TradeOffer offer = entry.getKey();
 
             if (type == TradeOffer.TYPE.BUYING) {
@@ -150,6 +152,9 @@ public class TraderSystem extends IteratingSystem {
         // When we're selling, sumOwn is negative
         amount -= sumOwnTradeOfferAmount(entity, need.item);
 
+        // Correct the amount by trades that are about to be delivered
+        amount -= sumDeliveringTradeAmount(entity, need.item);
+
         if (signum != Math.signum(amount)) {
             // Need says we need to sell, but turns our we have enough. Don't buy now.
             return 0;
@@ -169,6 +174,16 @@ public class TraderSystem extends IteratingSystem {
     public static int sumAcceptedTradeAmount(Entity entity, Item item) {
         TraderComponent trader = Mappers.trader.get(entity);
         return trader.acceptedTrades.stream()
+                .filter(trade -> trade.getItem() == item)
+                .map(trade -> trade.getTradersItemPosition(entity))
+                .mapToInt(PricedItemPosition::getAmount)
+                .sum();
+    }
+
+
+    public static int sumDeliveringTradeAmount(Entity entity, Item item) {
+        TraderComponent trader = Mappers.trader.get(entity);
+        return trader.waitingForDelivery.stream()
                 .filter(trade -> trade.getItem() == item)
                 .map(trade -> trade.getTradersItemPosition(entity))
                 .mapToInt(PricedItemPosition::getAmount)
@@ -200,17 +215,30 @@ public class TraderSystem extends IteratingSystem {
         trader.tradeOffers.removeIf(offer -> offer.getAmount() == 0);
     }
 
-    public static void processTrades(Entity entity) {
+    public static void processAcceptedTrades(Entity entity) {
         TraderComponent trader = Mappers.trader.get(entity);
         WalletComponent wallet = Mappers.wallet.get(entity);
 
         // The amount in trade offers is decreased automatically by the trade offer upon accepting
         for (Trade trade : trader.acceptedTrades) {
-            Item item = trade.getItem();
 
+            // In both cases, for buyer and seller, we add or subtract the credits
             PricedItemPosition newItemPosition = trade.getTradersItemPosition(entity);
             wallet.credit.iSubtract(newItemPosition.getPurchaseValue());
-            addPricedPositionToInventory(entity, newItemPosition);
+
+            System.out.println(trade);
+
+            if (trade.getSeller() == entity) {
+                // We are the seller, so we need to send a new Transport
+                addPricedPositionToInventory(entity, newItemPosition); // Remove items from inventory
+                Entity transport = TransportEntityFactory.Transport(trade);
+                Universe.engine.addEntity(transport);
+
+                Universe.messageDispatcher.dispatchMessage(Messages.TRANSPORT_SENT, transport);
+            } else {
+                // We are the buyer. We paid the delivery and wait for it to come.
+                trader.waitingForDelivery.add(trade);
+            }
         }
 
         // Remove all accepted trades
@@ -247,5 +275,27 @@ public class TraderSystem extends IteratingSystem {
         if (actualInventoryAmount < 0) {
             throw new RuntimeException("Actual inventory is <0. This is a bug");
         }
+    }
+
+    public static void processDeliveredTrade(Entity entity, Entity transportEntity) {
+        TraderComponent trader = Mappers.trader.get(entity);
+        TransportComponent transport = Mappers.transport.get(transportEntity);
+
+        // This trade was delivered to us. So we can add it to our inventory
+        PricedItemPosition newItemPosition = transport.trade.getTradersItemPosition(entity);
+        addPricedPositionToInventory(entity, newItemPosition);
+
+        // This trade was delivered, so we can remove it from the waiting list
+        trader.waitingForDelivery.remove(transport.trade);
+
+        Universe.messageDispatcher.dispatchMessage(Messages.TRANSPORT_ARRIVED, transportEntity);
+
+        TransportEntityFactory.destroy(transportEntity);
+    }
+
+    public static boolean doesAcceptDelivery(Entity entity, Entity transportEntity) {
+        TransportComponent transport = Mappers.transport.get(transportEntity);
+
+        return transport.trade.getBuyer() == entity;
     }
 }

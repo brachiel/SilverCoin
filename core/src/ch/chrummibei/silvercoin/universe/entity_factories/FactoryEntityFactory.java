@@ -4,6 +4,7 @@ import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.credit.Price;
+import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
 import ch.chrummibei.silvercoin.universe.item.Recipe;
 import ch.chrummibei.silvercoin.universe.position.PricedItemPosition;
@@ -12,6 +13,8 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeLibrary;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeLibraryManager;
 import com.badlogic.gdx.ai.btree.utils.BehaviorTreeParser;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 
 /**
  * Created by brachiel on 21/02/2017.
@@ -24,21 +27,29 @@ public class FactoryEntityFactory {
         BehaviorTreeLibraryManager.getInstance().setLibrary(new BehaviorTreeLibrary(BehaviorTreeParser.DEBUG_HIGH));
     }
 
-    public static Entity FactoryEntity(UniverseConfig universeConfig, MarketComponent market, Recipe recipe) {
+    public static Entity FactoryEntity(
+            UniverseConfig universeConfig,
+            Entity market,
+            Vector2 position,
+            Recipe recipe) {
         Entity entity = new Entity();
-        market.addTrader(entity);
+        Mappers.market.get(market).addTrader(entity);
 
         FactoryComponent factory = new FactoryComponent(recipe,
                 universeConfig.factory().getRandomInt("goalStock"),
                 universeConfig.factory().getRandomDouble("spreadFactor"));
         InventoryComponent inventory = new InventoryComponent();
 
+        PhysicsComponent physics = new PhysicsComponent(entity, position, BodyDef.BodyType.StaticBody, 3);
+
         entity.add(new NamedComponent(recipe.product.getName() + " factory " + factorySequence++));
         entity.add(new WalletComponent(universeConfig.factory().getRandomDouble("startingCredit")));
-        entity.add(market);
+        entity.add(new MarketAccessComponent(market));
         entity.add(inventory);
         entity.add(new TraderComponent());
         entity.add(factory);
+        entity.add(physics);
+
         if (Universe.DEBUG) {
             entity.add(new LoggerComponent());
         }

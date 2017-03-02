@@ -1,5 +1,6 @@
-package ch.chrummibei.silvercoin.gui.widgets;
+package ch.chrummibei.silvercoin.gui.actors;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -12,21 +13,24 @@ import com.badlogic.gdx.utils.Align;
  * Created by brachiel on 27/02/2017.
  */
 public class ShipActor extends Image {
+    public static Texture defaultTexture = new Texture(Gdx.files.internal("skins/ship.png"));
+    public static TextureRegion defaultTextureRegion =new TextureRegion(defaultTexture, 0, 0, 7, 11);
+
     Texture texture;
-    TextureRegion[] textureRegions = new TextureRegion[1];
     Body body;
     //int textureRegionNum = -1;
+
+
+    public ShipActor(Body body) {
+        this(body, defaultTexture);
+    }
 
     public ShipActor(Body body, Texture texture) {
         super();
         this.body = body;
         this.texture = texture;
 
-        this.textureRegions[0] = new TextureRegion(texture, 0, 0, 7, 11);
-        //this.textureRegions[1] = new TextureRegion(texture, 7, 0, 9, 11);
-        //this.textureRegions[2] = new TextureRegion(texture, 7+9, 0, 9, 10);
-
-        setDrawable(new TextureRegionDrawable(textureRegions[0]));
+        setDrawable(new TextureRegionDrawable(defaultTextureRegion));
         setSize(getPrefWidth(), getPrefHeight());
         setOrigin(Align.center);
     }

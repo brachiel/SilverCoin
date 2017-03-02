@@ -1,7 +1,9 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
 import ch.chrummibei.silvercoin.universe.Universe;
-import ch.chrummibei.silvercoin.universe.components.*;
+import ch.chrummibei.silvercoin.universe.components.PathfinderComponent;
+import ch.chrummibei.silvercoin.universe.components.PhysicsComponent;
+import ch.chrummibei.silvercoin.universe.components.PlayerComponent;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
@@ -15,12 +17,7 @@ import com.badlogic.gdx.physics.box2d.Body;
  * Created by brachiel on 26/02/2017.
  */
 public class PlayerSystem extends IteratingSystem implements InputProcessor {
-    public static Family family = Family.all(
-                PhysicsComponent.class,
-                WalletComponent.class,
-                InventoryComponent.class,
-                TraderComponent.class
-            ).get();
+    public static Family family = Family.all(PlayerComponent.class).get();
 
     public PlayerSystem() {
         super(family);
@@ -34,7 +31,6 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         PhysicsComponent physics = Mappers.physics.get(entity);
-        PathfinderComponent pathfinder = Mappers.pathfinder.get(entity);
 
         Body body = physics.body;
         Vector2 direction = new Vector2(1,0).rotateRad(body.getAngle());

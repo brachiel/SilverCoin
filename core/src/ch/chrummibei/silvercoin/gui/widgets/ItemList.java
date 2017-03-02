@@ -23,11 +23,13 @@ import java.util.Comparator;
  */
 public class ItemList extends Table {
     ArrayList<Item> items;
-    MarketComponent market;
+    Entity market;
+    MarketComponent marketComponent;
 
-    public ItemList(Universe universe, MarketComponent market, Skin skin) {
+    public ItemList(Universe universe, Entity market, Skin skin) {
         super(skin);
         this.market = market;
+        this.marketComponent = Mappers.market.get(market);
 
         add("ITEM").pad(0,0,5,5).align(Align.left);
         add("SELL").pad(0,0,5,5).align(Align.right).minWidth(40);
@@ -52,11 +54,11 @@ public class ItemList extends Table {
         for (Item item : items) {
             ++i;
             ((Label) cells.get(++i).getActor()).setText(
-                    market.searchBestSellingTrade(item)
+                    marketComponent.searchBestSellingTrade(item)
                         .map(TradeOffer::getPrice)
                         .map(Price::toString).orElse("-"));
             ((Label) cells.get(++i).getActor()).setText(
-                    market.searchBestBuyingTrade(item)
+                    marketComponent.searchBestBuyingTrade(item)
                         .map(TradeOffer::getPrice)
                         .map(Price::toString).orElse("-"));
         }

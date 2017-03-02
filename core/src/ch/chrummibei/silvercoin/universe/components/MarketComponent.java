@@ -58,7 +58,7 @@ public class MarketComponent implements Component {
     }
 
     /**
-     * Search all viewable markets in marketSight for the best prices to trade item. Return a Map
+     * Search all viewable markets in marketAccess for the best prices to trade item. Return a Map
      * of TradeOffers with the amount to trade with each offer. The last offer might be a partial trade.
      * @param item Item to be traded
      * @param type Trade type (BUYING or SELLING)
