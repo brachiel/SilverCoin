@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.Align;
  */
 public class ShipActor extends Image {
     public static Texture defaultTexture = new Texture(Gdx.files.internal("skins/ship.png"));
-    public static TextureRegion defaultTextureRegion =new TextureRegion(defaultTexture, 0, 0, 7, 11);
+    public static TextureRegion defaultTextureRegion = new TextureRegion(defaultTexture, 0, 0, 7, 11);
     public static ParticleEffect staticParticleEffect;
     public static ParticleEffectPool particleEffectPool;
 

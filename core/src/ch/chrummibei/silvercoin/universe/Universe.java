@@ -197,9 +197,7 @@ public class Universe {
     public void add(Entity entity) {
         engine.addEntity(entity);
     }
-
-
-
+    
     public static void addBodyToDestroy(Body body) {
         deadBodies.add(body);
     }

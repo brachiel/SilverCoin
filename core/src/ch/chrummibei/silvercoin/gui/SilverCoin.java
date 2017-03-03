@@ -3,6 +3,7 @@ package ch.chrummibei.silvercoin.gui;
 import ch.chrummibei.silvercoin.config.Resources;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.constants.Messages;
+import ch.chrummibei.silvercoin.gui.actors.FactoryActor;
 import ch.chrummibei.silvercoin.gui.actors.MarketActor;
 import ch.chrummibei.silvercoin.gui.actors.ShipActor;
 import ch.chrummibei.silvercoin.gui.widgets.FactoryList;
@@ -97,6 +98,9 @@ public class SilverCoin implements ApplicationListener {
                 stage.addActor(marketActor);
 
                 marketActor.addListener(marketHoverListener);
+            } else if (Mappers.factory.has(entity)) {
+                FactoryActor factoryActor = new FactoryActor(body);
+                stage.addActor(factoryActor);
             }
         }
     }
@@ -249,7 +253,7 @@ public class SilverCoin implements ApplicationListener {
         stage.act(deltaTime); // Update actors
 		stage.draw();
 
-		debugRenderer.render(universe.box2dWorld, stage.getCamera().combined);
+		//debugRenderer.render(universe.box2dWorld, stage.getCamera().combined);
 
         universe.update(deltaTime); // Game Tick
 	}
