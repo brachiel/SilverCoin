@@ -121,7 +121,7 @@ public class Universe {
         box2dWorld.getBodies(bodies);
         Vector2 newSpot = null;
         for (int tryNumber = 1; tryNumber < 10; ++tryNumber) {
-            newSpot = getRandomPosition(new Vector2(400,200), 400-10, 200-10);
+            newSpot = getRandomPosition(new Vector2(0,0), 1000, 1000);
             if (hasEnoughSpace(newSpot, bodies, minDistance)) {
                 return newSpot;
             }
@@ -141,8 +141,8 @@ public class Universe {
         add(player);
 
         // Add two markets
-        markets.add(MarketEntityFactory.Market(new Vector2(300,200)));
-        markets.add(MarketEntityFactory.Market(new Vector2(400,100)));
+        markets.add(MarketEntityFactory.Market(new Vector2(300,-200)));
+        markets.add(MarketEntityFactory.Market(new Vector2(-400,100)));
 
         universeConfig.recipeBook().getRecipes().stream()
             .flatMap(recipe -> Stream.iterate(recipe,r -> r)
