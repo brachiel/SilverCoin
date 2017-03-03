@@ -17,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -115,6 +116,26 @@ public class Universe {
         engine.addSystem(playerSystem);
     }
 
+    Vector2 findEmptySpot(float minDistance) {
+        Array<Body> bodies = new Array<>();
+        box2dWorld.getBodies(bodies);
+        Vector2 newSpot = null;
+        for (int tryNumber = 1; tryNumber < 10; ++tryNumber) {
+            newSpot = getRandomPosition(new Vector2(400,200), 400-10, 200-10);
+            if (hasEnoughSpace(newSpot, bodies, minDistance)) {
+                return newSpot;
+            }
+        }
+        return newSpot;
+    }
+
+    boolean hasEnoughSpace(Vector2 spot, Array<Body> bodies, float minDistance) {
+        for (Body body : bodies) {
+            if (spot.dst(body.getPosition()) < minDistance) return false;
+        }
+        return true;
+    }
+
     void generateEntities() {
         player = PlayerEntityFactory.Player(box2dWorld, new Vector2(100, 100));
         add(player);
@@ -138,19 +159,11 @@ public class Universe {
                 Entity entity = FactoryEntityFactory.FactoryEntity(
                         universeConfig,
                         market,
-                        getRandomPosition(new Vector2(400,200),400,200),
+                        findEmptySpot(20),
                         recipe);
                 factories.add(entity);
                 add(entity);
         });
-
-        // Find colliding factories and move them
-        box2dWorld.step(1, 1, 1);
-        box2dWorld.getContactList().forEach(collision -> {
-            Body bodyB = collision.getFixtureB().getBody();
-            bodyB.setTransform(getRandomPosition(bodyB.getPosition(), 50, 50), 0);
-        });
-
 
         /* TODO: Rewrite ArbitrageTrader as ComponentSystem
         ArbitrageTradeActor arbitrageTradeActor = new ArbitrageTradeActor(market);
@@ -162,7 +175,7 @@ public class Universe {
             Entity entity = BigSpenderEntityFactory.BigSpender(
                     transportShipItem,
                     market,
-                    getRandomPosition(new Vector2(0,0), 100, 100));
+                    getRandomPosition(new Vector2(400,200), 400, 200));
             add(entity);
         });
     }
