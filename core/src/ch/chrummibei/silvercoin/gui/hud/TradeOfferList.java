@@ -1,4 +1,4 @@
-package ch.chrummibei.silvercoin.gui.widgets;
+package ch.chrummibei.silvercoin.gui.hud;
 
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.MarketComponent;

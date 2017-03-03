@@ -6,9 +6,9 @@ import ch.chrummibei.silvercoin.constants.Messages;
 import ch.chrummibei.silvercoin.gui.actors.FactoryActor;
 import ch.chrummibei.silvercoin.gui.actors.MarketActor;
 import ch.chrummibei.silvercoin.gui.actors.ShipActor;
-import ch.chrummibei.silvercoin.gui.widgets.FactoryList;
-import ch.chrummibei.silvercoin.gui.widgets.ItemList;
-import ch.chrummibei.silvercoin.gui.widgets.TradeOfferList;
+import ch.chrummibei.silvercoin.gui.hud.FactoryList;
+import ch.chrummibei.silvercoin.gui.hud.ItemList;
+import ch.chrummibei.silvercoin.gui.hud.TradeOfferList;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.ActorComponent;
 import ch.chrummibei.silvercoin.universe.components.PhysicsComponent;
@@ -55,11 +55,15 @@ public class SilverCoin implements ApplicationListener {
     private Box2DDebugRenderer debugRenderer;
     private TradeOfferList tradeOfferList;
     private Table mainContainer;
-    private Table hud;
-    private ClickListener mapMoveListener;
     private ClickListener marketHoverListener;
     private boolean paused = false;
     private Drawable backgroundDrawable;
+
+    // HUD
+    private Stage hudStage;
+    private boolean drawHud;
+    private Table hud;
+    private ScrollPane factoryListScroll;
 
     @Override
 	public void create() {
@@ -68,10 +72,11 @@ public class SilverCoin implements ApplicationListener {
         universe = new Universe(universeConfig);
 
 		stage = new Stage(new ExtendViewport(WIDTH, HEIGHT));
+        hudStage = new Stage(new ExtendViewport(WIDTH, HEIGHT));
 		font = Resources.getDefaultFont();
 
-		skin = new Skin(Gdx.files.internal("skins/uiskin.json"),
-               new TextureAtlas(Gdx.files.internal("skins/uiskin.atlas")));
+		skin = new Skin(Gdx.files.internal("skins/neon/neon-ui.json"),
+               new TextureAtlas(Gdx.files.internal("skins/neon/neon-ui.atlas")));
 
 		debugRenderer = new Box2DDebugRenderer();
 
@@ -85,6 +90,7 @@ public class SilverCoin implements ApplicationListener {
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(universe.playerSystem);
+        multiplexer.addProcessor(hudStage);
         multiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(multiplexer);
 
@@ -118,15 +124,14 @@ public class SilverCoin implements ApplicationListener {
     }
 
     private void connectEventListener() {
-        stage.addListener(new ClickListener() {
-            final int scrollButton = Input.Buttons.MIDDLE;
-            float touchDownX;
-            float touchDownY;
-
+        hudStage.addListener(new ClickListener() {
             @Override
             public boolean keyDown(InputEvent event, int keyCode) {
                 if (keyCode == Input.Keys.TAB) {
+                    drawHud = true;
                     hud.setVisible(true);
+                    hudStage.setScrollFocus(factoryListScroll);
+                    return true;
                 }
                 return super.keyDown(event, keyCode);
             }
@@ -134,10 +139,19 @@ public class SilverCoin implements ApplicationListener {
             @Override
             public boolean keyUp(InputEvent event, int keyCode) {
                 if (keyCode == Input.Keys.TAB) {
+                    drawHud = false;
                     hud.setVisible(false);
+                    hudStage.unfocus(factoryListScroll);
+                    return true;
                 }
                 return super.keyUp(event, keyCode);
             }
+        });
+
+        stage.addListener(new ClickListener() {
+            final int scrollButton = Input.Buttons.MIDDLE;
+            float touchDownX;
+            float touchDownY;
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -183,9 +197,7 @@ public class SilverCoin implements ApplicationListener {
 
     private void createHUD() {
         FactoryList factoryList = new FactoryList(universe, skin);
-
-        ScrollPane factoryListScroll = new ScrollPane(factoryList);
-        factoryListScroll.setBounds(5, 5, WIDTH/2-5, HEIGHT-10);
+        factoryListScroll = new ScrollPane(factoryList, skin);
 
         VerticalGroup vSplitter = new VerticalGroup();
         universe.getMarkets().forEach(market -> {
@@ -196,12 +208,11 @@ public class SilverCoin implements ApplicationListener {
         tradeOfferList = new TradeOfferList(universe, skin);
 
         hud = new Table();
-        hud.setFillParent(true);
-        hud.setVisible(false);
-        hud.add(factoryListScroll).width(WIDTH/2).fill();
+        hud.pad(0,10,10,10);
+        hud.add(factoryListScroll).width(WIDTH/2).expandY().fill();
         hud.add(vSplitter).expand().fill();
-
-        mainContainer.addActor(hud);
+        hud.setFillParent(true);
+        hudStage.addActor(hud);
     }
 
     private void createMainContainer() {
@@ -220,13 +231,13 @@ public class SilverCoin implements ApplicationListener {
                         case Messages.PLAYER_JOINED_MARKET:
                             if (tradeOfferList.market != null) return true;
                             tradeOfferList.market = Mappers.market.get((Entity) msg.extraInfo);
-                            hud.add(tradeOfferList);
+                            tradeOfferList.setVisible(false);
                             break;
                         case Messages.HOVER_EXIT_MARKET:
                         case Messages.PLAYER_LEFT_MARKET:
                             if (tradeOfferList.market == null) return true;
                             tradeOfferList.market = null;
-                            hud.removeActor(tradeOfferList);
+                            tradeOfferList.setVisible(false);
                             break;
                         case Messages.TRANSPORT_SENT:
                             Entity transport = (Entity) msg.extraInfo;
@@ -277,6 +288,9 @@ public class SilverCoin implements ApplicationListener {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         stage.act(deltaTime); // Update actors
+        if (drawHud) {
+            hudStage.act(deltaTime);
+        }
 
         // Draw background
         Camera camera = stage.getCamera();
@@ -288,6 +302,9 @@ public class SilverCoin implements ApplicationListener {
         batch.end();
 
 		stage.draw();
+		if (drawHud) {
+		    hudStage.draw();
+        }
 
 		//debugRenderer.render(universe.box2dWorld, stage.getCamera().combined);
         if (! paused) {
