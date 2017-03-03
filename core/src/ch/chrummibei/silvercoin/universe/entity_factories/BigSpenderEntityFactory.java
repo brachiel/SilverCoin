@@ -1,11 +1,13 @@
 package ch.chrummibei.silvercoin.universe.entity_factories;
 
+import ch.chrummibei.silvercoin.constants.Categories;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Filter;
 
 /**
  * Created by brachiel on 21/02/2017.
@@ -21,7 +23,10 @@ public class BigSpenderEntityFactory {
         entity.add(new WalletComponent(0));
         entity.add(new TraderComponent());
         entity.add(new NamedComponent("Big Spender (" + itemToBuy + ") " + ++spenderNameSequence));
-        entity.add(new PhysicsComponent(entity, position, BodyDef.BodyType.StaticBody));
+        Filter filter = new Filter();
+        filter.categoryBits = Categories.FACTORY;
+        filter.maskBits = Categories.TRANSPORT | Categories.SHIP;
+        entity.add(new PhysicsComponent(entity, position, BodyDef.BodyType.StaticBody, 3, filter));
         return entity;
     }
 }

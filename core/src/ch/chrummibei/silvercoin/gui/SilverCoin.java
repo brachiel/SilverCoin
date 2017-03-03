@@ -28,7 +28,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -54,7 +53,9 @@ public class SilverCoin implements ApplicationListener {
     private TradeOfferList tradeOfferList;
     private Table mainContainer;
     private Table hud;
+    private ClickListener mapMoveListener;
     private ClickListener marketHoverListener;
+    private boolean paused = false;
 
     @Override
 	public void create() {
@@ -106,7 +107,10 @@ public class SilverCoin implements ApplicationListener {
     }
 
     private void connectEventListener() {
-        stage.addListener(new InputListener() {
+        stage.addListener(new ClickListener() {
+            final int scrollButton = Input.Buttons.MIDDLE;
+            boolean isScrolling = false;
+
             @Override
             public boolean keyDown(InputEvent event, int keyCode) {
                 if (keyCode == Input.Keys.TAB) {
@@ -122,8 +126,26 @@ public class SilverCoin implements ApplicationListener {
                 }
                 return super.keyUp(event, keyCode);
             }
-        });
 
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("touchDown " + x + " / " + y);
+                return true;
+                //return super.touchDown(event, x, y, pointer, button);
+            }
+
+            @Override
+            public void touchDragged(InputEvent event, float x, float y, int pointer) {
+                //super.touchDragged(event, x, y, pointer);
+                System.out.println("touchDragged " + x + " / " + y);
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                //super.touchUp(event, x, y, pointer, button);
+                System.out.println("touchUp " + x + " / " + y);
+            }
+        });
 
         marketHoverListener = new ClickListener() {
             @Override
@@ -249,23 +271,25 @@ public class SilverCoin implements ApplicationListener {
 
         Gdx.gl.glClearColor(0, 0, 0, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+        
         stage.act(deltaTime); // Update actors
 		stage.draw();
 
 		//debugRenderer.render(universe.box2dWorld, stage.getCamera().combined);
-
-        universe.update(deltaTime); // Game Tick
+        if (! paused) {
+            universe.update(deltaTime); // Game Tick
+        }
 	}
 
     @Override
 	public void pause() {
-
+        paused = true;
 	}
 
 	@Override
 	public void resume() {
-
+        paused = false;
+        universe.update(0.1f); // Game Tick
 	}
 
 	@Override
