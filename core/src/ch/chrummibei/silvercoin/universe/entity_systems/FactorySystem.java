@@ -49,7 +49,7 @@ public class FactorySystem extends IteratingSystem {
             productPrice.iAdd(position.getPurchasePrice().toTotalValue(ingredientAmount));
         });
 
-        return productPrice;
+        return productPrice.divide(factory.recipe.amountPerBulk);
     }
 
     public static YieldingItemPosition getProductPosition(Entity entity) {
