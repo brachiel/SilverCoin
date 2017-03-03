@@ -226,8 +226,6 @@ public class TraderSystem extends IteratingSystem {
             PricedItemPosition newItemPosition = trade.getTradersItemPosition(entity);
             wallet.credit.iSubtract(newItemPosition.getPurchaseValue());
 
-            System.out.println(trade);
-
             if (trade.getSeller() == entity) {
                 // We are the seller, so we need to send a new Transport
                 addPricedPositionToInventory(entity, newItemPosition); // Remove items from inventory
@@ -280,8 +278,6 @@ public class TraderSystem extends IteratingSystem {
     public static void processDeliveredTrade(Entity entity, Entity transportEntity) {
         TraderComponent trader = Mappers.trader.get(entity);
         TransportComponent transport = Mappers.transport.get(transportEntity);
-
-        System.out.println("Delivery of " + transport.trade);
 
         // This trade was delivered to us. So we can add it to our inventory
         PricedItemPosition newItemPosition = transport.trade.getTradersItemPosition(entity);

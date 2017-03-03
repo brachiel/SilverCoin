@@ -18,9 +18,11 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -34,6 +36,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -56,6 +59,7 @@ public class SilverCoin implements ApplicationListener {
     private ClickListener mapMoveListener;
     private ClickListener marketHoverListener;
     private boolean paused = false;
+    private Drawable backgroundDrawable;
 
     @Override
 	public void create() {
@@ -83,6 +87,13 @@ public class SilverCoin implements ApplicationListener {
         multiplexer.addProcessor(universe.playerSystem);
         multiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(multiplexer);
+
+
+        // Prepare and set background
+        Texture backgroundTexture = new Texture(Gdx.files.internal("images/ngc253.jpg"));
+        TextureRegion backgroundRegion = new TextureRegion(backgroundTexture);
+        backgroundDrawable = new TextureRegionDrawable(backgroundRegion)
+                .tint(new Color(0.4f, 0.4f, 0.4f, 1f));
     }
 
     private void addBodyActors() {
@@ -109,7 +120,8 @@ public class SilverCoin implements ApplicationListener {
     private void connectEventListener() {
         stage.addListener(new ClickListener() {
             final int scrollButton = Input.Buttons.MIDDLE;
-            boolean isScrolling = false;
+            float touchDownX;
+            float touchDownY;
 
             @Override
             public boolean keyDown(InputEvent event, int keyCode) {
@@ -129,21 +141,20 @@ public class SilverCoin implements ApplicationListener {
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("touchDown " + x + " / " + y);
+                if (button != scrollButton) return false;
+                touchDownX = x;
+                touchDownY = y;
                 return true;
-                //return super.touchDown(event, x, y, pointer, button);
             }
 
             @Override
             public void touchDragged(InputEvent event, float x, float y, int pointer) {
                 //super.touchDragged(event, x, y, pointer);
-                System.out.println("touchDragged " + x + " / " + y);
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                //super.touchUp(event, x, y, pointer, button);
-                System.out.println("touchUp " + x + " / " + y);
+                stage.getCamera().translate(touchDownX-x, touchDownY-y, 0);
+                /* We do not touch the touch down points since with the moving of the camera, they are
+                 * in the right spot already :). */
+                //touchDownX = x;
+                //touchDownY = y;
             }
         });
 
@@ -199,11 +210,6 @@ public class SilverCoin implements ApplicationListener {
         // Pack everything to the main container
         mainContainer.setFillParent(true);
 
-        // Prepare and set background
-        Texture backgroundTexture = new Texture(Gdx.files.internal("images/ngc253.jpg"));
-        TextureRegion backgroundRegion = new TextureRegion(backgroundTexture);
-        TextureRegionDrawable backgroundDrawable = new TextureRegionDrawable(backgroundRegion);
-        mainContainer.background(backgroundDrawable.tint(new Color(0.4f,0.4f,0.4f,1f)));
         stage.addActor(mainContainer);
     }
 
@@ -223,7 +229,6 @@ public class SilverCoin implements ApplicationListener {
                             hud.removeActor(tradeOfferList);
                             break;
                         case Messages.TRANSPORT_SENT:
-                            System.out.println("Transport SENT");
                             Entity transport = (Entity) msg.extraInfo;
                             PhysicsComponent physics = Mappers.physics.get(transport);
 
@@ -237,7 +242,6 @@ public class SilverCoin implements ApplicationListener {
                             stage.addActor(ship);
                             break;
                         case Messages.TRANSPORT_ARRIVED:
-                            System.out.println("Transport ARRIVED");
                             transport = (Entity) msg.extraInfo;
 
                             // We need to destroy the transport actor
@@ -271,8 +275,18 @@ public class SilverCoin implements ApplicationListener {
 
         Gdx.gl.glClearColor(0, 0, 0, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        
+
         stage.act(deltaTime); // Update actors
+
+        // Draw background
+        Camera camera = stage.getCamera();
+        camera.update();
+        Batch batch = stage.getBatch();
+        batch.begin();
+        batch.setProjectionMatrix(camera.projection);
+        backgroundDrawable.draw(batch, -WIDTH/2, -HEIGHT/2, WIDTH, HEIGHT);
+        batch.end();
+
 		stage.draw();
 
 		//debugRenderer.render(universe.box2dWorld, stage.getCamera().combined);

@@ -92,7 +92,7 @@ public class Universe {
         catalogue.addAll(universeConfig.catalogue().getItems());
 
         // Turn on message debugger
-        messageDispatcher.setDebugEnabled(true);
+        messageDispatcher.setDebugEnabled(false);
 
         generateEntities();
         generateEntitySystems();
@@ -189,7 +189,7 @@ public class Universe {
     }
 
     public void update(float delta) {
-        System.out.println("---- TICK ----------------------------------------------------------");
+        //System.out.println("---- TICK ----------------------------------------------------------");
 
         // Message update
         messageDispatcher.update();
