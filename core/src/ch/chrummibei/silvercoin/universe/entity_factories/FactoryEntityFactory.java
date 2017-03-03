@@ -43,7 +43,7 @@ public class FactoryEntityFactory {
             return factoryNameReservoir[0];
         } else {
             factorySequences.put(item, currentSequence + 1);
-            return factoryNameReservoir[currentSequence];
+            return factoryNameReservoir[currentSequence % factoryNameReservoir.length];
         }
     }
 
