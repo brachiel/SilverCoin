@@ -1,5 +1,6 @@
 package ch.chrummibei.silvercoin.gui.actors;
 
+import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -14,6 +15,8 @@ import com.badlogic.gdx.utils.Align;
  */
 public class FactoryActor extends Image {
     public static Texture defaultTexture = new Texture(Gdx.files.internal("skins/market.png"));
+    public static Texture shipYardTexture = new Texture(Gdx.files.internal("skins/shipyard.png"));
+    public static Texture solarTexture = new Texture(Gdx.files.internal("skins/solar_factory.png"));
     public static TextureRegion defaultTextureRegion = new TextureRegion(defaultTexture);
     Texture texture;
     Body body;
@@ -21,14 +24,23 @@ public class FactoryActor extends Image {
     //int textureRegionNum = -1;
 
     public FactoryActor(Body body) {
-        this(body, defaultTextureRegion);
-    }
-
-    public FactoryActor(Body body, TextureRegion textureRegion) {
         super();
         this.body = body;
         this.texture = texture;
         this.market = (Entity) body.getUserData();
+
+        TextureRegion textureRegion;
+        switch(Mappers.factory.get(market).recipe.product.getName()) {
+            case "Energy":
+                textureRegion = new TextureRegion(solarTexture);
+                break;
+            case "Transport ship":
+                textureRegion = new TextureRegion(shipYardTexture);
+                break;
+            default:
+                textureRegion = defaultTextureRegion;
+                break;
+        }
 
         setDrawable(new TextureRegionDrawable(textureRegion));
         setSize(getPrefWidth(), getPrefHeight());
