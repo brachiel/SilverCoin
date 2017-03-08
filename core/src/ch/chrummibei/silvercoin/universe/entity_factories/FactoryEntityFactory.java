@@ -5,7 +5,6 @@ import ch.chrummibei.silvercoin.constants.Categories;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.*;
 import ch.chrummibei.silvercoin.universe.credit.Price;
-import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.item.Recipe;
@@ -49,11 +48,9 @@ public class FactoryEntityFactory {
 
     public static Entity FactoryEntity(
             UniverseConfig universeConfig,
-            Entity market,
             Vector2 position,
             Recipe recipe) {
         Entity entity = new Entity();
-        Mappers.market.get(market).addTrader(entity);
 
         FactoryComponent factory = new FactoryComponent(recipe,
                 universeConfig.factory().getRandomInt("goalStock"),
@@ -63,15 +60,14 @@ public class FactoryEntityFactory {
         Filter filter = new Filter();
         filter.categoryBits = Categories.FACTORY;
         filter.maskBits = Categories.TRANSPORT | Categories.SHIP;
-        PhysicsComponent physics = new PhysicsComponent(entity, position, BodyDef.BodyType.StaticBody, 3, filter);
-
+        PhysicsComponent physics = new PhysicsComponent(entity, position, BodyDef.BodyType.KinematicBody, 3, filter);
         entity.add(new NamedComponent(recipe.product.getName() + " " + getNextName(recipe.product).toLowerCase()));
         entity.add(new WalletComponent(universeConfig.factory().getRandomDouble("startingCredit")));
-        entity.add(new MarketAccessComponent(market));
         entity.add(inventory);
         entity.add(new TraderComponent());
         entity.add(factory);
         entity.add(physics);
+        entity.add(new TradeSphereComponent(physics, 500));
 
         if (Universe.DEBUG) {
             entity.add(new LoggerComponent());

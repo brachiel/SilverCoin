@@ -11,26 +11,26 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 
 /**
- * Created by brachiel on 27/02/2017.
+ * Drawable actor for factories. Gives different sprites depending on the product.
  */
 public class FactoryActor extends Image {
-    public static Texture defaultTexture = new Texture(Gdx.files.internal("skins/market.png"));
+    public static Texture defaultTexture = new Texture(Gdx.files.internal("skins/factory.png"));
     public static Texture shipYardTexture = new Texture(Gdx.files.internal("skins/shipyard.png"));
     public static Texture solarTexture = new Texture(Gdx.files.internal("skins/solar_factory.png"));
     public static TextureRegion defaultTextureRegion = new TextureRegion(defaultTexture);
     Texture texture;
     Body body;
-    public Entity market;
+    public Entity factory;
     //int textureRegionNum = -1;
 
     public FactoryActor(Body body) {
         super();
         this.body = body;
         this.texture = texture;
-        this.market = (Entity) body.getUserData();
+        this.factory = (Entity) body.getUserData();
 
         TextureRegion textureRegion;
-        switch(Mappers.factory.get(market).recipe.product.getName()) {
+        switch(Mappers.factory.get(factory).recipe.product.getName()) {
             case "Energy":
                 textureRegion = new TextureRegion(solarTexture);
                 break;

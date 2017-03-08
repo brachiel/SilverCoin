@@ -24,7 +24,7 @@ import java.util.Optional;
 public class TraderSystem extends IteratingSystem {
     private static final Family family = Family.all(TraderComponent.class,
                                                     WalletComponent.class,
-                                                    MarketAccessComponent.class,
+                                                    TradeSphereComponent.class,
                                                     InventoryComponent.class).get();
 
     public TraderSystem() {
@@ -97,7 +97,7 @@ public class TraderSystem extends IteratingSystem {
 
     /** Accept as many trades as possible, and return the amount that is left to trade */
     private int acceptPossibleTrades(Entity entity, TradeNeed need) {
-        MarketAccessComponent marketAccess = Mappers.marketAccess.get(entity);
+        TradeSphereComponent tradeSphere = Mappers.tradeSphere.get(entity);
         WalletComponent wallet = Mappers.wallet.get(entity);
 
         int toTrade = calcAmountToTrade(entity, need);
@@ -106,9 +106,13 @@ public class TraderSystem extends IteratingSystem {
         TradeOffer.TYPE type = TradeOffer.TYPE.fromAmount(toTrade);
         int toTradeAbs = Math.abs(toTrade);
 
-        for (Map.Entry<TradeOffer, Integer> entry :
-                marketAccess.getMarket().searchTradeOffersToTradeAmount(need.item, type.opposite(), toTradeAbs)
-                        .entrySet()) {
+        Map<TradeOffer, Integer> tradeOffers = TradeOffer.searchTradeOffersToTradeAmount(
+                tradeSphere.getAllTrades(),
+                need.item,
+                type.opposite(),
+                toTradeAbs);
+
+        for (Map.Entry<TradeOffer, Integer> entry : tradeOffers.entrySet()) {
             TradeOffer offer = entry.getKey();
 
             if (type == TradeOffer.TYPE.BUYING) {
@@ -291,9 +295,16 @@ public class TraderSystem extends IteratingSystem {
         TransportEntityFactory.destroy(transportEntity);
     }
 
-    public static boolean doesAcceptDelivery(Entity entity, Entity transportEntity) {
+    public static boolean doesAcceptDelivery(Entity trader, Entity transportEntity) {
         TransportComponent transport = Mappers.transport.get(transportEntity);
 
-        return transport.trade.getBuyer() == entity;
+        return transport.trade.getBuyer() == trader;
+    }
+
+    public static void beginContactTransportTrader(Entity transport, Entity trader) {
+        if (doesAcceptDelivery(trader, transport)) {
+            System.out.println("Accepted trade");
+            processDeliveredTrade(trader, transport);
+        }
     }
 }

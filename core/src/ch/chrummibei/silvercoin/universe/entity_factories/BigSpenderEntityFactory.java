@@ -15,10 +15,9 @@ import com.badlogic.gdx.physics.box2d.Filter;
 public class BigSpenderEntityFactory {
     private static int spenderNameSequence = 0;
 
-    public static Entity BigSpender(Item itemToBuy, Entity market, Vector2 position) {
+    public static Entity BigSpender(Item itemToBuy, Vector2 position) {
         Entity entity = new Entity();
         entity.add(new BigSpenderComponent(itemToBuy, (float) Universe.getRandomDouble(2,3)));
-        entity.add(new MarketAccessComponent(market));
         entity.add(new InventoryComponent());
         entity.add(new WalletComponent(0));
         entity.add(new TraderComponent());
@@ -26,7 +25,10 @@ public class BigSpenderEntityFactory {
         Filter filter = new Filter();
         filter.categoryBits = Categories.FACTORY;
         filter.maskBits = Categories.TRANSPORT | Categories.SHIP;
-        entity.add(new PhysicsComponent(entity, position, BodyDef.BodyType.StaticBody, 3, filter));
+        PhysicsComponent physics = new PhysicsComponent(entity, position, BodyDef.BodyType.StaticBody, 3, filter);
+        entity.add(physics);
+        entity.add(new TradeSphereComponent(physics, 200));
+
         return entity;
     }
 }

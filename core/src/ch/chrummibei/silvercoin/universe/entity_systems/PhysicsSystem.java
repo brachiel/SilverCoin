@@ -1,10 +1,7 @@
 package ch.chrummibei.silvercoin.universe.entity_systems;
 
-import ch.chrummibei.silvercoin.constants.Messages;
-import ch.chrummibei.silvercoin.universe.Universe;
-import ch.chrummibei.silvercoin.universe.components.MarketAccessComponent;
-import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.components.PhysicsComponent;
+import ch.chrummibei.silvercoin.universe.components.TradeSphereComponent;
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
@@ -40,24 +37,6 @@ public class PhysicsSystem extends IteratingSystem implements ContactListener {
         super(family, priority);
     }
 
-    private void beginContactTraderMarket(Entity trader, Entity market) {
-        // Add trader to be present at market.
-        trader.add(new MarketAccessComponent(market));
-
-        if (trader == Universe.player) {
-            Universe.messageDispatcher.dispatchMessage(Messages.PLAYER_JOINED_MARKET, market);
-        }
-    }
-
-    private void endContactTraderMarket(Entity trader, Entity market) {
-        // Add trader to be present at market.
-        trader.remove(MarketComponent.class);
-
-        if (trader == Universe.player) {
-            Universe.messageDispatcher.dispatchMessage(Messages.PLAYER_LEFT_MARKET);
-        }
-    }
-
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         return; // Does nothing so far. If you do something here, you have to activate the system in Universe
@@ -75,26 +54,19 @@ public class PhysicsSystem extends IteratingSystem implements ContactListener {
 
     @Override
     public void beginContact(Contact contact) {
-        checkContact(contact, Mappers.trader, Mappers.market).ifPresent(ec ->
-            beginContactTraderMarket(ec.a, ec.b)
-        );
         checkContact(contact, Mappers.transport, Mappers.trader).ifPresent(ec ->
-            beginContactTransportTrader(ec.a, ec.b)
+                TraderSystem.beginContactTransportTrader(ec.a, ec.b)
+        );
+
+        checkContact(contact, Mappers.tradeSphere, Mappers.tradeSphere).ifPresent(ec ->
+                TradeSphereComponent.beginContactTradeSpheres(ec.a, ec.b)
         );
     }
-
-    private void beginContactTransportTrader(Entity transport, Entity trader) {
-        // TODO: This doesn't belong here.
-        if (TraderSystem.doesAcceptDelivery(trader, transport)) {
-            TraderSystem.processDeliveredTrade(trader, transport);
-        }
-    }
-
 
     @Override
     public void endContact(Contact contact) {
-        checkContact(contact, Mappers.trader, Mappers.market).ifPresent(ec ->
-            endContactTraderMarket(ec.a, ec.b)
+        checkContact(contact, Mappers.tradeSphere, Mappers.tradeSphere).ifPresent(ec ->
+                TradeSphereComponent.endContactTradeSpheres(ec.a, ec.b)
         );
     }
 

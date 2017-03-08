@@ -1,7 +1,8 @@
 package ch.chrummibei.silvercoin.gui.hud;
 
 import ch.chrummibei.silvercoin.universe.Universe;
-import ch.chrummibei.silvercoin.universe.components.MarketComponent;
+import ch.chrummibei.silvercoin.universe.components.TradeSphereComponent;
+import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
@@ -17,12 +18,10 @@ import java.util.stream.Collectors;
  */
 public class TradeOfferList extends Table {
     private final Universe universe;
-    public MarketComponent market;
 
     public TradeOfferList(Universe universe, Skin skin) {
         super(skin);
         this.universe = universe;
-        this.market = null;
 
         add("ITEM").pad(0,0,5,5).align(Align.left);
         add("AMOUNT").pad(0,0,5,5).align(Align.right).minWidth(40);
@@ -38,9 +37,11 @@ public class TradeOfferList extends Table {
         if (cells.size > 3)
             cells.removeRange(3,cells.size-1);
 
-        if (market == null) return;
+        if (Universe.player == null) return;
+        TradeSphereComponent tradeSphere = Mappers.tradeSphere.get(Universe.player);
+        if (tradeSphere == null) return;
 
-        for (TradeOffer offer : market.collectTradeOffers().collect(Collectors.toList())) {
+        for (TradeOffer offer : tradeSphere.getAllTrades().collect(Collectors.toList())) {
             row();
 
             add(String.valueOf(offer.getItem())).align(Align.left);

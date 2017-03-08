@@ -41,6 +41,8 @@ public class PhysicsComponent implements Component {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
         fixtureDef.friction = 0;
+        fixtureDef.density = 0;
+        fixtureDef.restitution = 0;
         if (filter != null) {
             fixtureDef.filter.categoryBits = filter.categoryBits;
             fixtureDef.filter.groupIndex = filter.groupIndex;

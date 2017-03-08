@@ -7,7 +7,10 @@ import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import com.badlogic.ashley.core.Entity;
 
-import java.util.Comparator;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A TradeOffer is a potential Trade offered by a TraderComponent.
@@ -155,5 +158,74 @@ public class TradeOffer {
         Mappers.trader.get(offeringTrader).acceptedTrades.add(resultingTrade);
 
         TraderSystem.integrityCheck(offeringTrader);
+    }
+
+
+    /*** STATIC METHODS ***/
+
+
+    public static Stream<TradeOffer> filterTradeOffers(Stream<TradeOffer> tradeOffers, Predicate<TradeOffer> cmp) {
+        return tradeOffers.filter(cmp);
+    }
+
+    /**
+     * Searches through the offered trades for the first credit of item.
+     * If none is found, null is returned.
+     * @param item Item to be filtered
+     * @return credit or null
+     */
+    public static Stream<TradeOffer> filterTradeOffers(Stream<TradeOffer> tradeOffers, Item item, TradeOffer.TYPE type) {
+        return filterTradeOffers(tradeOffers, offer -> offer.getItem() == item && offer.getType() == type);
+    }
+
+    public static Stream<TradeOffer> filterAndSortByBestPrice(Stream<TradeOffer> tradeOffers, Item item, TradeOffer.TYPE type) {
+        return filterTradeOffers(tradeOffers, item, type).sorted(TradeOffer.bestPriceComparator);
+    }
+
+    public static Optional<TradeOffer> searchBestSellingTrade(Stream<TradeOffer> tradeOffers, Item item) {
+        return filterTradeOffers(tradeOffers, item, TradeOffer.TYPE.SELLING).min(TradeOffer.bestPriceComparator);
+    }
+
+    public static Optional<TradeOffer> searchBestBuyingTrade(Stream<TradeOffer> tradeOffers, Item item) {
+        return filterTradeOffers(tradeOffers, item, TradeOffer.TYPE.BUYING).max(TradeOffer.bestPriceComparator);
+    }
+
+    /**
+     * Search all viewable markets in marketAccess for the best prices to trade item. Return a Map
+     * of TradeOffers with the amount to trade with each offer. The last offer might be a partial trade.
+     * @param item Item to be traded
+     * @param type Trade type (BUYING or SELLING)
+     * @param amount Amount to trade.
+     * @return Might return an empty list or a list with not enough trades to fully trade amount.
+     */
+    public static Map<TradeOffer,Integer> searchTradeOffersToTradeAmount(Stream<TradeOffer> tradeOffers,
+                                                                         Item item,
+                                                                         TradeOffer.TYPE type,
+                                                                         int amount) {
+        HashMap<TradeOffer,Integer> tradeOffersToAccept = new HashMap<>();
+
+        int amountLeftToTrade = Math.abs(amount);
+
+        List<TradeOffer> sortedTradeOffers = filterTradeOffers(tradeOffers, item, type)
+                .filter(offer -> offer.getAmount() != 0)
+                .sorted(TradeOffer.bestPriceComparator)
+                .collect(Collectors.toList());
+
+
+        for (TradeOffer tradeOffer : sortedTradeOffers) {
+            int amountToTradeWithThisOffer = Math.min(amountLeftToTrade, tradeOffer.getAmount());
+            amountLeftToTrade -= amountToTradeWithThisOffer;
+
+            if (amountToTradeWithThisOffer < 0) throw new RuntimeException("Trading <0? Are you crazy?");
+
+            tradeOffersToAccept.put(tradeOffer, amountToTradeWithThisOffer);
+
+            if (amountLeftToTrade <= 0) {
+                // Last Buy
+                break;
+            }
+        }
+
+        return tradeOffersToAccept;
     }
 }

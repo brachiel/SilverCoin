@@ -1,7 +1,10 @@
 package ch.chrummibei.silvercoin.universe.entity_factories;
 
 import ch.chrummibei.silvercoin.universe.Universe;
-import ch.chrummibei.silvercoin.universe.components.*;
+import ch.chrummibei.silvercoin.universe.components.InventoryComponent;
+import ch.chrummibei.silvercoin.universe.components.NamedComponent;
+import ch.chrummibei.silvercoin.universe.components.TraderComponent;
+import ch.chrummibei.silvercoin.universe.components.WalletComponent;
 import ch.chrummibei.silvercoin.universe.credit.Credit;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.entity_systems.TraderSystem;
@@ -18,13 +21,12 @@ import java.util.ArrayList;
 public class TraderEntityFactory {
     public static int traderSequence = 0;
 
-    public static Entity RandomisedTraderEntity(ArrayList<Item> catalogue, Entity market) {
+    public static Entity RandomisedTraderEntity(ArrayList<Item> catalogue) {
         Entity entity = new Entity();
         Credit credit = new Credit(0);
         InventoryComponent inventory = new InventoryComponent();
         TraderComponent trader = new TraderComponent();
 
-        entity.add(new MarketAccessComponent(market));
         entity.add(new WalletComponent(credit));
         entity.add(trader);
         entity.add(inventory);

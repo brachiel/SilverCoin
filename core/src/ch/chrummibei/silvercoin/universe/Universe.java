@@ -1,14 +1,11 @@
 package ch.chrummibei.silvercoin.universe;
 
 import ch.chrummibei.silvercoin.config.UniverseConfig;
-import ch.chrummibei.silvercoin.universe.components.MarketComponent;
 import ch.chrummibei.silvercoin.universe.entity_factories.BigSpenderEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.FactoryEntityFactory;
-import ch.chrummibei.silvercoin.universe.entity_factories.MarketEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_factories.PlayerEntityFactory;
 import ch.chrummibei.silvercoin.universe.entity_systems.*;
 import ch.chrummibei.silvercoin.universe.item.Item;
-import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
@@ -19,7 +16,10 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Random;
 import java.util.stream.Stream;
 
 /**
@@ -35,11 +35,8 @@ public class Universe {
     private static final HashSet<Body> deadBodies = new HashSet<>();
     private static final HashMap<Body, Fixture> deadFixtures = new HashMap<>();
 
-    public enum EVENTS { PLAYER_JOINED_MARKET, PLAYER_LEFT_MARKET }
-
     private final UniverseConfig universeConfig;
     private final HashSet<Item> catalogue = new HashSet<>();
-    private final HashSet<Entity> markets = new HashSet();
     private final HashSet<Entity> factories = new HashSet<>();
 
     public static Entity player;
@@ -72,20 +69,6 @@ public class Universe {
 
     public ArrayList<Item> getItems() {
         return universeConfig.catalogue().getItems();
-    }
-
-    public void printStatus(Entity entity) {
-        MarketComponent market = Mappers.market.get(entity);
-
-        catalogue.forEach(item -> {
-            Optional<TradeOffer> bestBuy = market.searchBestBuyingTrade(item);
-            Optional<TradeOffer> bestSell = market.searchBestSellingTrade(item);
-            System.out.println(
-                    item + " BUY: " +
-                            bestBuy.map(TradeOffer::compactString).orElse("No Buyer") + " SELL: " +
-                            bestSell.map(TradeOffer::compactString).orElse("No Seller"));
-
-        });
     }
 
     void initialise() {
@@ -137,28 +120,16 @@ public class Universe {
     }
 
     void generateEntities() {
-        player = PlayerEntityFactory.Player(box2dWorld, new Vector2(100, 100));
+        player = PlayerEntityFactory.Player(new Vector2(100, 100));
         add(player);
 
         // Add two markets
-        markets.add(MarketEntityFactory.Market(new Vector2(300,-200)));
-        markets.add(MarketEntityFactory.Market(new Vector2(-400,100)));
-
         universeConfig.recipeBook().getRecipes().stream()
             .flatMap(recipe -> Stream.iterate(recipe,r -> r)
                                      .limit(universeConfig.factory().getRandomInt("factoriesPerRecipe")))
             .forEach(recipe -> {
-                // Choose random market
-                int r = Universe.getRandomInt(0, markets.size()-1);
-                Entity market = null;
-                Iterator<Entity> marketIterator = markets.iterator();
-                for (int i = 0; i <= r; ++i) {
-                    market = marketIterator.next();
-                }
-
                 Entity entity = FactoryEntityFactory.FactoryEntity(
                         universeConfig,
-                        market,
                         findEmptySpot(20),
                         recipe);
                 factories.add(entity);
@@ -166,22 +137,21 @@ public class Universe {
         });
 
         /* TODO: Rewrite ArbitrageTrader as ComponentSystem
-        ArbitrageTradeActor arbitrageTradeActor = new ArbitrageTradeActor(market);
+        ArbitrageTradeActor arbitrageTradeActor = new ArbitrageTradeActor(factory);
         addActor(arbitrageTradeActor);
         */
 
         Item transportShipItem = catalogue.stream().filter(item -> item.getName().equals("Transport ship")).findFirst().get();
-        markets.forEach(market -> {
+        getFactories().stream()
+                .filter(entity -> Mappers.factory.get(entity).recipe.product == transportShipItem)
+                .forEach(factory -> {
             Entity entity = BigSpenderEntityFactory.BigSpender(
                     transportShipItem,
-                    market,
-                    getRandomPosition(new Vector2(400,200), 400, 200));
+                    getRandomPosition(Mappers.physics.get(factory).body.getPosition(), 50, 50));
             add(entity);
         });
-    }
 
-    public Stream<Entity> getMarkets() {
-        return markets.stream();
+        System.out.println("Initialisation finished");
     }
 
     public HashSet<Entity> getFactories() {

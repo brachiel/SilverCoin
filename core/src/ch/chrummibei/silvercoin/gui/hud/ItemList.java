@@ -1,12 +1,11 @@
 package ch.chrummibei.silvercoin.gui.hud;
 
 import ch.chrummibei.silvercoin.universe.Universe;
-import ch.chrummibei.silvercoin.universe.components.MarketComponent;
+import ch.chrummibei.silvercoin.universe.components.TradeSphereComponent;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.item.Item;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -22,14 +21,13 @@ import java.util.Comparator;
  * Created by brachiel on 24/02/2017.
  */
 public class ItemList extends Table {
+    private final TradeSphereComponent tradeSphere;
     ArrayList<Item> items;
-    Entity market;
-    MarketComponent marketComponent;
 
-    public ItemList(Universe universe, Entity market, Skin skin) {
+
+    public ItemList(Universe universe, Skin skin) {
         super(skin);
-        this.market = market;
-        this.marketComponent = Mappers.market.get(market);
+        this.tradeSphere = Mappers.tradeSphere.get(Universe.player);
 
         add("ITEM").pad(0,0,5,5).align(Align.left);
         add("SELL").pad(0,0,5,5).align(Align.right).minWidth(40);
@@ -54,11 +52,11 @@ public class ItemList extends Table {
         for (Item item : items) {
             ++i;
             ((Label) cells.get(++i).getActor()).setText(
-                    marketComponent.searchBestSellingTrade(item)
+                    TradeOffer.searchBestSellingTrade(tradeSphere.getAllTrades(), item)
                         .map(TradeOffer::getPrice)
                         .map(Price::toString).orElse("-"));
             ((Label) cells.get(++i).getActor()).setText(
-                    marketComponent.searchBestBuyingTrade(item)
+                    TradeOffer.searchBestBuyingTrade(tradeSphere.getAllTrades(), item)
                         .map(TradeOffer::getPrice)
                         .map(Price::toString).orElse("-"));
         }

@@ -4,8 +4,9 @@ import ch.chrummibei.silvercoin.config.Resources;
 import ch.chrummibei.silvercoin.config.UniverseConfig;
 import ch.chrummibei.silvercoin.constants.Messages;
 import ch.chrummibei.silvercoin.gui.actors.FactoryActor;
-import ch.chrummibei.silvercoin.gui.actors.MarketActor;
+import ch.chrummibei.silvercoin.gui.actors.PlayerActor;
 import ch.chrummibei.silvercoin.gui.actors.ShipActor;
+import ch.chrummibei.silvercoin.gui.hud.BottomBar;
 import ch.chrummibei.silvercoin.gui.hud.FactoryList;
 import ch.chrummibei.silvercoin.gui.hud.ItemList;
 import ch.chrummibei.silvercoin.gui.hud.TradeOfferList;
@@ -55,15 +56,15 @@ public class SilverCoin implements ApplicationListener {
     private Box2DDebugRenderer debugRenderer;
     private TradeOfferList tradeOfferList;
     private Table mainContainer;
-    private ClickListener marketHoverListener;
+    private ClickListener actorHoverListener;
     private boolean paused = false;
     private Drawable backgroundDrawable;
 
     // HUD
     private Stage hudStage;
-    private boolean drawHud;
-    private Table hud;
+    private Table hudOverlay;
     private ScrollPane factoryListScroll;
+    private BottomBar bottomBar;
 
     @Override
 	public void create() {
@@ -104,21 +105,18 @@ public class SilverCoin implements ApplicationListener {
 
     private void addBodyActors() {
         // Add Ships
-        Texture marketTexture = new Texture(Gdx.files.internal("skins/market.png"));
-
         Array<Body> bodies = new Array<>();
         universe.box2dWorld.getBodies(bodies);
         for (Body body : bodies) {
             Entity entity = (Entity) body.getUserData();
 
-            if (Mappers.market.has(entity)) {
-                MarketActor marketActor = new MarketActor(body, marketTexture);
-                stage.addActor(marketActor);
-
-                marketActor.addListener(marketHoverListener);
+            if (Mappers.player.has(entity)) {
+                PlayerActor playerActor = new PlayerActor(body);
+                stage.addActor(playerActor);
             } else if (Mappers.factory.has(entity)) {
                 FactoryActor factoryActor = new FactoryActor(body);
                 stage.addActor(factoryActor);
+                factoryActor.addListener(actorHoverListener);
             }
         }
     }
@@ -127,11 +125,23 @@ public class SilverCoin implements ApplicationListener {
         hudStage.addListener(new ClickListener() {
             @Override
             public boolean keyDown(InputEvent event, int keyCode) {
-                if (keyCode == Input.Keys.TAB) {
-                    drawHud = true;
-                    hud.setVisible(true);
-                    hudStage.setScrollFocus(factoryListScroll);
-                    return true;
+                switch (keyCode) {
+                    case Input.Keys.TAB:
+                        hudOverlay.setVisible(true);
+                        hudStage.setScrollFocus(factoryListScroll);
+                        return true;
+                    case Input.Keys.LEFT:
+                        stage.getCamera().translate(-20, 0, 0);
+                        return true;
+                    case Input.Keys.RIGHT:
+                        stage.getCamera().translate(20, 0, 0);
+                        return true;
+                    case Input.Keys.UP:
+                        stage.getCamera().translate(0, 20, 0);
+                        return true;
+                    case Input.Keys.DOWN:
+                        stage.getCamera().translate(0, -20, 0);
+                        return true;
                 }
                 return super.keyDown(event, keyCode);
             }
@@ -139,13 +149,14 @@ public class SilverCoin implements ApplicationListener {
             @Override
             public boolean keyUp(InputEvent event, int keyCode) {
                 if (keyCode == Input.Keys.TAB) {
-                    drawHud = false;
-                    hud.setVisible(false);
+                    hudOverlay.setVisible(false);
                     hudStage.unfocus(factoryListScroll);
                     return true;
                 }
                 return super.keyUp(event, keyCode);
             }
+
+
         });
 
         stage.addListener(new ClickListener() {
@@ -172,25 +183,22 @@ public class SilverCoin implements ApplicationListener {
             }
         });
 
-        marketHoverListener = new ClickListener() {
+        actorHoverListener = new ClickListener() {
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
                 super.enter(event, x, y, pointer, fromActor);
 
-                if (! (fromActor instanceof MarketActor)) return;
-
-                Entity market = ((MarketActor) fromActor).market;
-                universe.messageDispatcher.dispatchMessage(Messages.HOVER_ENTER_MARKET, market);
+                if (! (fromActor instanceof FactoryActor)) return;
+                bottomBar.setDisplayedFactory((Entity) fromActor.getUserObject());
+                System.out.println("Hover Factory");
             }
 
             @Override
             public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
                 super.exit(event, x, y, pointer, toActor);
 
-                if (! (toActor instanceof MarketActor)) return;
-
-                Entity market = ((MarketActor) toActor).market;
-                universe.messageDispatcher.dispatchMessage(Messages.HOVER_EXIT_MARKET, market);
+                if (! (toActor instanceof FactoryActor)) return;
+                bottomBar.clearDisplayedFactory();
             }
         };
     }
@@ -200,19 +208,25 @@ public class SilverCoin implements ApplicationListener {
         factoryListScroll = new ScrollPane(factoryList, skin);
 
         VerticalGroup vSplitter = new VerticalGroup();
-        universe.getMarkets().forEach(market -> {
-            ItemList itemList = new ItemList(universe, market, skin);
-            vSplitter.addActor(itemList);
-        });
+        ItemList itemList = new ItemList(universe, skin);
+        vSplitter.addActor(itemList);
 
         tradeOfferList = new TradeOfferList(universe, skin);
 
-        hud = new Table();
-        hud.pad(0,10,10,10);
-        hud.add(factoryListScroll).width(WIDTH/2).expandY().fill();
-        hud.add(vSplitter).expand().fill();
-        hud.setFillParent(true);
+        Table hud = new Table();
+        hud.setPosition(WIDTH/2, HEIGHT/2);
+        hudOverlay = new Table();
+        hudOverlay.pad(0,10,10,10);
+        hudOverlay.add(factoryListScroll).width(WIDTH/2).expandY().fill();
+        hudOverlay.add(vSplitter).expand().fill();
+        hudOverlay.setFillParent(true);
+        hud.add(hudOverlay).expand().fill();
+
+        hud.row();
+        bottomBar = new BottomBar(skin);
+        hud.add(bottomBar).expandX().fillX();
         hudStage.addActor(hud);
+        hudStage.setDebugAll(true);
     }
 
     private void createMainContainer() {
@@ -227,18 +241,6 @@ public class SilverCoin implements ApplicationListener {
     private void connectMessageHandler() {
         universe.messageDispatcher.addListeners(msg -> {
                     switch (msg.message) {
-                        case Messages.HOVER_ENTER_MARKET:
-                        case Messages.PLAYER_JOINED_MARKET:
-                            if (tradeOfferList.market != null) return true;
-                            tradeOfferList.market = Mappers.market.get((Entity) msg.extraInfo);
-                            tradeOfferList.setVisible(false);
-                            break;
-                        case Messages.HOVER_EXIT_MARKET:
-                        case Messages.PLAYER_LEFT_MARKET:
-                            if (tradeOfferList.market == null) return true;
-                            tradeOfferList.market = null;
-                            tradeOfferList.setVisible(false);
-                            break;
                         case Messages.TRANSPORT_SENT:
                             Entity transport = (Entity) msg.extraInfo;
                             PhysicsComponent physics = Mappers.physics.get(transport);
@@ -266,10 +268,6 @@ public class SilverCoin implements ApplicationListener {
                     }
                     return true;
                 },
-                Messages.PLAYER_JOINED_MARKET,
-                Messages.PLAYER_LEFT_MARKET,
-                Messages.HOVER_ENTER_MARKET,
-                Messages.HOVER_EXIT_MARKET,
                 Messages.TRANSPORT_SENT,
                 Messages.TRANSPORT_ARRIVED);
     }
@@ -288,9 +286,7 @@ public class SilverCoin implements ApplicationListener {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         stage.act(deltaTime); // Update actors
-        if (drawHud) {
-            hudStage.act(deltaTime);
-        }
+        hudStage.act(deltaTime);
 
         // Draw background
         Camera camera = stage.getCamera();
@@ -302,11 +298,9 @@ public class SilverCoin implements ApplicationListener {
         batch.end();
 
 		stage.draw();
-		if (drawHud) {
-		    hudStage.draw();
-        }
+        hudStage.draw();
 
-		//debugRenderer.render(universe.box2dWorld, stage.getCamera().combined);
+		debugRenderer.render(universe.box2dWorld, stage.getCamera().combined);
         if (! paused) {
             universe.update(deltaTime); // Game Tick
         }
