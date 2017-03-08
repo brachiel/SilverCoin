@@ -8,7 +8,6 @@ import ch.chrummibei.silvercoin.gui.actors.PlayerActor;
 import ch.chrummibei.silvercoin.gui.actors.ShipActor;
 import ch.chrummibei.silvercoin.gui.hud.BottomBar;
 import ch.chrummibei.silvercoin.gui.hud.FactoryList;
-import ch.chrummibei.silvercoin.gui.hud.ItemList;
 import ch.chrummibei.silvercoin.gui.hud.TradeOfferList;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.components.ActorComponent;
@@ -35,10 +34,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
@@ -188,45 +187,52 @@ public class SilverCoin implements ApplicationListener {
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
                 super.enter(event, x, y, pointer, fromActor);
 
-                if (! (fromActor instanceof FactoryActor)) return;
-                bottomBar.setDisplayedFactory((Entity) fromActor.getUserObject());
-                System.out.println("Hover Factory");
+                if (! (event.getTarget() instanceof FactoryActor)) return;
+                FactoryActor factoryActor = (FactoryActor) event.getTarget();
+                bottomBar.setDisplayedFactory(factoryActor.factory);
             }
 
             @Override
             public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
                 super.exit(event, x, y, pointer, toActor);
 
-                if (! (toActor instanceof FactoryActor)) return;
+                if (! (event.getTarget() instanceof FactoryActor)) return;
                 bottomBar.clearDisplayedFactory();
             }
         };
     }
 
     private void createHUD() {
-        FactoryList factoryList = new FactoryList(universe, skin);
+        FactoryList factoryList = new FactoryList(skin);
         factoryListScroll = new ScrollPane(factoryList, skin);
 
+        /*
         VerticalGroup vSplitter = new VerticalGroup();
         ItemList itemList = new ItemList(universe, skin);
         vSplitter.addActor(itemList);
 
         tradeOfferList = new TradeOfferList(universe, skin);
+        */
 
         Table hud = new Table();
-        hud.setPosition(WIDTH/2, HEIGHT/2);
+        hud.setPosition(0, 0);
+        hud.setOrigin(Align.bottom);
+        hud.align(Align.bottom);
+        hud.setFillParent(true);
+
         hudOverlay = new Table();
-        hudOverlay.pad(0,10,10,10);
-        hudOverlay.add(factoryListScroll).width(WIDTH/2).expandY().fill();
-        hudOverlay.add(vSplitter).expand().fill();
-        hudOverlay.setFillParent(true);
-        hud.add(hudOverlay).expand().fill();
+        //hudOverlay.pad(0,10,10,10);
+        hudOverlay.add(factoryListScroll).expandY(); //.width(WIDTH/2).expandY().fill();
+        hudOverlay.setVisible(false);
+        //hudOverlay.add(vSplitter).expand().fill();
+        hud.add(hudOverlay).fill();
 
         hud.row();
         bottomBar = new BottomBar(skin);
-        hud.add(bottomBar).expandX().fillX();
+        hud.add(bottomBar).align(Align.bottom).expandX().fillX();
+
         hudStage.addActor(hud);
-        hudStage.setDebugAll(true);
+        //hudStage.setDebugAll(true);
     }
 
     private void createMainContainer() {

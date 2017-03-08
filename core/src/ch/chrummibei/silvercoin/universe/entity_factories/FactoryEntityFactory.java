@@ -67,7 +67,7 @@ public class FactoryEntityFactory {
         entity.add(new TraderComponent());
         entity.add(factory);
         entity.add(physics);
-        entity.add(new TradeSphereComponent(physics, 500));
+        entity.add(new TradeSphereComponent(physics, universeConfig.factory().getRandomInt("tradeSphereSize")));
 
         if (Universe.DEBUG) {
             entity.add(new LoggerComponent());

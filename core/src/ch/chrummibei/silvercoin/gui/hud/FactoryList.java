@@ -1,82 +1,65 @@
 package ch.chrummibei.silvercoin.gui.hud;
 
 import ch.chrummibei.silvercoin.universe.Universe;
-import ch.chrummibei.silvercoin.universe.components.FactoryComponent;
-import ch.chrummibei.silvercoin.universe.components.NamedComponent;
 import ch.chrummibei.silvercoin.universe.components.TraderComponent;
-import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.entity_systems.FactorySystem;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.position.YieldingItemPosition;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.Array;
 
 import java.util.Comparator;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Created by brachiel on 24/02/2017.
  */
 public class FactoryList extends Table {
-    Universe universe;
-
-    public FactoryList(Universe universe, Skin skin) {
+    public FactoryList(Skin skin) {
         super(skin);
-        this.universe = universe;
+        updateLabels();
+    }
 
+    public void updateLabels() {
+        Vector2 playerPosition = Mappers.physics.get(Universe.player).body.getPosition();
+
+        // TODO: This is really nasty
+
+        // Remove all cells
+        clear();
+
+        // Create header
         add("FACTORY").pad(0,0,5,5).align(Align.left);
         add("STOCK").pad(0,0,5,5).align(Align.right).minWidth(40);
         add("GOAL").pad(0,0,5,5).align(Align.right).minWidth(40);
         add("PRICE").pad(0,0,5,0).align(Align.right).minWidth(80);
 
-        for (Entity entity : universe.getFactories().stream()
-                                .sorted(Comparator.comparing(entity -> Mappers.named.get(entity).name))
-                                .collect(Collectors.toList())) {
-            row();
+        Mappers.tradeSphere.get(Universe.player).tradersInSphere.stream()
+                .filter(Mappers.factory::has) // only factories
+                .sorted(Comparator.comparing(
+                        entity -> Mappers.physics.get(entity).body.getPosition().dst(playerPosition))) // Sort by dist
+                .forEachOrdered(entity -> {
+                    row();
+                    TraderComponent trader = Mappers.trader.get(entity);
+                    YieldingItemPosition productPosition = FactorySystem.getProductPosition(entity);
 
-            NamedComponent named = Mappers.named.get(entity);
-            FactoryComponent factory = Mappers.factory.get(entity);
-
-            add(String.valueOf(named.name)).align(Align.left);
-            add(" ").align(Align.right);
-            add(String.valueOf(factory.goalStock)).align(Align.right);
-            add(" ").align(Align.right);
-        }
-
-        updateLabels();
-    }
-
-    public void updateLabels() {
-        Array<Cell> cells = this.getCells();
-
-        int i = 3;
-        for (Entity entity : universe.getFactories().stream().collect(Collectors.toList())) {
-            TraderComponent trader = Mappers.trader.get(entity);
-            YieldingItemPosition productPosition = FactorySystem.getProductPosition(entity);
-
-            Optional<TradeOffer> productSellOffer = trader.tradeOffers.stream()
-                                .filter(offer -> offer.getItem() == productPosition.getItem() && offer.getAmount() > 0)
-                                .findAny();
-            ++i;
-            ((Label) cells.get(++i).getActor()).setText(productSellOffer
-                                                        .map(TradeOffer::getAmount)
-                                                        .map(String::valueOf)
-                                                        .orElse("-"));
-            ++i;
-            ((Label) cells.get(++i).getActor()).setText(productSellOffer
-                                                        .map(TradeOffer::getPrice)
-                                                        .map(Price::toString)
-                                                        .orElse("-"));
-        }
-
+                    Optional<TradeOffer> productSellOffer = trader.tradeOffers.stream()
+                                        .filter(offer -> offer.getItem() == productPosition.getItem()
+                                                            && offer.getAmount() > 0)
+                                        .findAny();
+                    add(Mappers.named.get(entity).name); // FACTORY
+                    add(productSellOffer.map(TradeOffer::getAmount) // AMOUNT
+                            .map(String::valueOf)
+                            .orElse("-"));
+                    add(String.valueOf(Mappers.factory.get(entity).goalStock)); // GOAL
+                    add(productSellOffer.map(TradeOffer::getPrice) // PRICE
+                            .map(String::valueOf)
+                            .orElse("-"));
+        });
     }
 
     @Override
