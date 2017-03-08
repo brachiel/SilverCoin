@@ -303,7 +303,6 @@ public class TraderSystem extends IteratingSystem {
 
     public static void beginContactTransportTrader(Entity transport, Entity trader) {
         if (doesAcceptDelivery(trader, transport)) {
-            System.out.println("Accepted trade");
             processDeliveredTrade(trader, transport);
         }
     }

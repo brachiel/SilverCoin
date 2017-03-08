@@ -300,7 +300,7 @@ public class SilverCoin implements ApplicationListener {
 		stage.draw();
         hudStage.draw();
 
-		debugRenderer.render(universe.box2dWorld, stage.getCamera().combined);
+		//debugRenderer.render(universe.box2dWorld, stage.getCamera().combined);
         if (! paused) {
             universe.update(deltaTime); // Game Tick
         }

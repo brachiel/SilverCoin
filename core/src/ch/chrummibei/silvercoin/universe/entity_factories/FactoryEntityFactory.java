@@ -60,7 +60,7 @@ public class FactoryEntityFactory {
         Filter filter = new Filter();
         filter.categoryBits = Categories.FACTORY;
         filter.maskBits = Categories.TRANSPORT | Categories.SHIP;
-        PhysicsComponent physics = new PhysicsComponent(entity, position, BodyDef.BodyType.KinematicBody, 3, filter);
+        PhysicsComponent physics = new PhysicsComponent(entity, position, BodyDef.BodyType.StaticBody, 3, filter);
         entity.add(new NamedComponent(recipe.product.getName() + " " + getNextName(recipe.product).toLowerCase()));
         entity.add(new WalletComponent(universeConfig.factory().getRandomDouble("startingCredit")));
         entity.add(inventory);
