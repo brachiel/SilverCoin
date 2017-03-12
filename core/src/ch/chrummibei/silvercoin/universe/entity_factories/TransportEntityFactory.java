@@ -25,7 +25,14 @@ public class TransportEntityFactory {
         Filter filter = new Filter();
         filter.categoryBits = Categories.TRANSPORT;
         filter.maskBits = Categories.FACTORY | Categories.SHIP;
-        entity.add(new PhysicsComponent(entity, sellerPhysics.body.getPosition(), BodyDef.BodyType.DynamicBody, 2, filter));
+        PhysicsComponent physics = new PhysicsComponent(
+                entity,
+                sellerPhysics.body.getPosition(),
+                BodyDef.BodyType.DynamicBody,
+                2,
+                filter);
+        physics.fixture.setSensor(true); // Do not collide
+        entity.add(physics);
         entity.add(new PathfinderComponent(buyerPhysics.body.getPosition()));
 
         return entity;

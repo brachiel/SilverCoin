@@ -30,11 +30,12 @@ public class TradeOfferList extends Table {
         public void clicked(InputEvent event, float x, float y) {
             if (event.getButton() != Input.Buttons.LEFT) return;
 
-            TradeOffer offer = (TradeOffer) event.getTarget().getUserObject();
+            TextButton clickedButton = (TextButton) event.getListenerActor();
+            TradeOffer offer = (TradeOffer) clickedButton.getUserObject();
             offer.accept(Universe.player, offer.getAmount());
 
             // Deactivate button
-            ((Button)event.getTarget()).setDisabled(true);
+            clickedButton.setDisabled(true);
         }
     };
     private final Telegraph telegraph = new Telegraph() {

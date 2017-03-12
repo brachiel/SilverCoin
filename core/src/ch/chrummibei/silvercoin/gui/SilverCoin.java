@@ -91,9 +91,9 @@ public class SilverCoin implements ApplicationListener {
         addBodyActors();
 
         InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(universe.playerSystem);
-        multiplexer.addProcessor(hudStage);
-        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(hudStage); // First are HUD actions
+        multiplexer.addProcessor(stage); // Second are actions on Actors on the map
+        multiplexer.addProcessor(universe.playerSystem); // Third are general map actions like scrolling/moving
         Gdx.input.setInputProcessor(multiplexer);
 
 
@@ -146,7 +146,7 @@ public class SilverCoin implements ApplicationListener {
                         stage.getCamera().translate(0, -20, 0);
                         return true;
                 }
-                return super.keyDown(event, keyCode);
+                return false;
             }
 
             @Override
@@ -155,7 +155,7 @@ public class SilverCoin implements ApplicationListener {
                     hideEnvironmentInfoHud();
                     return true;
                 }
-                return super.keyUp(event, keyCode);
+                return false;
             }
 
 

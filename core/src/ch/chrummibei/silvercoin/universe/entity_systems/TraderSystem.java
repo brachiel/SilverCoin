@@ -308,7 +308,9 @@ public class TraderSystem extends IteratingSystem {
     }
 
     public static void beginContactTransportTrader(Entity transport, Entity trader) {
+        System.out.println("beginContactTransportTrader " + transport + " / " + Mappers.named.get(trader).name);
         if (doesAcceptDelivery(trader, transport)) {
+            System.out.println("ACCEPT" + transport + " / " + Mappers.named.get(trader).name);
             processDeliveredTrade(trader, transport);
         }
     }

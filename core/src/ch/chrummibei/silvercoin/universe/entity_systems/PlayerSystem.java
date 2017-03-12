@@ -39,15 +39,15 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
         final float angularImpulse = 50f;
 
         // Trivial input handling
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             // Accelerate
             physics.body.applyLinearImpulse(direction.cpy().setLength(straightImpulse), body.getPosition(), true);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+        } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             // Decelerate
             physics.body.applyLinearImpulse(direction.cpy().setLength(straightImpulse).rotate(180), body.getPosition(), true);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             physics.body.applyAngularImpulse(angularImpulse, true);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             physics.body.applyAngularImpulse(-angularImpulse, true);
         }
 
@@ -72,7 +72,8 @@ public class PlayerSystem extends IteratingSystem implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         PathfinderComponent pathfinder = Mappers.pathfinder.get(Universe.player);
 
-        if (button == Input.Buttons.LEFT) {
+        if (button == Input.Buttons.RIGHT) {
+            // TODO: Take scrolled camera into consideration
             pathfinder.goal = new Vector2(screenX/2, (Gdx.graphics.getHeight()-screenY)/2);
             return true;
         }
