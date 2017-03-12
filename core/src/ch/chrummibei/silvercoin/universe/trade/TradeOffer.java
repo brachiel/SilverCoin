@@ -1,5 +1,7 @@
 package ch.chrummibei.silvercoin.universe.trade;
 
+import ch.chrummibei.silvercoin.constants.Messages;
+import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.credit.Price;
 import ch.chrummibei.silvercoin.universe.credit.TotalValue;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
@@ -60,6 +62,8 @@ public class TradeOffer {
         if (amount <= 0) {
             throw new RuntimeException("TradeOffer with amount <= 0. This is a bug.");
         }
+
+        Universe.messageDispatcher.dispatchMessage(Messages.TRADE_OFFER_ADDED, this);
     }
 
 
@@ -158,6 +162,15 @@ public class TradeOffer {
         Mappers.trader.get(offeringTrader).acceptedTrades.add(resultingTrade);
 
         TraderSystem.integrityCheck(offeringTrader);
+
+        Universe.messageDispatcher.dispatchMessage(Messages.TRADE_OFFER_ACCEPTED, this);
+        if (this.amount <= 0) {
+            Universe.messageDispatcher.dispatchMessage(Messages.TRADE_OFFER_FULLY_ACCEPTED, this);
+        }
+    }
+
+    public void remove() {
+        Universe.messageDispatcher.dispatchMessage(Messages.TRADE_OFFER_REMOVED, this);
     }
 
 

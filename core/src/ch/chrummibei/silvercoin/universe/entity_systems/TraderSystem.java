@@ -216,7 +216,13 @@ public class TraderSystem extends IteratingSystem {
 
     public static void removeOwnEmptyTradeOffers(Entity entity) {
         TraderComponent trader = Mappers.trader.get(entity);
-        trader.tradeOffers.removeIf(offer -> offer.getAmount() == 0);
+        trader.tradeOffers.removeIf(offer -> {
+            if (offer.getAmount() == 0) {
+                offer.remove(); // Let the universe know we're removing this
+                return true;
+            }
+            return false;
+        });
     }
 
     public static void processAcceptedTrades(Entity entity) {

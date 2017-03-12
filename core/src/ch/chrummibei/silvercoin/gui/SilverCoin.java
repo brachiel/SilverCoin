@@ -33,6 +33,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -61,8 +62,9 @@ public class SilverCoin implements ApplicationListener {
 
     // HUD
     private Stage hudStage;
-    private Table hudOverlay;
+    private Stack hudOverlay;
     private ScrollPane factoryListScroll;
+    private ScrollPane tradeOfferListScroll;
     private BottomBar bottomBar;
 
     @Override
@@ -126,8 +128,10 @@ public class SilverCoin implements ApplicationListener {
             public boolean keyDown(InputEvent event, int keyCode) {
                 switch (keyCode) {
                     case Input.Keys.TAB:
-                        hudOverlay.setVisible(true);
-                        hudStage.setScrollFocus(factoryListScroll);
+                        showEnvironmentInfoHud();
+                        return true;
+                    case Input.Keys.T:
+                        toggleTradeOffers();
                         return true;
                     case Input.Keys.LEFT:
                         stage.getCamera().translate(-20, 0, 0);
@@ -148,8 +152,7 @@ public class SilverCoin implements ApplicationListener {
             @Override
             public boolean keyUp(InputEvent event, int keyCode) {
                 if (keyCode == Input.Keys.TAB) {
-                    hudOverlay.setVisible(false);
-                    hudStage.unfocus(factoryListScroll);
+                    hideEnvironmentInfoHud();
                     return true;
                 }
                 return super.keyUp(event, keyCode);
@@ -202,9 +205,38 @@ public class SilverCoin implements ApplicationListener {
         };
     }
 
+
+    private void toggleTradeOffers() {
+        if (tradeOfferListScroll.isVisible()) {
+            hideTradeOffers();
+        } else {
+            showTradeOffers();
+        }
+    }
+
+    private void showTradeOffers() {
+        hideEnvironmentInfoHud();
+        hudStage.setScrollFocus(tradeOfferListScroll);
+        tradeOfferListScroll.setVisible(true);
+    }
+
+    private void hideTradeOffers() {
+        tradeOfferListScroll.setVisible(false);
+        hudStage.unfocus(factoryListScroll);
+    }
+
+    private void showEnvironmentInfoHud() {
+        hideTradeOffers();
+        factoryListScroll.setVisible(true);
+        hudStage.setScrollFocus(factoryListScroll);
+    }
+
+    private void hideEnvironmentInfoHud() {
+        factoryListScroll.setVisible(false);
+        hudStage.unfocus(factoryListScroll);
+    }
+
     private void createHUD() {
-        FactoryList factoryList = new FactoryList(skin);
-        factoryListScroll = new ScrollPane(factoryList, skin);
 
         /*
         VerticalGroup vSplitter = new VerticalGroup();
@@ -220,11 +252,19 @@ public class SilverCoin implements ApplicationListener {
         hud.align(Align.bottom);
         hud.setFillParent(true);
 
-        hudOverlay = new Table();
-        //hudOverlay.pad(0,10,10,10);
-        hudOverlay.add(factoryListScroll).expandY(); //.width(WIDTH/2).expandY().fill();
-        hudOverlay.setVisible(false);
-        //hudOverlay.add(vSplitter).expand().fill();
+        hudOverlay = new Stack();
+
+        TradeOfferList tradeOfferList = new TradeOfferList(skin);
+        tradeOfferListScroll = new ScrollPane(tradeOfferList, skin);
+        tradeOfferListScroll.setVisible(false);
+        hudOverlay.add(tradeOfferListScroll);
+
+
+        FactoryList factoryList = new FactoryList(skin);
+        factoryListScroll = new ScrollPane(factoryList, skin);
+        factoryListScroll.setVisible(false);
+        hudOverlay.add(factoryListScroll);
+
         hud.add(hudOverlay).fill();
 
         hud.row();

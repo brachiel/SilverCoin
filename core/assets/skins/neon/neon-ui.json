@@ -23,6 +23,12 @@
 		"b": 0.4,
 		"a": 1
 	},
+    "disabled": {
+      "r": 0.2,
+      "g": 0.2,
+      "b": 0.2,
+      "a": 1
+    },
 	"text": {
 		"r": 0.580392156,
 		"g": 1,
@@ -247,6 +253,14 @@
 		"imageDown": "button-pressed-c",
 		"imageOver": "button-over-c"
 	}
+},
+"com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle": {
+    "default": {
+        "font": "font",
+        "fontColor": "text",
+        "downFontColor": "text-selected",
+        "disabledFontColor": "disabled"
+    }
 },
 "com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton$ImageTextButtonStyle": {
 	"default": {

@@ -1,6 +1,7 @@
 package ch.chrummibei.silvercoin.universe.components;
 
 import ch.chrummibei.silvercoin.constants.Categories;
+import ch.chrummibei.silvercoin.constants.Messages;
 import ch.chrummibei.silvercoin.universe.Universe;
 import ch.chrummibei.silvercoin.universe.entity_systems.Mappers;
 import ch.chrummibei.silvercoin.universe.trade.TradeOffer;
@@ -46,11 +47,27 @@ public class TradeSphereComponent implements Component {
     public static void beginContactTradeSpheres(Entity entityA, Entity entityB) {
         Mappers.tradeSphere.get(entityA).tradersInSphere.add(entityB);
         Mappers.tradeSphere.get(entityB).tradersInSphere.add(entityA);
+
+        if (entityA == Universe.player) {
+            sendMessage(Messages.PLAYER_BEGINS_SEEING_TRADER, entityB);
+        } else if (entityB == Universe.player) {
+            sendMessage(Messages.PLAYER_BEGINS_SEEING_TRADER, entityA);
+        }
+    }
+
+    public static void sendMessage(int msg, Entity entity) {
+        Universe.messageDispatcher.dispatchMessage(msg, entity);
     }
 
     public static void endContactTradeSpheres(Entity entityA, Entity entityB) {
         Mappers.tradeSphere.get(entityA).tradersInSphere.remove(entityB);
         Mappers.tradeSphere.get(entityB).tradersInSphere.remove(entityA);
+
+        if (entityA == Universe.player) {
+            sendMessage(Messages.PLAYER_ENDS_SEEING_TRADER, entityB);
+        } else if (entityB == Universe.player) {
+            sendMessage(Messages.PLAYER_ENDS_SEEING_TRADER, entityA);
+        }
     }
 
     public Stream<TradeOffer> getAllTrades() {
